@@ -7,6 +7,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/hyperledger/fabric-chaincode-go/shim"
@@ -64,6 +65,7 @@ func configureLotStub() (*MockContext, *MockStub) {
 		ProdUnit:      "punit01",
 		LotInternalID: "lot01-iid01",
 	}
+
 	lotBytes, _ := json.Marshal(testLot)
 
 	ms := new(MockStub)
@@ -98,4 +100,20 @@ func TestLotExists(t *testing.T) {
 	exists, err = c.LotExists(ctx, "existingkey")
 	assert.Nil(t, err, "should not return error when can read from world state and value exists for key")
 	assert.True(t, exists, "should return true when value for key in world state")
+}
+
+func TestCreateLot(t *testing.T) {
+	var err error
+
+	ctx, stub := configureLotStub()
+	c := new(StvgdContract)
+
+	_, err = c.CreateLot(ctx, "statebad", "test-type", "", 100, "KG", "punit01", "lot01-iid01")
+	assert.EqualError(t, err, fmt.Sprintf("could not read from world state. %s", getStateError), "should error when exists errors")
+
+	_, err = c.CreateLot(ctx, "existingkey", "test-type", "", 100, "KG", "punit01", "lot01-iid01")
+	assert.EqualError(t, err, "the lot existingkey already exists", "should error when exists returns true")
+
+	_, _ = c.CreateLot(ctx, "missingkey", "test-type", "", 100, "KG", "punit01", "lot01-iid01")
+	stub.AssertCalled(t, "PutState", "missingkey", []byte("{\"docType\":\"lot\",\"ID\":\"missingkey\",\"lotType\":\"test-type\",\"amount\":100,\"unit\":\"KG\",\"prodUnit\":\"punit01\",\"lotInternalID\":\"lot01-iid01\"}"))
 }

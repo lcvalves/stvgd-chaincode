@@ -58,6 +58,44 @@ func (c *StvgdContract) InitLedgerLot(ctx contractapi.TransactionContextInterfac
 			return "", fmt.Errorf("failed to put to world state: %v", err)
 		}
 	}
+	return fmt.Sprintf("lots [%s-%s] were successfully added to the ledger", lots[0].ID, lots[len(lots)-1].ID), nil
+}
 
-	return "lots [" + lots[0].ID + "-" + lots[len(lots)-1].ID + "] were successfully added to the ledger", nil
+// CreateLot creates a new instance of Lot
+func (c *StvgdContract) CreateLot(ctx contractapi.TransactionContextInterface, lotID, lotType, prodActivity string,
+	amount float32, unit, prodUnit, lotInternalID string) (string, error) {
+
+	exists, err := c.LotExists(ctx, lotID)
+	if err != nil {
+		return "", fmt.Errorf("could not read from world state. %s", err)
+	} else if exists {
+		return "", fmt.Errorf("the lot %s already exists", lotID)
+	}
+
+	if amount < 0 {
+		return "", fmt.Errorf("the amount should be greater than 0")
+	} else {
+		lot := &Lot{
+			DocType:       "lot",
+			ID:            lotID,
+			LotType:       lotType,
+			ProdActivity:  prodActivity,
+			Amount:        amount,
+			Unit:          unit,
+			ProdUnit:      prodUnit,
+			LotInternalID: lotInternalID,
+		}
+
+		lotJSON, err := json.Marshal(lot)
+		if err != nil {
+			return "", err
+		}
+
+		err = ctx.GetStub().PutState(lotID, lotJSON)
+		if err != nil {
+			return "", fmt.Errorf("failed to put to world state: %v", err)
+		}
+	}
+
+	return fmt.Sprintf("%s created successfully", lotID), nil
 }
