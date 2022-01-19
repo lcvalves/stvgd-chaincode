@@ -1,0 +1,10 @@
+{
+    "docType": "lot",
+    "ID": "lot01",
+    "lotType": "test-type",
+    "prodActivity": "pa01",
+    "amount": 100,
+    "unit": "KG",
+    "prodUnit": "punit01",
+    "lotInternalID": "lot01-iid01"
+}

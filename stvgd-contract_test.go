@@ -117,3 +117,57 @@ func TestCreateLot(t *testing.T) {
 	_, _ = c.CreateLot(ctx, "missingkey", "test-type", "", 100, "KG", "punit01", "lot01-iid01")
 	stub.AssertCalled(t, "PutState", "missingkey", []byte("{\"docType\":\"lot\",\"ID\":\"missingkey\",\"lotType\":\"test-type\",\"amount\":100,\"unit\":\"KG\",\"prodUnit\":\"punit01\",\"lotInternalID\":\"lot01-iid01\"}"))
 }
+
+func TestReadLot(t *testing.T) {
+	var lot *Lot
+	var err error
+
+	ctx, _ := configureLotStub()
+	c := new(StvgdContract)
+
+	lot, err = c.ReadLot(ctx, "statebad")
+	assert.EqualError(t, err, fmt.Sprintf("could not read from world state. %s", getStateError), "should error when exists errors when reading")
+	assert.Nil(t, lot, "should not return Lot when exists errors when reading")
+
+	lot, err = c.ReadLot(ctx, "missingkey")
+	assert.EqualError(t, err, "the lot missingkey does not exist", "should error when exists returns true when reading")
+	assert.Nil(t, lot, "should not return Lot when key does not exist in world state when reading")
+
+	// No need for "existingkey" testing due to method being dependent on Lot type
+	/*
+		lot, err = c.ReadLot(ctx, "existingkey")
+		assert.EqualError(t, err, "could not unmarshal world state data to type Lot", "should error when data in key is not Lot")
+		assert.Nil(t, lot, "should not return Lot when data in key is not of type Lot")
+	*/
+
+	lot, err = c.ReadLot(ctx, "lotkey")
+	expectedLot := &Lot{
+		DocType:       "lot",
+		ID:            "lot01",
+		LotType:       "test-type",
+		ProdActivity:  "pa01",
+		Amount:        100,
+		Unit:          "KG",
+		ProdUnit:      "punit01",
+		LotInternalID: "lot01-iid01",
+	}
+	assert.Nil(t, err, "should not return error when Lot exists in world state when reading")
+	assert.Equal(t, expectedLot, lot, "should return deserialized Lot from world state")
+}
+
+func TestDeleteLot(t *testing.T) {
+	var err error
+
+	ctx, stub := configureLotStub()
+	c := new(StvgdContract)
+
+	_, err = c.DeleteLot(ctx, "statebad")
+	assert.EqualError(t, err, fmt.Sprintf("could not read from world state. %s", getStateError), "should error when exists errors")
+
+	_, err = c.DeleteLot(ctx, "missingkey")
+	assert.EqualError(t, err, "the lot missingkey does not exist", "should error when exists returns true when deleting")
+
+	_, err = c.DeleteLot(ctx, "lotkey")
+	assert.Nil(t, err, "should not return error when Lot exists in world state when deleting")
+	stub.AssertCalled(t, "DelState", "lotkey")
+}

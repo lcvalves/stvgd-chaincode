@@ -16,6 +16,12 @@ type StvgdContract struct {
 	contractapi.Contract
 }
 
+/*
+ * -----------------------------------
+ * LOT
+ * -----------------------------------
+ */
+
 // LotExists returns true when lot with given ID exists in world state
 func (c *StvgdContract) LotExists(ctx contractapi.TransactionContextInterface, lotID string) (bool, error) {
 	data, err := ctx.GetStub().GetState(lotID)
@@ -86,16 +92,56 @@ func (c *StvgdContract) CreateLot(ctx contractapi.TransactionContextInterface, l
 			LotInternalID: lotInternalID,
 		}
 
-		lotJSON, err := json.Marshal(lot)
+		lotBytes, err := json.Marshal(lot)
 		if err != nil {
 			return "", err
 		}
 
-		err = ctx.GetStub().PutState(lotID, lotJSON)
+		err = ctx.GetStub().PutState(lot.ID, lotBytes)
 		if err != nil {
 			return "", fmt.Errorf("failed to put to world state: %v", err)
 		}
 	}
 
 	return fmt.Sprintf("%s created successfully", lotID), nil
+}
+
+// ReadLot retrieves an instance of Lot from the world state
+func (c *StvgdContract) ReadLot(ctx contractapi.TransactionContextInterface, lotID string) (*Lot, error) {
+
+	exists, err := c.LotExists(ctx, lotID)
+	if err != nil {
+		return nil, fmt.Errorf("could not read from world state. %s", err)
+	} else if !exists {
+		return nil, fmt.Errorf("the lot %s does not exist", lotID)
+	}
+
+	bytes, _ := ctx.GetStub().GetState(lotID)
+
+	lot := new(Lot)
+
+	err = json.Unmarshal(bytes, lot)
+
+	if err != nil {
+		return nil, fmt.Errorf("could not unmarshal world state data to type Lot")
+	}
+
+	return lot, nil
+}
+
+// DeleteLot deletes an instance of Lot from the world state
+func (c *StvgdContract) DeleteLot(ctx contractapi.TransactionContextInterface, lotID string) (string, error) {
+	exists, err := c.LotExists(ctx, lotID)
+	if err != nil {
+		return "", fmt.Errorf("could not read from world state. %s", err)
+	} else if !exists {
+		return "", fmt.Errorf("the lot %s does not exist", lotID)
+	}
+
+	err = ctx.GetStub().DelState(lotID)
+	if err != nil {
+		return "", fmt.Errorf("could not delete from world state. %s", err)
+	} else {
+		return fmt.Sprintf("%s deleted successfully", lotID), nil
+	}
 }
