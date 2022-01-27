@@ -155,6 +155,38 @@ func TestReadLot(t *testing.T) {
 	assert.Equal(t, expectedLot, lot, "should return deserialized Lot from world state")
 }
 
+//TODO: TestGetAllLots
+
+func TestUpdateLotAmount(t *testing.T) {
+	var err error
+
+	ctx, stub := configureLotStub()
+	c := new(StvgdContract)
+
+	_, err = c.UpdateLotAmount(ctx, "statebad", 200)
+	assert.EqualError(t, err, fmt.Sprintf("could not read from world state. %s", getStateError), "should error when exists errors when updating")
+
+	_, err = c.UpdateLotAmount(ctx, "missingkey", 200)
+	assert.EqualError(t, err, "the lot missingkey does not exist", "should error when exists returns true when updating")
+
+	_, err = c.UpdateLotAmount(ctx, "lotkey", 200)
+	expectedLot := &Lot{
+		DocType:       "lot",
+		ID:            "lot01",
+		LotType:       "test-type",
+		ProdActivity:  "pa01",
+		Amount:        200,
+		Unit:          "KG",
+		ProdUnit:      "punit01",
+		LotInternalID: "lot01-iid01",
+	}
+	expectedLotBytes, _ := json.Marshal(expectedLot)
+	assert.Nil(t, err, "should not return error when Lot exists in world state when updating")
+	stub.AssertCalled(t, "PutState", "lotkey", expectedLotBytes)
+}
+
+//TODO: TestUpdateLotAmountToZero
+
 func TestDeleteLot(t *testing.T) {
 	var err error
 
@@ -165,9 +197,11 @@ func TestDeleteLot(t *testing.T) {
 	assert.EqualError(t, err, fmt.Sprintf("could not read from world state. %s", getStateError), "should error when exists errors")
 
 	_, err = c.DeleteLot(ctx, "missingkey")
-	assert.EqualError(t, err, "the lot missingkey does not exist", "should error when exists returns true when deleting")
+	assert.EqualError(t, err, "the lot [missingkey] does not exist", "should error when exists returns true when deleting")
 
 	_, err = c.DeleteLot(ctx, "lotkey")
 	assert.Nil(t, err, "should not return error when Lot exists in world state when deleting")
 	stub.AssertCalled(t, "DelState", "lotkey")
 }
+
+//TODO: TestDeleteAllLots
