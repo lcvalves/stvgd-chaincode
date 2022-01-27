@@ -17,6 +17,71 @@ type StvgdContract struct {
 	contractapi.Contract
 }
 
+// InitLedger adds a base set of ProdActivities to the ledger
+func (c *StvgdContract) InitLedger(ctx contractapi.TransactionContextInterface) (string, error) {
+
+	lots := []Lot{
+		{DocType: "lot", ID: "lot01", LotType: "test-type", ProdActivity: "pa01", Amount: 100, Unit: "KG", ProdUnit: "punit01", LotInternalID: "lot01-iid01"},
+		{DocType: "lot", ID: "lot02", LotType: "test-type", ProdActivity: "pa02", Amount: 200, Unit: "KG", ProdUnit: "punit01", LotInternalID: "lot02-iid01"},
+		{DocType: "lot", ID: "lot03", LotType: "test-type", ProdActivity: "pa03", Amount: 300, Unit: "KG", ProdUnit: "punit01", LotInternalID: "lot03-iid01"},
+		{DocType: "lot", ID: "lot04", LotType: "test-type", ProdActivity: "pa04", Amount: 400, Unit: "KG", ProdUnit: "punit02", LotInternalID: "lot04-iid01"},
+		{DocType: "lot", ID: "lot05", LotType: "test-type", ProdActivity: "pa05", Amount: 500, Unit: "KG", ProdUnit: "punit02", LotInternalID: "lot05-iid01"},
+		{DocType: "lot", ID: "lot06", LotType: "test-type", Amount: 600, Unit: "KG", ProdUnit: "punit02", LotInternalID: "lot06-iid01"},
+		{DocType: "lot", ID: "lot07", LotType: "test-type", Amount: 700, Unit: "KG", ProdUnit: "punit03", LotInternalID: "lot07-iid01"},
+	}
+
+	prodActivities := []ProdActivity{
+		{DocType: "prodActivity", ID: "pa01", ActivityType: "test-type", ProdUnit: "punit01", InputLots: map[string]float32{"lot01": 10}, OutputLot: lots[0], ActivityEndDate: "date", CompanyLegalName: "name", Location: "location", EnvScore: 73},
+		{DocType: "prodActivity", ID: "pa02", ActivityType: "test-type", ProdUnit: "punit01", InputLots: map[string]float32{"lot01": 10}, OutputLot: lots[1], ActivityEndDate: "date", CompanyLegalName: "name", Location: "location", EnvScore: 16},
+		{DocType: "prodActivity", ID: "pa03", ActivityType: "test-type", ProdUnit: "punit01", InputLots: map[string]float32{"lot01": 20, "lot02": 15}, OutputLot: lots[2], ActivityEndDate: "date", CompanyLegalName: "name", Location: "location", EnvScore: 51},
+		{DocType: "prodActivity", ID: "pa04", ActivityType: "test-type", ProdUnit: "punit02", InputLots: map[string]float32{"lot01": 10}, OutputLot: lots[3], ActivityEndDate: "date", CompanyLegalName: "name", Location: "location", EnvScore: 26},
+		{DocType: "prodActivity", ID: "pa05", ActivityType: "test-type", ProdUnit: "punit02", InputLots: map[string]float32{"lot01": 10}, OutputLot: lots[4], ActivityEndDate: "date", CompanyLegalName: "name", Location: "location", EnvScore: 14},
+		{DocType: "prodActivity", ID: "pa06", ActivityType: "test-type", ProdUnit: "punit02", InputLots: map[string]float32{"lot04": 50, "lot05": 20}, OutputLot: lots[5], ActivityEndDate: "date", CompanyLegalName: "name", Location: "location", EnvScore: 20},
+		{DocType: "prodActivity", ID: "pa07", ActivityType: "test-type", ProdUnit: "punit03", InputLots: map[string]float32{"lot01": 30, "lot04": 10, "lot06": 10}, OutputLot: lots[6], ActivityEndDate: "date", CompanyLegalName: "name", Location: "location", EnvScore: 100},
+	}
+
+	for _, lot := range lots {
+
+		exists, err := c.LotExists(ctx, lot.ID)
+		if err != nil {
+			return "", fmt.Errorf("could not read from world state. %s", err)
+		} else if exists {
+			return "", fmt.Errorf("the lot %s already exists", lot.ID)
+		}
+
+		lotBytes, err := json.Marshal(lot)
+		if err != nil {
+			return "", err
+		}
+
+		err = ctx.GetStub().PutState(lot.ID, lotBytes)
+		if err != nil {
+			return "", fmt.Errorf("failed to put to world state: %v", err)
+		}
+	}
+
+	for _, prodActivity := range prodActivities {
+		exists, err := c.ProdActivityExists(ctx, prodActivity.ID)
+		if err != nil {
+			return "", fmt.Errorf("could not read from world state. %s", err)
+		} else if exists {
+			return "", fmt.Errorf("the production activity [%s] already exists", prodActivity.ID)
+		}
+
+		prodActivityBytes, err := json.Marshal(prodActivity)
+		if err != nil {
+			return "", err
+		}
+
+		err = ctx.GetStub().PutState(prodActivity.ID, prodActivityBytes)
+		if err != nil {
+			return "", fmt.Errorf("failed to put to world state: %v", err)
+		}
+	}
+
+	return fmt.Sprintf("production activities [%s-%s] & lots [%s-%s] were successfully added to the ledger", prodActivities[0].ID, prodActivities[len(prodActivities)-1].ID, lots[0].ID, lots[len(lots)-1].ID), nil
+}
+
 /*
  * -----------------------------------
  * LOT
@@ -275,4 +340,203 @@ func (c *StvgdContract) DeleteAllLots(ctx contractapi.TransactionContextInterfac
 	}
 
 	return "all the lots were successfully deleted", nil
+}
+
+/*
+ * -----------------------------------
+ * PRODUCTION ACTIVITY
+ * -----------------------------------
+ */
+
+// ProdActivityExists returns true when prodActivity with given ID exists in world state
+func (c *StvgdContract) ProdActivityExists(ctx contractapi.TransactionContextInterface, prodActivityID string) (bool, error) {
+	data, err := ctx.GetStub().GetState(prodActivityID)
+
+	if err != nil {
+		return false, err
+	}
+
+	return data != nil, nil
+}
+
+// CreateProdActivity creates a new instance of ProdActivity
+func (c *StvgdContract) CreateProdActivity(ctx contractapi.TransactionContextInterface, prodActivityID, activityType, prodUnit string,
+	inputLots map[string]float32, outputLot Lot, activityEndDate, companyLegalName, location string, envScore float32) (string, error) {
+
+	// Checks if the output lot ID already exists
+	exists, err := c.LotExists(ctx, outputLot.ID)
+	if err != nil {
+		return "", fmt.Errorf("could not read from world state. %s", err)
+	} else if exists {
+		return "", fmt.Errorf("the lot [%s] already exists", outputLot.ID)
+	}
+
+	// Checks if the production activity ID already exists
+	exists, err = c.ProdActivityExists(ctx, prodActivityID)
+	if err != nil {
+		return "", fmt.Errorf("could not read from world state. %s", err)
+	} else if exists {
+		return "", fmt.Errorf("the production activity [%s] already exists", prodActivityID)
+	}
+
+	// Checks equality in production activity IDs & production units
+	if prodActivityID != outputLot.ProdActivity {
+		return "", fmt.Errorf("production activity's ID [%s] must be the same as output lot's production activity's ID [%s]", prodActivityID, outputLot.ProdActivity)
+	} else if prodUnit != outputLot.ProdUnit {
+		return "", fmt.Errorf("production unit's ID [%s] must be the same as output lot's production unit's ID [%s]", prodUnit, outputLot.ProdUnit)
+	}
+
+	// Input lots audit
+	if len(inputLots) > 0 { // If production activity uses input lots
+
+		var amountSum float32 = 0 // Local variable to verify if newly created Lot's amount doesn't exceed sum of input lots' amounts
+
+		for lotID, amount := range inputLots { // In every single input lot
+
+			// Checks if the lot ID already exist
+			exists, err := c.LotExists(ctx, lotID)
+			if err != nil {
+				return "", fmt.Errorf("could not read from world state. %s", err)
+			} else if !exists {
+				return "", fmt.Errorf("the lot [%s] does not exist", lotID)
+			}
+
+			// Reads the lot
+			lot, err := c.ReadLot(ctx, lotID)
+			if err != nil {
+				return "", fmt.Errorf("could not read from world state. %s", err)
+			}
+
+			// Validate inserted amounts (0 <= amount(inputLot) <= lot.Amount)
+			switch {
+			case amount <= 0:
+				return "", fmt.Errorf("input lots' amounts must be greater than 0 (input amount for lot [%s] is %.2f)", lotID, amount)
+			case amount > lot.Amount:
+				return "", fmt.Errorf("input lots' amounts must not exceed the lot's total amount (lot [%s] max amount is %.2f)", lotID, lot.Amount)
+			}
+
+			amountSum += amount // Increment input lot's amount to sum
+
+			// Subtract lot's amount with input lots' amount //! CURRENTLY NOT WORKING
+			_, err = c.UpdateLotAmount(ctx, lotID, lot.Amount-amount)
+			if err != nil {
+				return "", fmt.Errorf("could not write to world state. %s", err)
+			}
+
+			// Transfer input lots ownership to new production unit / owner
+			if lot.ProdUnit != prodUnit { // Only transfer is production units for the input lots are different
+				_, err = c.TransferLot(ctx, lotID, prodUnit)
+				if err != nil {
+					return "", fmt.Errorf("could not write to world state. %s", err)
+				}
+			}
+		}
+
+		// Validate output lot's amount (outputLot.Amount > amountSum)
+		if outputLot.Amount > amountSum {
+			return "", fmt.Errorf("output lot's inserted amount [%.2f] is bigger than the sum of input lots' amounts [%.2f]", outputLot.Amount, amountSum)
+		}
+	}
+
+	// Create production activity's output lot
+	_, err = c.CreateLot(ctx, outputLot.ID, outputLot.LotType, prodActivityID, outputLot.Amount, outputLot.Unit, outputLot.ProdUnit, outputLot.LotInternalID)
+	if err != nil {
+		return "", fmt.Errorf("could not write to world state. %s", err)
+	}
+
+	prodActivity := &ProdActivity{
+		DocType:          "prodActivity",
+		ID:               prodActivityID,
+		ActivityType:     activityType,
+		ProdUnit:         prodUnit,
+		InputLots:        inputLots,
+		OutputLot:        outputLot,
+		ActivityEndDate:  activityEndDate,
+		CompanyLegalName: companyLegalName,
+		Location:         location,
+		EnvScore:         envScore,
+	}
+
+	prodActivityBytes, err := json.Marshal(prodActivity)
+	if err != nil {
+		return "", err
+	}
+
+	err = ctx.GetStub().PutState(prodActivityID, prodActivityBytes)
+	if err != nil {
+		return "", fmt.Errorf("failed to put to world state: %v", err)
+	}
+
+	return fmt.Sprintf("production activity [%s] & lot [%s] were successfully added to the ledger", prodActivityID, outputLot.ID), nil
+}
+
+// ReadProdActivity retrieves an instance of ProdActivity from the world state
+func (c *StvgdContract) ReadProdActivity(ctx contractapi.TransactionContextInterface, prodActivityID string) (*ProdActivity, error) {
+
+	exists, err := c.ProdActivityExists(ctx, prodActivityID)
+	if err != nil {
+		return nil, fmt.Errorf("could not read from world state. %s", err)
+	} else if !exists {
+		return nil, fmt.Errorf("the production activity [%s] does not exist", prodActivityID)
+	}
+
+	prodActivityBytes, _ := ctx.GetStub().GetState(prodActivityID)
+
+	prodActivity := new(ProdActivity)
+
+	err = json.Unmarshal(prodActivityBytes, prodActivity)
+
+	if err != nil {
+		return nil, fmt.Errorf("could not unmarshal world state data to type ProdActivity")
+	}
+
+	return prodActivity, nil
+}
+
+// GetAllProdActivities returns all production activities found in world state
+func (c *StvgdContract) GetAllProdActivities(ctx contractapi.TransactionContextInterface) ([]*ProdActivity, error) {
+	// range query with empty string for endKey does an
+	// open-ended query of all production activities in the chaincode namespace.
+	resultsIterator, err := ctx.GetStub().GetStateByRange("pa", "")
+	if err != nil {
+		return nil, err
+	}
+	defer resultsIterator.Close()
+
+	var prodActivities []*ProdActivity
+	for resultsIterator.HasNext() {
+		queryResponse, err := resultsIterator.Next()
+		if err != nil {
+			return nil, err
+		}
+
+		var prodActivity ProdActivity
+		err = json.Unmarshal(queryResponse.Value, &prodActivity)
+		if err != nil {
+			return nil, err
+		}
+		prodActivities = append(prodActivities, &prodActivity)
+	}
+
+	return prodActivities, nil
+}
+
+// DeleteProdActivities deletes all production activities found in world state
+func (c *StvgdContract) DeleteAllProdActivities(ctx contractapi.TransactionContextInterface) (string, error) {
+
+	prodActivities, err := c.GetAllProdActivities(ctx)
+	if err != nil {
+		return "", fmt.Errorf("could not read from world state. %s", err)
+	} else if len(prodActivities) == 0 {
+		return "", fmt.Errorf("there are no productions activites in world state to delete")
+	}
+
+	for _, prodActivity := range prodActivities {
+		err = ctx.GetStub().DelState(prodActivity.ID)
+		if err != nil {
+			return "", fmt.Errorf("could not delete from world state. %s", err)
+		}
+	}
+
+	return "all the production activities were successfully deleted", nil
 }

@@ -52,6 +52,12 @@ func (mc *MockContext) GetStub() shim.ChaincodeStubInterface {
 	return args.Get(0).(*MockStub)
 }
 
+/*
+ * -----------------------------------
+ * LOT
+ * -----------------------------------
+ */
+
 func configureLotStub() (*MockContext, *MockStub) {
 	var nilBytes []byte
 
@@ -205,3 +211,80 @@ func TestDeleteLot(t *testing.T) {
 }
 
 //TODO: TestDeleteAllLots
+
+func configureProdActivityStub() (*MockContext, *MockStub) {
+	var nilBytes []byte
+
+	testLot := Lot{
+		DocType:       "lot",
+		ID:            "lot01",
+		LotType:       "test-type",
+		ProdActivity:  "pa01",
+		Amount:        100,
+		Unit:          "KG",
+		ProdUnit:      "punit01",
+		LotInternalID: "lot01-iid01",
+	}
+
+	testProdActivity := &ProdActivity{
+		DocType:          "prodActivity",
+		ID:               "pa01",
+		ActivityType:     "test-type",
+		ProdUnit:         "punit01",
+		InputLots:        map[string]float32{"lot01": 10},
+		OutputLot:        testLot,
+		ActivityEndDate:  "test-date",
+		CompanyLegalName: "test-name",
+		Location:         "test-location",
+		EnvScore:         20,
+	}
+
+	lotBytes, _ := json.Marshal(testProdActivity)
+
+	ms := new(MockStub)
+	ms.On("GetState", "statebad").Return(nilBytes, errors.New(getStateError))
+	ms.On("GetState", "missingkey").Return(nilBytes, nil)
+	ms.On("GetState", "existingkey").Return([]byte("{\"docType\":\"prodActivity\",\"ID\":\"pa01\",\"activityType\":\"test-type\",\"prodUnit\":\"punit01\",\"inputLots\":{\"lot01\":10},\"outputLot\":{\"docType\": \"lot\",\"ID\":\"lot01\",\"lotType\":\"test-type\",\"prodActivity\":\"pa01\",\"amount\":100,\"unit\":\"KG\",\"prodUnit\":\"punit01\",\"lotInternalID\":\"lot01-iid01\"},\"activityEndDate\":\"test-date\",\"companyLegalName\":\"test-name\",\"location\":\"test-location\",\"envScore\":20}"), nil)
+	ms.On("GetState", "lotkey").Return(lotBytes, nil)
+	ms.On("PutState", mock.AnythingOfType("string"), mock.AnythingOfType("[]uint8")).Return(nil)
+	ms.On("DelState", mock.AnythingOfType("string")).Return(nil)
+
+	mc := new(MockContext)
+	mc.On("GetStub").Return(ms)
+
+	return mc, ms
+}
+
+/*
+ * -----------------------------------
+ * PRODUCTION ACTIVITY
+ * -----------------------------------
+ */
+
+func TestProdActivityExists(t *testing.T) {
+	var exists bool
+	var err error
+
+	ctx, _ := configureProdActivityStub()
+	c := new(StvgdContract)
+
+	exists, err = c.ProdActivityExists(ctx, "statebad")
+	assert.EqualError(t, err, getStateError)
+	assert.False(t, exists, "should return false on error")
+
+	exists, err = c.ProdActivityExists(ctx, "missingkey")
+	assert.Nil(t, err, "should not return error when can read from world state but no value for key")
+	assert.False(t, exists, "should return false when no value for key in world state")
+
+	exists, err = c.ProdActivityExists(ctx, "existingkey")
+	assert.Nil(t, err, "should not return error when can read from world state and value exists for key")
+	assert.True(t, exists, "should return true when value for key in world state")
+}
+
+//TODO: TestCreateProdActivity
+
+//TODO: TestReadProdActivity
+
+//TODO: TestGetAllProdActivities
+
+//TODO: TestDeleteAllProdActivities

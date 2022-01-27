@@ -1,0 +1,14 @@
+{
+    "docType": "prodActivity",
+    "ID": "pa01",
+    "activityType": "type",
+    "prodUnit": "punit01",
+    "inputLots": {
+        "lot01": 10
+    },
+    "outputLot": "lot02",
+    "activityEndDate": "date",
+    "companyLegalName": "name",
+    "location": "location",
+    "envScore": 50
+}
