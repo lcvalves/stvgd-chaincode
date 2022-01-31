@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"cloud.google.com/go/civil"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
@@ -38,6 +39,16 @@ func (c *StvgdContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 		{DocType: "prodActivity", ID: "pa05", ActivityType: "test-type", ProdUnit: "punit02", InputLots: map[string]float32{"lot01": 10}, OutputLot: lots[4], ActivityEndDate: "date", CompanyLegalName: "name", Location: "location", EnvScore: 14},
 		{DocType: "prodActivity", ID: "pa06", ActivityType: "test-type", ProdUnit: "punit02", InputLots: map[string]float32{"lot04": 50, "lot05": 20}, OutputLot: lots[5], ActivityEndDate: "date", CompanyLegalName: "name", Location: "location", EnvScore: 20},
 		{DocType: "prodActivity", ID: "pa07", ActivityType: "test-type", ProdUnit: "punit03", InputLots: map[string]float32{"lot01": 30, "lot04": 10, "lot06": 10}, OutputLot: lots[6], ActivityEndDate: "date", CompanyLegalName: "name", Location: "location", EnvScore: 100},
+	}
+
+	logActivities := []LogActivity{
+		{DocType: "logActivity", ID: "la01", TransportationType: "test-type", ProdUnitFrom: "punit01", ProdUnitTo: "punit01", Lots: []string{"lot01"}, Distance: 10, Cost: 10, DateSent: "2022-01-01", DateReceived: "2022-02-01"},
+		{DocType: "logActivity", ID: "la02", TransportationType: "test-type", ProdUnitFrom: "punit01", ProdUnitTo: "punit01", Lots: []string{"lot01"}, Distance: 20, Cost: 20, DateSent: "2022-01-02", DateReceived: "2022-02-02"},
+		{DocType: "logActivity", ID: "la03", TransportationType: "test-type", ProdUnitFrom: "punit01", ProdUnitTo: "punit01", Lots: []string{"lot01"}, Distance: 30, Cost: 30, DateSent: "2022-01-03", DateReceived: "2022-02-03"},
+		{DocType: "logActivity", ID: "la04", TransportationType: "test-type", ProdUnitFrom: "punit02", ProdUnitTo: "punit02", Lots: []string{"lot01"}, Distance: 40, Cost: 40, DateSent: "2022-01-04", DateReceived: "2022-02-04"},
+		{DocType: "logActivity", ID: "la05", TransportationType: "test-type", ProdUnitFrom: "punit02", ProdUnitTo: "punit02", Lots: []string{"lot01"}, Distance: 50, Cost: 50, DateSent: "2022-01-05", DateReceived: "2022-02-05"},
+		{DocType: "logActivity", ID: "la06", TransportationType: "test-type", ProdUnitFrom: "punit02", ProdUnitTo: "punit02", Lots: []string{"lot04"}, Distance: 60, Cost: 60, DateSent: "2022-01-06", DateReceived: "2022-02-06"},
+		{DocType: "logActivity", ID: "la07", TransportationType: "test-type", ProdUnitFrom: "punit03", ProdUnitTo: "punit03", Lots: []string{"lot01"}, Distance: 70, Cost: 70, DateSent: "2022-01-07", DateReceived: "2022-02-07"},
 	}
 
 	for _, lot := range lots {
@@ -79,7 +90,26 @@ func (c *StvgdContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 		}
 	}
 
-	return fmt.Sprintf("production activities [%s-%s] & lots [%s-%s] were successfully added to the ledger", prodActivities[0].ID, prodActivities[len(prodActivities)-1].ID, lots[0].ID, lots[len(lots)-1].ID), nil
+	for _, logActivity := range logActivities {
+		exists, err := c.LogActivityExists(ctx, logActivity.ID)
+		if err != nil {
+			return "", fmt.Errorf("could not read from world state. %s", err)
+		} else if exists {
+			return "", fmt.Errorf("the logistic activity [%s] already exists", logActivity.ID)
+		}
+
+		logActivityBytes, err := json.Marshal(logActivity)
+		if err != nil {
+			return "", err
+		}
+
+		err = ctx.GetStub().PutState(logActivity.ID, logActivityBytes)
+		if err != nil {
+			return "", fmt.Errorf("failed to put to world state: %v", err)
+		}
+	}
+
+	return fmt.Sprintf("production activities [%s-%s], lots [%s-%s] and logistic activities [%s-%s] were successfully added to the ledger", prodActivities[0].ID, prodActivities[len(prodActivities)-1].ID, lots[0].ID, lots[len(lots)-1].ID, logActivities[0].ID, logActivities[len(logActivities)-1].ID), nil
 }
 
 /*
@@ -393,7 +423,7 @@ func (c *StvgdContract) CreateProdActivity(ctx contractapi.TransactionContextInt
 
 		for lotID, amount := range inputLots { // In every single input lot
 
-			// Checks if the lot ID already exist
+			// Checks if the lot ID exists in world state
 			exists, err := c.LotExists(ctx, lotID)
 			if err != nil {
 				return "", fmt.Errorf("could not read from world state. %s", err)
@@ -521,14 +551,14 @@ func (c *StvgdContract) GetAllProdActivities(ctx contractapi.TransactionContextI
 	return prodActivities, nil
 }
 
-// DeleteProdActivities deletes all production activities found in world state
+// DeleteAllProdActivities deletes all production activities found in world state
 func (c *StvgdContract) DeleteAllProdActivities(ctx contractapi.TransactionContextInterface) (string, error) {
 
 	prodActivities, err := c.GetAllProdActivities(ctx)
 	if err != nil {
 		return "", fmt.Errorf("could not read from world state. %s", err)
 	} else if len(prodActivities) == 0 {
-		return "", fmt.Errorf("there are no productions activites in world state to delete")
+		return "", fmt.Errorf("there are no productions activities in world state to delete")
 	}
 
 	for _, prodActivity := range prodActivities {
@@ -539,4 +569,207 @@ func (c *StvgdContract) DeleteAllProdActivities(ctx contractapi.TransactionConte
 	}
 
 	return "all the production activities were successfully deleted", nil
+}
+
+/*
+ * -----------------------------------
+ * LOGISTICS ACTIVITY
+ * -----------------------------------
+ */
+
+// LogActivityExists returns true when logActivity with given ID exists in world state
+func (c *StvgdContract) LogActivityExists(ctx contractapi.TransactionContextInterface, logActivityID string) (bool, error) {
+	data, err := ctx.GetStub().GetState(logActivityID)
+
+	if err != nil {
+		return false, err
+	}
+
+	return data != nil, nil
+}
+
+// CreateProdActivity creates a new instance of ProdActivity
+func (c *StvgdContract) CreateLogActivity(ctx contractapi.TransactionContextInterface, logActivityID,
+	transportationType, prodUnitFrom, prodUnitTo string, lots []string, distance, cost float32, dateSent, dateReceived string) (string, error) {
+
+	// Checks if the logistic activity ID already exists
+	exists, err := c.LogActivityExists(ctx, logActivityID)
+	if err != nil {
+		return "", fmt.Errorf("could not read from world state. %s", err)
+	} else if exists {
+		return "", fmt.Errorf("the logistic activity [%s] already exists", logActivityID)
+	}
+
+	// Checks if the origin & destination production units are different
+	if prodUnitFrom == prodUnitTo {
+		return "", fmt.Errorf("origin & destination production units can't be the the same")
+	}
+
+	// Checks if the distance is not 0
+	if distance <= 0 {
+		return "", fmt.Errorf("distance can't be 0")
+	}
+
+	// Checks if the cost is not 0
+	if cost <= 0 {
+		return "", fmt.Errorf("cost can't be 0")
+	}
+
+	// Date parsing
+	civilDateSent, err := civil.ParseDate(dateSent)
+	if err != nil {
+		return "", fmt.Errorf("could not parse the sent date to correct format. %s", err)
+	}
+	civilDateReceived, err := civil.ParseDate(dateReceived)
+	if err != nil {
+		return "", fmt.Errorf("could not parse the sent date to correct format. %s", err)
+	}
+
+	// Checks if the sent date is before received date
+	if civilDateSent.After(civilDateReceived) {
+		return "", fmt.Errorf("sent date can't be after the received date")
+	}
+
+	// Lots audit
+	if len(lots) <= 0 { // force atleast 1 lot per logistic activity
+		return "", fmt.Errorf("the logistic activity must trasnport atleast 1 lot")
+	} else {
+
+		for _, lotID := range lots { // For every lot
+
+			// Check if the lot ID exists in world state
+			exists, err := c.LotExists(ctx, lotID)
+			if err != nil {
+				return "", fmt.Errorf("could not read from world state. %s", err)
+			} else if !exists {
+				return "", fmt.Errorf("the lot [%s] does not exist", lotID)
+			}
+
+			// Reads the lot
+			lot, err := c.ReadLot(ctx, lotID)
+			if err != nil {
+				return "", fmt.Errorf("could not read from world state. %s", err)
+			}
+
+			// Checks equality in logistic activity's origin production unit & lot's production unit
+			if prodUnitFrom != lot.ProdUnit {
+				return "", fmt.Errorf("logistic activity's origin production unit [%s] must be the same as the lot's [%s] production unit [%s]", prodUnitFrom, lotID, lot.ProdUnit)
+			} else { // Transfer lots ownership to new production unit / owner
+				_, err = c.TransferLot(ctx, lotID, prodUnitTo)
+				if err != nil {
+					return "", fmt.Errorf("could not write to world state. %s", err)
+				}
+			}
+
+		}
+	}
+
+	logActivity := &LogActivity{
+		DocType:            "logActivity",
+		ID:                 logActivityID,
+		TransportationType: transportationType,
+		ProdUnitFrom:       prodUnitFrom,
+		ProdUnitTo:         prodUnitTo,
+		Lots:               lots,
+		Distance:           distance,
+		Cost:               cost,
+		DateSent:           dateSent,
+		DateReceived:       dateReceived,
+	}
+
+	logActivityBytes, err := json.Marshal(logActivity)
+	if err != nil {
+		return "", err
+	}
+
+	err = ctx.GetStub().PutState(logActivityID, logActivityBytes)
+	if err != nil {
+		return "", fmt.Errorf("failed to put to world state: %v", err)
+	}
+
+	return fmt.Sprintf("logistic activity [%s] was successfully added to the ledger", logActivityID), nil
+}
+
+// ReadProdActivity retrieves an instance of ProdActivity from the world state
+func (c *StvgdContract) ReadLogActivity(ctx contractapi.TransactionContextInterface, logActivityID string) (*LogActivity, error) {
+
+	exists, err := c.ProdActivityExists(ctx, logActivityID)
+	if err != nil {
+		return nil, fmt.Errorf("could not read from world state. %s", err)
+	} else if !exists {
+		return nil, fmt.Errorf("the logistic activity [%s] does not exist", logActivityID)
+	}
+
+	logActivityBytes, _ := ctx.GetStub().GetState(logActivityID)
+
+	logActivity := new(LogActivity)
+
+	err = json.Unmarshal(logActivityBytes, logActivity)
+
+	if err != nil {
+		return nil, fmt.Errorf("could not unmarshal world state data to type LogActivity")
+	}
+
+	return logActivity, nil
+}
+
+// constructQueryResponseFromIterator constructs a slice of lots from the resultsIterator
+func constructLogActivityQueryResponseFromIterator(resultsIterator shim.StateQueryIteratorInterface) ([]*LogActivity, error) {
+	var logActivities []*LogActivity
+	for resultsIterator.HasNext() {
+		queryResult, err := resultsIterator.Next()
+		if err != nil {
+			return nil, err
+		}
+		var logActivity LogActivity
+		err = json.Unmarshal(queryResult.Value, &logActivity)
+		if err != nil {
+			return nil, err
+		}
+		logActivities = append(logActivities, &logActivity)
+	}
+
+	return logActivities, nil
+}
+
+// getQueryResultForQueryString executes the passed in query string.
+// The result set is built and returned as a byte array containing the JSON results.
+func getLogActivityQueryResultForQueryString(ctx contractapi.TransactionContextInterface, queryString string) ([]*LogActivity, error) {
+	resultsIterator, err := ctx.GetStub().GetQueryResult(queryString)
+	if err != nil {
+		return nil, err
+	}
+	defer resultsIterator.Close()
+
+	return constructLogActivityQueryResponseFromIterator(resultsIterator)
+}
+
+// GetAllLogActivities queries for all logistic activities.
+// This is an example of a parameterized query where the query logic is baked into the chaincode,
+// and accepting a single query parameter (docType).
+// Only available on state databases that support rich query (e.g. CouchDB)
+// Example: Parameterized rich query
+func (c *StvgdContract) GetAllLogActivities(ctx contractapi.TransactionContextInterface) ([]*LogActivity, error) {
+	queryString := `{"selector":{"docType":"logActivity"}}`
+	return getLogActivityQueryResultForQueryString(ctx, queryString)
+}
+
+// DeleteAllLogActivities deletes all production activities found in world state
+func (c *StvgdContract) DeleteAllLogActivities(ctx contractapi.TransactionContextInterface) (string, error) {
+
+	logActivities, err := c.GetAllLogActivities(ctx)
+	if err != nil {
+		return "", fmt.Errorf("could not read from world state. %s", err)
+	} else if len(logActivities) == 0 {
+		return "", fmt.Errorf("there are no logistic activities in world state to delete")
+	}
+
+	for _, logActivity := range logActivities {
+		err = ctx.GetStub().DelState(logActivity.ID)
+		if err != nil {
+			return "", fmt.Errorf("could not delete from world state. %s", err)
+		}
+	}
+
+	return "all the logistic activities were successfully deleted", nil
 }
