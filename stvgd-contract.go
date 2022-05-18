@@ -7,6 +7,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"cloud.google.com/go/civil"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
@@ -18,37 +19,51 @@ type StvgdContract struct {
 	contractapi.Contract
 }
 
+// HistoryQueryResult structure used for returning result of history query
+type HistoryQueryResult struct {
+	Record    *Batch    `json:"record"`
+	TxId      string    `json:"txId"`
+	Timestamp time.Time `json:"timestamp"`
+	IsDelete  bool      `json:"isDelete"`
+}
+
+//TODO: Init LogisticalActivityTransport with return = false;
+
+/*
 // InitLedger adds a base set of ProdActivities to the ledger
 func (c *StvgdContract) InitLedger(ctx contractapi.TransactionContextInterface) (string, error) {
 
+	//TODO: Simulate supply chain use case with proper instances of each struct
+	// (check with other STVGD participants)
+
 	lots := []Lot{
-		{DocType: "lot", ID: "lot01", LotType: "test-type", ProdActivity: "pa01", Amount: 100, Unit: "KG", ProdUnit: "punit01", LotInternalID: "lot01-iid01"},
-		{DocType: "lot", ID: "lot02", LotType: "test-type", ProdActivity: "pa02", Amount: 200, Unit: "KG", ProdUnit: "punit01", LotInternalID: "lot02-iid01"},
-		{DocType: "lot", ID: "lot03", LotType: "test-type", ProdActivity: "pa03", Amount: 300, Unit: "KG", ProdUnit: "punit01", LotInternalID: "lot03-iid01"},
-		{DocType: "lot", ID: "lot04", LotType: "test-type", ProdActivity: "pa04", Amount: 400, Unit: "KG", ProdUnit: "punit02", LotInternalID: "lot04-iid01"},
-		{DocType: "lot", ID: "lot05", LotType: "test-type", ProdActivity: "pa05", Amount: 500, Unit: "KG", ProdUnit: "punit02", LotInternalID: "lot05-iid01"},
-		{DocType: "lot", ID: "lot06", LotType: "test-type", Amount: 600, Unit: "KG", ProdUnit: "punit02", LotInternalID: "lot06-iid01"},
-		{DocType: "lot", ID: "lot07", LotType: "test-type", Amount: 700, Unit: "KG", ProdUnit: "punit03", LotInternalID: "lot07-iid01"},
+		{ObjectType: "lot", ID: "lot01", LotType: "test-type", ProdActivity: "pa01", Amount: 100, Unit: "KG", ProdUnit: "punit01", LotInternalID: "lot01-iid01"},
+		{ObjectType: "lot", ID: "lot02", LotType: "test-type", ProdActivity: "pa02", Amount: 200, Unit: "KG", ProdUnit: "punit01", LotInternalID: "lot02-iid01"},
+		{ObjectType: "lot", ID: "lot03", LotType: "test-type", ProdActivity: "pa03", Amount: 300, Unit: "KG", ProdUnit: "punit01", LotInternalID: "lot03-iid01"},
+		{ObjectType: "lot", ID: "lot04", LotType: "test-type", ProdActivity: "pa04", Amount: 400, Unit: "KG", ProdUnit: "punit02", LotInternalID: "lot04-iid01"},
+		{ObjectType: "lot", ID: "lot05", LotType: "test-type", ProdActivity: "pa05", Amount: 500, Unit: "KG", ProdUnit: "punit02", LotInternalID: "lot05-iid01"},
+		{ObjectType: "lot", ID: "lot06", LotType: "test-type", Amount: 600, Unit: "KG", ProdUnit: "punit02", LotInternalID: "lot06-iid01"},
+		{ObjectType: "lot", ID: "lot07", LotType: "test-type", Amount: 700, Unit: "KG", ProdUnit: "punit03", LotInternalID: "lot07-iid01"},
 	}
 
 	prodActivities := []ProdActivity{
-		{DocType: "prodActivity", ID: "pa01", ActivityType: "test-type", ProdUnit: "punit01", InputLots: map[string]float32{"lot01": 10}, OutputLot: lots[0], ActivityEndDate: "date", CompanyLegalName: "name", Location: "location", EnvScore: 73},
-		{DocType: "prodActivity", ID: "pa02", ActivityType: "test-type", ProdUnit: "punit01", InputLots: map[string]float32{"lot01": 10}, OutputLot: lots[1], ActivityEndDate: "date", CompanyLegalName: "name", Location: "location", EnvScore: 16},
-		{DocType: "prodActivity", ID: "pa03", ActivityType: "test-type", ProdUnit: "punit01", InputLots: map[string]float32{"lot01": 20, "lot02": 15}, OutputLot: lots[2], ActivityEndDate: "date", CompanyLegalName: "name", Location: "location", EnvScore: 51},
-		{DocType: "prodActivity", ID: "pa04", ActivityType: "test-type", ProdUnit: "punit02", InputLots: map[string]float32{"lot01": 10}, OutputLot: lots[3], ActivityEndDate: "date", CompanyLegalName: "name", Location: "location", EnvScore: 26},
-		{DocType: "prodActivity", ID: "pa05", ActivityType: "test-type", ProdUnit: "punit02", InputLots: map[string]float32{"lot01": 10}, OutputLot: lots[4], ActivityEndDate: "date", CompanyLegalName: "name", Location: "location", EnvScore: 14},
-		{DocType: "prodActivity", ID: "pa06", ActivityType: "test-type", ProdUnit: "punit02", InputLots: map[string]float32{"lot04": 50, "lot05": 20}, OutputLot: lots[5], ActivityEndDate: "date", CompanyLegalName: "name", Location: "location", EnvScore: 20},
-		{DocType: "prodActivity", ID: "pa07", ActivityType: "test-type", ProdUnit: "punit03", InputLots: map[string]float32{"lot01": 30, "lot04": 10, "lot06": 10}, OutputLot: lots[6], ActivityEndDate: "date", CompanyLegalName: "name", Location: "location", EnvScore: 100},
+		{ObjectType: "prodActivity", ID: "pa01", ActivityType: "test-type", ProdUnit: "punit01", InputLots: map[string]float32{"lot01": 10}, OutputLot: lots[0], ActivityEndDate: "date", CompanyLegalName: "name", Location: "location", EnvScore: 73},
+		{ObjectType: "prodActivity", ID: "pa02", ActivityType: "test-type", ProdUnit: "punit01", InputLots: map[string]float32{"lot01": 10}, OutputLot: lots[1], ActivityEndDate: "date", CompanyLegalName: "name", Location: "location", EnvScore: 16},
+		{ObjectType: "prodActivity", ID: "pa03", ActivityType: "test-type", ProdUnit: "punit01", InputLots: map[string]float32{"lot01": 20, "lot02": 15}, OutputLot: lots[2], ActivityEndDate: "date", CompanyLegalName: "name", Location: "location", EnvScore: 51},
+		{ObjectType: "prodActivity", ID: "pa04", ActivityType: "test-type", ProdUnit: "punit02", InputLots: map[string]float32{"lot01": 10}, OutputLot: lots[3], ActivityEndDate: "date", CompanyLegalName: "name", Location: "location", EnvScore: 26},
+		{ObjectType: "prodActivity", ID: "pa05", ActivityType: "test-type", ProdUnit: "punit02", InputLots: map[string]float32{"lot01": 10}, OutputLot: lots[4], ActivityEndDate: "date", CompanyLegalName: "name", Location: "location", EnvScore: 14},
+		{ObjectType: "prodActivity", ID: "pa06", ActivityType: "test-type", ProdUnit: "punit02", InputLots: map[string]float32{"lot04": 50, "lot05": 20}, OutputLot: lots[5], ActivityEndDate: "date", CompanyLegalName: "name", Location: "location", EnvScore: 20},
+		{ObjectType: "prodActivity", ID: "pa07", ActivityType: "test-type", ProdUnit: "punit03", InputLots: map[string]float32{"lot01": 30, "lot04": 10, "lot06": 10}, OutputLot: lots[6], ActivityEndDate: "date", CompanyLegalName: "name", Location: "location", EnvScore: 100},
 	}
 
 	logActivities := []LogActivity{
-		{DocType: "logActivity", ID: "la01", TransportationType: "test-type", ProdUnitFrom: "punit01", ProdUnitTo: "punit01", Lots: []string{"lot01"}, Distance: 10, Cost: 10, DateSent: "2022-01-01", DateReceived: "2022-02-01"},
-		{DocType: "logActivity", ID: "la02", TransportationType: "test-type", ProdUnitFrom: "punit01", ProdUnitTo: "punit01", Lots: []string{"lot01"}, Distance: 20, Cost: 20, DateSent: "2022-01-02", DateReceived: "2022-02-02"},
-		{DocType: "logActivity", ID: "la03", TransportationType: "test-type", ProdUnitFrom: "punit01", ProdUnitTo: "punit01", Lots: []string{"lot01"}, Distance: 30, Cost: 30, DateSent: "2022-01-03", DateReceived: "2022-02-03"},
-		{DocType: "logActivity", ID: "la04", TransportationType: "test-type", ProdUnitFrom: "punit02", ProdUnitTo: "punit02", Lots: []string{"lot01"}, Distance: 40, Cost: 40, DateSent: "2022-01-04", DateReceived: "2022-02-04"},
-		{DocType: "logActivity", ID: "la05", TransportationType: "test-type", ProdUnitFrom: "punit02", ProdUnitTo: "punit02", Lots: []string{"lot01"}, Distance: 50, Cost: 50, DateSent: "2022-01-05", DateReceived: "2022-02-05"},
-		{DocType: "logActivity", ID: "la06", TransportationType: "test-type", ProdUnitFrom: "punit02", ProdUnitTo: "punit02", Lots: []string{"lot04"}, Distance: 60, Cost: 60, DateSent: "2022-01-06", DateReceived: "2022-02-06"},
-		{DocType: "logActivity", ID: "la07", TransportationType: "test-type", ProdUnitFrom: "punit03", ProdUnitTo: "punit03", Lots: []string{"lot01"}, Distance: 70, Cost: 70, DateSent: "2022-01-07", DateReceived: "2022-02-07"},
+		{ObjectType: "logActivity", ID: "la01", TransportationType: "test-type", ProdUnitFrom: "punit01", ProdUnitTo: "punit01", Lots: []string{"lot01"}, Distance: 10, Cost: 10, DateSent: "2022-01-01", DateReceived: "2022-02-01", EnvScore: 50},
+		{ObjectType: "logActivity", ID: "la02", TransportationType: "test-type", ProdUnitFrom: "punit01", ProdUnitTo: "punit01", Lots: []string{"lot01"}, Distance: 20, Cost: 20, DateSent: "2022-01-02", DateReceived: "2022-02-02", EnvScore: 50},
+		{ObjectType: "logActivity", ID: "la03", TransportationType: "test-type", ProdUnitFrom: "punit01", ProdUnitTo: "punit01", Lots: []string{"lot01"}, Distance: 30, Cost: 30, DateSent: "2022-01-03", DateReceived: "2022-02-03", EnvScore: 50},
+		{ObjectType: "logActivity", ID: "la04", TransportationType: "test-type", ProdUnitFrom: "punit02", ProdUnitTo: "punit02", Lots: []string{"lot01"}, Distance: 40, Cost: 40, DateSent: "2022-01-04", DateReceived: "2022-02-04", EnvScore: 50},
+		{ObjectType: "logActivity", ID: "la05", TransportationType: "test-type", ProdUnitFrom: "punit02", ProdUnitTo: "punit02", Lots: []string{"lot01"}, Distance: 50, Cost: 50, DateSent: "2022-01-05", DateReceived: "2022-02-05", EnvScore: 50},
+		{ObjectType: "logActivity", ID: "la06", TransportationType: "test-type", ProdUnitFrom: "punit02", ProdUnitTo: "punit02", Lots: []string{"lot04"}, Distance: 60, Cost: 60, DateSent: "2022-01-06", DateReceived: "2022-02-06", EnvScore: 50},
+		{ObjectType: "logActivity", ID: "la07", TransportationType: "test-type", ProdUnitFrom: "punit03", ProdUnitTo: "punit03", Lots: []string{"lot01"}, Distance: 70, Cost: 70, DateSent: "2022-01-07", DateReceived: "2022-02-07", EnvScore: 50},
 	}
 
 	for _, lot := range lots {
@@ -110,17 +125,17 @@ func (c *StvgdContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 	}
 
 	return fmt.Sprintf("production activities [%s-%s], lots [%s-%s] and logistic activities [%s-%s] were successfully added to the ledger", prodActivities[0].ID, prodActivities[len(prodActivities)-1].ID, lots[0].ID, lots[len(lots)-1].ID, logActivities[0].ID, logActivities[len(logActivities)-1].ID), nil
-}
+} */
 
 /*
  * -----------------------------------
- * LOT
+ * BATCH
  * -----------------------------------
  */
 
-// LotExists returns true when lot with given ID exists in world state
-func (c *StvgdContract) LotExists(ctx contractapi.TransactionContextInterface, lotID string) (bool, error) {
-	data, err := ctx.GetStub().GetState(lotID)
+// BatchExists returns true when batch with given ID exists in world state
+func (c *StvgdContract) BatchExists(ctx contractapi.TransactionContextInterface, batchID string) (bool, error) {
+	data, err := ctx.GetStub().GetState(batchID)
 
 	if err != nil {
 		return false, err
@@ -129,90 +144,93 @@ func (c *StvgdContract) LotExists(ctx contractapi.TransactionContextInterface, l
 	return data != nil, nil
 }
 
-// CreateLot creates a new instance of Lot
-func (c *StvgdContract) CreateLot(ctx contractapi.TransactionContextInterface, lotID, lotType, prodActivity string,
-	amount float32, unit, prodUnit, lotInternalID string) (string, error) {
+// CreateBatch creates a new instance of Batch
+func (c *StvgdContract) CreateBatch(ctx contractapi.TransactionContextInterface, batchID, batchTypeID, productionActivityID, productionUnitID, batchInternalID, supplierID, unit string, batchComposition map[string]float32, quantity, ecs, ses float32) (string, error) {
 
-	exists, err := c.LotExists(ctx, lotID)
+	exists, err := c.BatchExists(ctx, batchID)
 	if err != nil {
 		return "", fmt.Errorf("could not read from world state. %s", err)
 	} else if exists {
-		return "", fmt.Errorf("the lot %s already exists", lotID)
+		return "", fmt.Errorf("the batch [%s] already exists", batchID)
 	}
 
-	if amount < 0 {
-		return "", fmt.Errorf("the amount should be greater than 0")
-	} else {
-		lot := &Lot{
-			DocType:       "lot",
-			ID:            lotID,
-			LotType:       lotType,
-			ProdActivity:  prodActivity,
-			Amount:        amount,
-			Unit:          unit,
-			ProdUnit:      prodUnit,
-			LotInternalID: lotInternalID,
-		}
-
-		lotBytes, err := json.Marshal(lot)
-		if err != nil {
-			return "", err
-		}
-
-		err = ctx.GetStub().PutState(lot.ID, lotBytes)
-		if err != nil {
-			return "", fmt.Errorf("failed to put to world state: %v", err)
-		}
+	if quantity < 0 {
+		return "", fmt.Errorf("the batch quantity should be greater than 0")
 	}
 
-	return fmt.Sprintf("%s created successfully", lotID), nil
+	batch := &Batch{
+		ObjectType:           "batch",
+		ID:                   batchID,
+		BatchTypeID:          batchTypeID,
+		ProductionActivityID: productionActivityID,
+		ProductionUnitID:     productionUnitID,
+		BatchInternalID:      batchInternalID,
+		SupplierID:           supplierID,
+		BatchComposition:     batchComposition,
+		Quantity:             quantity,
+		Unit:                 unit,
+		ECS:                  ecs,
+		SES:                  ses,
+	}
+
+	batchBytes, err := json.Marshal(batch)
+	if err != nil {
+		return "", err
+	}
+
+	err = ctx.GetStub().PutState(batch.ID, batchBytes)
+	if err != nil {
+		return "", fmt.Errorf("failed to add batch to world state: %v", err)
+	}
+
+	return fmt.Sprintf("[%s] created successfully", batchID), nil
 }
 
-// ReadLot retrieves an instance of Lot from the world state
-func (c *StvgdContract) ReadLot(ctx contractapi.TransactionContextInterface, lotID string) (*Lot, error) {
+// ReadBatch retrieves an instance of Batch from the world state
+func (c *StvgdContract) ReadBatch(ctx contractapi.TransactionContextInterface, batchID string) (*Batch, error) {
 
-	exists, err := c.LotExists(ctx, lotID)
+	exists, err := c.BatchExists(ctx, batchID)
 	if err != nil {
-		return nil, fmt.Errorf("could not read from world state. %s", err)
+		return nil, fmt.Errorf("could not read batch from world state. %s", err)
 	} else if !exists {
-		return nil, fmt.Errorf("the lot %s does not exist", lotID)
+		return nil, fmt.Errorf("[%s] does not exist", batchID)
 	}
 
-	lotBytes, _ := ctx.GetStub().GetState(lotID)
+	batchBytes, _ := ctx.GetStub().GetState(batchID)
 
-	lot := new(Lot)
+	batch := new(Batch)
 
-	err = json.Unmarshal(lotBytes, lot)
+	err = json.Unmarshal(batchBytes, batch)
 
 	if err != nil {
-		return nil, fmt.Errorf("could not unmarshal world state data to type Lot")
+		return nil, fmt.Errorf("could not unmarshal world state data to type Batch")
 	}
 
-	return lot, nil
+	return batch, nil
 }
 
-// constructQueryResponseFromIterator constructs a slice of lots from the resultsIterator
-func constructQueryResponseFromIterator(resultsIterator shim.StateQueryIteratorInterface) ([]*Lot, error) {
-	var lots []*Lot
+// constructQueryResponseFromIterator constructs a slice of batches from the resultsIterator
+func constructQueryResponseFromIterator(resultsIterator shim.StateQueryIteratorInterface) ([]*Batch, error) {
+	var batches []*Batch
 	for resultsIterator.HasNext() {
 		queryResult, err := resultsIterator.Next()
 		if err != nil {
 			return nil, err
 		}
-		var lot Lot
-		err = json.Unmarshal(queryResult.Value, &lot)
+		var batch Batch
+		err = json.Unmarshal(queryResult.Value, &batch)
 		if err != nil {
 			return nil, err
 		}
-		lots = append(lots, &lot)
+		batches = append(batches, &batch)
 	}
 
-	return lots, nil
+	return batches, nil
 }
 
 // getQueryResultForQueryString executes the passed in query string.
 // The result set is built and returned as a byte array containing the JSON results.
-func getQueryResultForQueryString(ctx contractapi.TransactionContextInterface, queryString string) ([]*Lot, error) {
+func getQueryResultForQueryString(ctx contractapi.TransactionContextInterface, queryString string) ([]*Batch, error) {
 	resultsIterator, err := ctx.GetStub().GetQueryResult(queryString)
 	if err != nil {
 		return nil, err
@@ -222,154 +240,210 @@ func getQueryResultForQueryString(ctx contractapi.TransactionContextInterface, q
 	return constructQueryResponseFromIterator(resultsIterator)
 }
 
-// GetAllLots queries for all lots.
+// GetAllBatches queries for all batches.
 // This is an example of a parameterized query where the query logic is baked into the chaincode,
 // and accepting a single query parameter (docType).
 // Only available on state databases that support rich query (e.g. CouchDB)
 // Example: Parameterized rich query
-func (c *StvgdContract) GetAllLots(ctx contractapi.TransactionContextInterface) ([]*Lot, error) {
-	queryString := `{"selector":{"docType":"lot"}}`
+func (c *StvgdContract) GetAllBatches(ctx contractapi.TransactionContextInterface) ([]*Batch, error) {
+	queryString := `{"selector":{"docType":"batch"}}`
 	return getQueryResultForQueryString(ctx, queryString)
 }
 
-// UpdateLotAmount updates the amount of a Lot from the world state
-func (c *StvgdContract) UpdateLotAmount(ctx contractapi.TransactionContextInterface, lotID string, newAmount float32) (string, error) {
+/*
+// GetAssetHistory returns the chain of custody for a batch since issuance.
+func (c *StvgdContract) GetBatchHistory(ctx contractapi.TransactionContextInterface, batchID string) ([]HistoryQueryResult, error) {
+	log.Printf("GetAssetHistory: ID %v", batchID)
 
-	// Verifies if Lot that has lotID already exists
-	exists, err := c.LotExists(ctx, lotID)
+	resultsIterator, err := ctx.GetStub().GetHistoryForKey(batchID)
 	if err != nil {
-		return "", fmt.Errorf("could not read from world state. %s", err)
-	} else if !exists {
-		return "", fmt.Errorf("the lot %s does not exist", lotID)
+		return nil, err
 	}
+	defer resultsIterator.Close()
 
-	outdatedLotBytes, _ := ctx.GetStub().GetState(lotID) // Gets "old" Lot bytes from lotID
-
-	outdatedLot := new(Lot) // Initialize outdated/"old" Lot object
-
-	// Parses the JSON-encoded data in bytes (outdatedLotBytes) to the "old" Lot object (outdatedLot)
-	err = json.Unmarshal(outdatedLotBytes, outdatedLot)
-	if err != nil {
-		return "", fmt.Errorf("could not unmarshal world state data to type Lot")
-	}
-
-	// Checks if amount >= 0
-	if newAmount < 0 {
-		return "", fmt.Errorf("the new amount should be greater than 0")
-	} else {
-		// Initialize updated/"new" Lot object
-		updatedLot := &Lot{
-			DocType:       outdatedLot.DocType,
-			ID:            outdatedLot.ID,
-			LotType:       outdatedLot.LotType,
-			ProdActivity:  outdatedLot.ProdActivity,
-			Amount:        newAmount,
-			Unit:          outdatedLot.Unit,
-			ProdUnit:      outdatedLot.ProdUnit,
-			LotInternalID: outdatedLot.LotInternalID,
+	var records []HistoryQueryResult
+	for resultsIterator.HasNext() {
+		response, err := resultsIterator.Next()
+		if err != nil {
+			return nil, err
 		}
 
-		updatedLotBytes, _ := json.Marshal(updatedLot) // Encodes the JSON updatedLot data to bytes
-
-		err = ctx.GetStub().PutState(lotID, updatedLotBytes) // Updates world state with newly updated Lot
-		if err != nil {
-			return "", fmt.Errorf("could not write from world state. %s", err)
-		} else if newAmount == 0 { // Deletes the lot if there is no more amount left / newAmount = 0
-			_, err = c.DeleteLot(ctx, lotID)
+		var batch Batch
+		if len(response.Value) > 0 {
+			err = json.Unmarshal(response.Value, &batch)
 			if err != nil {
-				return "", fmt.Errorf("could not delete from world state. %s", err)
-			} else {
-				return fmt.Sprintf("lot [%s]'s amount was successfully updated to %.2f%s and deleted from world state", lotID, newAmount, outdatedLot.Unit), nil
+				return nil, err
 			}
 		} else {
-			return fmt.Sprintf("lot [%s]'s amount was successfully updated to %.2f%s", lotID, newAmount, outdatedLot.Unit), nil
+			batch = Batch{
+				ID: batchID,
+			}
+		}
+
+		timestamp := timestamppb.New(response.Timestamp.AsTime())
+		if timestamp.CheckValid() != nil {
+			return nil, err
+		}
+
+		record := HistoryQueryResult{
+			TxId:      response.TxId,
+			Timestamp: timestamp.AsTime(),
+			Record:    &batch,
+			IsDelete:  response.IsDelete,
+		}
+		records = append(records, record)
+	}
+
+	return records, nil
+}
+*/
+
+// UpdateBatchQuantity updates the quantity of a Batch from the world state
+func (c *StvgdContract) UpdateBatchQuantity(ctx contractapi.TransactionContextInterface, batchID string, newQuantity float32) (string, error) {
+
+	// Verifies if Batch that has batchID already exists
+	exists, err := c.BatchExists(ctx, batchID)
+	if err != nil {
+		return "", fmt.Errorf("could not read batch from world state. %s", err)
+	} else if !exists {
+		return "", fmt.Errorf("%s does not exist", batchID)
+	}
+
+	outdatedBatchBytes, _ := ctx.GetStub().GetState(batchID) // Gets "old" Batch bytes from batchID
+
+	outdatedBatch := new(Batch) // Initialize outdated/"old" Batch object
+
+	// Parses the JSON-encoded data in bytes (outdatedBatchBytes) to the "old" Batch object (outdatedBatch)
+	err = json.Unmarshal(outdatedBatchBytes, outdatedBatch)
+	if err != nil {
+		return "", fmt.Errorf("could not unmarshal batch world state data to type Batch")
+	}
+
+	// Checks if quantity >= 0
+	if newQuantity < 0 {
+		return "", fmt.Errorf("the new quantity should be greater than 0")
+	} else {
+		// Initialize updated/"new" Batch object
+		updatedBatch := &Batch{
+			ObjectType:           outdatedBatch.ObjectType,
+			ID:                   outdatedBatch.ID,
+			BatchTypeID:          outdatedBatch.BatchTypeID,
+			ProductionActivityID: outdatedBatch.ProductionActivityID,
+			ProductionUnitID:     outdatedBatch.ProductionUnitID,
+			BatchInternalID:      outdatedBatch.BatchInternalID,
+			SupplierID:           outdatedBatch.SupplierID,
+			BatchComposition:     outdatedBatch.BatchComposition,
+			Quantity:             newQuantity,
+			Unit:                 outdatedBatch.Unit,
+			ECS:                  outdatedBatch.ECS,
+			SES:                  outdatedBatch.SES,
+		}
+
+		updatedBatchBytes, _ := json.Marshal(updatedBatch) // Encodes the JSON updatedBatch data to bytes
+
+		err = ctx.GetStub().PutState(batchID, updatedBatchBytes) // Updates world state with newly updated Batch
+		if err != nil {
+			return "", fmt.Errorf("could not write batch to world state. %s", err)
+		} else if newQuantity == 0 { // Deletes the batch if there is no more quantity left / newQuantity = 0
+			_, err = c.DeleteBatch(ctx, batchID)
+			if err != nil {
+				return "", fmt.Errorf("could not delete batch from world state. %s", err)
+			} else {
+				return fmt.Sprintf("[%s]'s quantity was successfully updated to %.2f%s and deleted from world state", batchID, newQuantity, outdatedBatch.Unit), nil
+			}
+		} else {
+			return fmt.Sprintf("[%s]'s quantity was successfully updated to %.2f%s", batchID, newQuantity, outdatedBatch.Unit), nil
 		}
 	}
 }
 
-// TransferLot transfers a lot by setting a new production unit id on the lot
-func (c *StvgdContract) TransferLot(ctx contractapi.TransactionContextInterface, lotID, newProdUnit string) (string, error) {
+// TransferBatch transfers a batch by setting a new production unit id on the batch
+func (c *StvgdContract) TransferBatch(ctx contractapi.TransactionContextInterface, batchID, newProductionUnitID string) (string, error) {
 
-	// Verifies if Lot that has lotID already exists
-	exists, err := c.LotExists(ctx, lotID)
+	// Verifies if Batch that has batchID already exists
+	exists, err := c.BatchExists(ctx, batchID)
 	if err != nil {
-		return "", fmt.Errorf("could not read from world state. %s", err)
+		return "", fmt.Errorf("could not read batch from world state. %s", err)
 	} else if !exists {
-		return "", fmt.Errorf("the lot %s does not exist", lotID)
+		return "", fmt.Errorf("[%s] does not exist", batchID)
 	}
 
-	outdatedLotBytes, _ := ctx.GetStub().GetState(lotID) // Gets "old" Lot bytes from lotID
+	outdatedBatchBytes, _ := ctx.GetStub().GetState(batchID) // Gets "old" Batch bytes from batchID
 
-	outdatedLot := new(Lot) // Initialize outdated/"old" Lot object
+	outdatedBatch := new(Batch) // Initialize outdated/"old" Batch object
 
-	// Parses the JSON-encoded data in bytes (outdatedLotBytes) to the "old" Lot object (outdatedLot)
-	err = json.Unmarshal(outdatedLotBytes, outdatedLot)
+	// Parses the JSON-encoded data in bytes (outdatedBatchBytes) to the "old" Batch object (outdatedBatch)
+	err = json.Unmarshal(outdatedBatchBytes, outdatedBatch)
 	if err != nil {
-		return "", fmt.Errorf("could not unmarshal world state data to type Lot")
+		return "", fmt.Errorf("could not unmarshal batch world state data to type Batch")
 	}
 
 	// Checks if new owner is different
-	if newProdUnit == outdatedLot.ProdUnit {
-		return "", fmt.Errorf("cannot transfer a lot to the current owner/production unit [%s]", outdatedLot.ProdUnit)
+	if newProductionUnitID == outdatedBatch.ProductionUnitID {
+		return "", fmt.Errorf("cannot transfer a batch to the current owner/production unit %s[]", outdatedBatch.ProductionUnitID)
 	} else {
-		// Initialize updated/"new" Lot object
-		updatedLot := &Lot{
-			DocType:       outdatedLot.DocType,
-			ID:            outdatedLot.ID,
-			LotType:       outdatedLot.LotType,
-			ProdActivity:  outdatedLot.ProdActivity,
-			Amount:        outdatedLot.Amount,
-			Unit:          outdatedLot.Unit,
-			ProdUnit:      newProdUnit,
-			LotInternalID: outdatedLot.LotInternalID,
+		// Initialize updated/"new" Batch object
+		updatedBatch := &Batch{
+			ObjectType:           outdatedBatch.ObjectType,
+			ID:                   outdatedBatch.ID,
+			BatchTypeID:          outdatedBatch.BatchTypeID,
+			ProductionActivityID: outdatedBatch.ProductionActivityID,
+			ProductionUnitID:     newProductionUnitID,
+			BatchInternalID:      outdatedBatch.BatchInternalID,
+			SupplierID:           outdatedBatch.SupplierID,
+			BatchComposition:     outdatedBatch.BatchComposition,
+			Quantity:             outdatedBatch.Quantity,
+			Unit:                 outdatedBatch.Unit,
+			ECS:                  outdatedBatch.ECS,
+			SES:                  outdatedBatch.SES,
 		}
 
-		updatedLotBytes, _ := json.Marshal(updatedLot) // Encodes the JSON updatedLot data to bytes
+		updatedBatchBytes, _ := json.Marshal(updatedBatch) // Encodes the JSON updatedBatch data to bytes
 
-		err = ctx.GetStub().PutState(lotID, updatedLotBytes) // Updates world state with newly updated Lot
+		err = ctx.GetStub().PutState(batchID, updatedBatchBytes) // Updates world state with newly updated Batch
 		if err != nil {
 			return "", fmt.Errorf("could not write to world state. %s", err)
 		} else {
-			return fmt.Sprintf("lot [%s] transfered successfully to production unit [%s]", lotID, newProdUnit), nil
+			return fmt.Sprintf("[%s] transfered successfully to production unit [%s]", batchID, newProductionUnitID), nil
 		}
 	}
 }
 
-// DeleteLot deletes an instance of Lot from the world state
-func (c *StvgdContract) DeleteLot(ctx contractapi.TransactionContextInterface, lotID string) (string, error) {
-	exists, err := c.LotExists(ctx, lotID)
+// DeleteBatch deletes an instance of Batch from the world state
+func (c *StvgdContract) DeleteBatch(ctx contractapi.TransactionContextInterface, batchID string) (string, error) {
+	exists, err := c.BatchExists(ctx, batchID)
 	if err != nil {
-		return "", fmt.Errorf("could not read from world state. %s", err)
+		return "", fmt.Errorf("could not read batch from world state. %s", err)
 	} else if !exists {
-		return "", fmt.Errorf("the lot [%s] does not exist", lotID)
+		return "", fmt.Errorf("[%s] does not exist", batchID)
 	}
 
-	err = ctx.GetStub().DelState(lotID)
+	err = ctx.GetStub().DelState(batchID)
 	if err != nil {
-		return "", fmt.Errorf("could not delete from world state. %s", err)
+		return "", fmt.Errorf("could not delete batch from world state. %s", err)
 	} else {
-		return fmt.Sprintf("lot [%s] deleted successfully", lotID), nil
+		return fmt.Sprintf("[%s] deleted successfully", batchID), nil
 	}
 }
 
-// DeleteAllLots deletes all lots found in world state
-func (c *StvgdContract) DeleteAllLots(ctx contractapi.TransactionContextInterface) (string, error) {
+// DeleteAllBatches deletes all batches found in world state
+func (c *StvgdContract) DeleteAllBatches(ctx contractapi.TransactionContextInterface) (string, error) {
 
-	lots, err := c.GetAllLots(ctx)
+	batches, err := c.GetAllBatches(ctx)
 	if err != nil {
-		return "", fmt.Errorf("could not read from world state. %s", err)
-	} else if len(lots) == 0 {
-		return "", fmt.Errorf("there are no lots in world state to delete")
+		return "", fmt.Errorf("could not read batch from world state. %s", err)
+	} else if len(batches) == 0 {
+		return "", fmt.Errorf("there are no batches in world state to delete")
 	}
 
-	for _, lot := range lots {
-		err = ctx.GetStub().DelState(lot.ID)
+	for _, batch := range batches {
+		err = ctx.GetStub().DelState(batch.ID)
 		if err != nil {
-			return "", fmt.Errorf("could not delete from world state. %s", err)
+			return "", fmt.Errorf("could not delete batch from world state. %s", err)
 		}
 	}
 
-	return "all the lots were successfully deleted", nil
+	return "all the batches were successfully deleted", nil
 }
 
 /*
@@ -378,9 +452,9 @@ func (c *StvgdContract) DeleteAllLots(ctx contractapi.TransactionContextInterfac
  * -----------------------------------
  */
 
-// ProdActivityExists returns true when prodActivity with given ID exists in world state
-func (c *StvgdContract) ProdActivityExists(ctx contractapi.TransactionContextInterface, prodActivityID string) (bool, error) {
-	data, err := ctx.GetStub().GetState(prodActivityID)
+// ProductionActivityExists returns true when productionActivity with given ID exists in world state
+func (c *StvgdContract) ProductionActivityExists(ctx contractapi.TransactionContextInterface, productionActivityID string) (bool, error) {
+	data, err := ctx.GetStub().GetState(productionActivityID)
 
 	if err != nil {
 		return false, err
@@ -389,142 +463,149 @@ func (c *StvgdContract) ProdActivityExists(ctx contractapi.TransactionContextInt
 	return data != nil, nil
 }
 
-// CreateProdActivity creates a new instance of ProdActivity
-func (c *StvgdContract) CreateProdActivity(ctx contractapi.TransactionContextInterface, prodActivityID, activityType, prodUnit string,
-	inputLots map[string]float32, outputLot Lot, activityEndDate, companyLegalName, location string, envScore float32) (string, error) {
+// CreateProductionActivity creates a new instance of ProductionActivity
+func (c *StvgdContract) CreateProductionActivity(ctx contractapi.TransactionContextInterface, productionActivityID, productionUnitID, companyID, activityTypeID, activityStartDate, activityEndDate string, inputBatches map[string]float32, outputBatch Batch, ECS, SES float32) (string, error) {
 
 	// Checks if the output lot ID already exists
-	exists, err := c.LotExists(ctx, outputLot.ID)
+	exists, err := c.BatchExists(ctx, outputBatch.ID)
 	if err != nil {
-		return "", fmt.Errorf("could not read from world state. %s", err)
+		return "", fmt.Errorf("could not read batch from world state. %s", err)
 	} else if exists {
-		return "", fmt.Errorf("the lot [%s] already exists", outputLot.ID)
+		return "", fmt.Errorf("[%s] already exists", outputBatch.ID)
 	}
 
 	// Checks if the production activity ID already exists
-	exists, err = c.ProdActivityExists(ctx, prodActivityID)
+	exists, err = c.ProductionActivityExists(ctx, productionActivityID)
 	if err != nil {
-		return "", fmt.Errorf("could not read from world state. %s", err)
+		return "", fmt.Errorf("could not read production activity from world state. %s", err)
 	} else if exists {
-		return "", fmt.Errorf("the production activity [%s] already exists", prodActivityID)
+		return "", fmt.Errorf("production activity [%s] already exists", productionActivityID)
 	}
 
 	// Checks equality in production activity IDs & production units
-	if prodActivityID != outputLot.ProdActivity {
-		return "", fmt.Errorf("production activity's ID [%s] must be the same as output lot's production activity's ID [%s]", prodActivityID, outputLot.ProdActivity)
-	} else if prodUnit != outputLot.ProdUnit {
-		return "", fmt.Errorf("production unit's ID [%s] must be the same as output lot's production unit's ID [%s]", prodUnit, outputLot.ProdUnit)
+	if productionActivityID != outputBatch.ProductionActivityID {
+		return "", fmt.Errorf("production activity's ID [%s] must be the same as output batch's production activity's ID [%s]", productionActivityID, outputBatch.ProductionActivityID)
+	} else if productionUnitID != outputBatch.ProductionUnitID {
+		return "", fmt.Errorf("production unit's ID [%s] must be the same as output batch's production unit's ID [%s]", productionUnitID, outputBatch.ProductionUnitID)
 	}
 
-	// Input lots audit
-	if len(inputLots) > 0 { // If production activity uses input lots
+	// Date parsing
+	civilActivityStartDate, err := civil.ParseDateTime(activityStartDate)
+	if err != nil {
+		return "", fmt.Errorf("could not parse the activity start date to correct format. %s", err)
+	}
+	civilActivityEndDate, err := civil.ParseDateTime(activityEndDate)
+	if err != nil {
+		return "", fmt.Errorf("could not parse the activity end date to correct format. %s", err)
+	}
 
-		var amountSum float32 = 0 // Local variable to verify if newly created Lot's amount doesn't exceed sum of input lots' amounts
+	// Checks if the sent date is before received date
+	if civilActivityStartDate.After(civilActivityEndDate) {
+		return "", fmt.Errorf("activity start date can't be after the activity end date")
+	}
 
-		for lotID, amount := range inputLots { // In every single input lot
+	// Input batches audit
+	if len(inputBatches) > 0 { // If production activity uses input batches
 
-			// Checks if the lot ID exists in world state
-			exists, err := c.LotExists(ctx, lotID)
+		for batchID, quantity := range inputBatches { // In every single input batch
+
+			// Checks if the batch ID exists in world state
+			exists, err := c.BatchExists(ctx, batchID)
 			if err != nil {
-				return "", fmt.Errorf("could not read from world state. %s", err)
+				return "", fmt.Errorf("could not read batch from world state. %s", err)
 			} else if !exists {
-				return "", fmt.Errorf("the lot [%s] does not exist", lotID)
+				return "", fmt.Errorf("[%s] does not exist", batchID)
 			}
 
-			// Reads the lot
-			lot, err := c.ReadLot(ctx, lotID)
+			// Reads the batch
+			batch, err := c.ReadBatch(ctx, batchID)
 			if err != nil {
-				return "", fmt.Errorf("could not read from world state. %s", err)
+				return "", fmt.Errorf("could not read batch from world state. %s", err)
 			}
 
-			// Validate inserted amounts (0 <= amount(inputLot) <= lot.Amount)
+			// Validate inserted quantities (0 <= quantity(inputBatch) <= batch.Quantity)
 			switch {
-			case amount <= 0:
-				return "", fmt.Errorf("input lots' amounts must be greater than 0 (input amount for lot [%s] is %.2f)", lotID, amount)
-			case amount > lot.Amount:
-				return "", fmt.Errorf("input lots' amounts must not exceed the lot's total amount (lot [%s] max amount is %.2f)", lotID, lot.Amount)
+			case quantity <= 0:
+				return "", fmt.Errorf("input batches' quantities must be greater than 0 (input quantity for batch [%s] is %.2f)", batchID, quantity)
+			case quantity > batch.Quantity:
+				return "", fmt.Errorf("input batches' quantities must not exceed the batch's total quantity (batch [%s] max quantity is %.2f)", batchID, batch.Quantity)
 			}
 
-			amountSum += amount // Increment input lot's amount to sum
-
-			// Subtract lot's amount with input lots' amount //! CURRENTLY NOT WORKING
-			_, err = c.UpdateLotAmount(ctx, lotID, lot.Amount-amount)
+			// Subtract batch's quantity with input batches' quantity //! CURRENTLY NOT WORKING
+			_, err = c.UpdateBatchQuantity(ctx, batchID, batch.Quantity-quantity)
 			if err != nil {
-				return "", fmt.Errorf("could not write to world state. %s", err)
+				return "", fmt.Errorf("could not write batch to world state. %s", err)
 			}
 
-			// Transfer input lots ownership to new production unit / owner
-			if lot.ProdUnit != prodUnit { // Only transfer is production units for the input lots are different
-				_, err = c.TransferLot(ctx, lotID, prodUnit)
+			// Transfer input batches ownership to new production unit / owner
+			if batch.ProductionUnitID != productionUnitID { // Only transfer if production units for the input batches are different
+				_, err = c.TransferBatch(ctx, batchID, productionUnitID)
 				if err != nil {
-					return "", fmt.Errorf("could not write to world state. %s", err)
+					return "", fmt.Errorf("could not write batch to world state. %s", err)
 				}
 			}
 		}
 
-		// Validate output lot's amount (outputLot.Amount > amountSum)
-		if outputLot.Amount > amountSum {
-			return "", fmt.Errorf("output lot's inserted amount [%.2f] is bigger than the sum of input lots' amounts [%.2f]", outputLot.Amount, amountSum)
-		}
 	}
 
-	// Create production activity's output lot
-	_, err = c.CreateLot(ctx, outputLot.ID, outputLot.LotType, prodActivityID, outputLot.Amount, outputLot.Unit, outputLot.ProdUnit, outputLot.LotInternalID)
+	// Create production activity's output batch
+	_, err = c.CreateBatch(ctx, outputBatch.ID, outputBatch.BatchTypeID, productionActivityID, outputBatch.ProductionUnitID, outputBatch.BatchInternalID, outputBatch.SupplierID, outputBatch.Unit, outputBatch.BatchComposition, outputBatch.Quantity, outputBatch.ECS, outputBatch.SES)
 	if err != nil {
-		return "", fmt.Errorf("could not write to world state. %s", err)
+		return "", fmt.Errorf("could not write batch to world state. %s", err)
 	}
 
-	prodActivity := &ProdActivity{
-		DocType:          "prodActivity",
-		ID:               prodActivityID,
-		ActivityType:     activityType,
-		ProdUnit:         prodUnit,
-		InputLots:        inputLots,
-		OutputLot:        outputLot,
-		ActivityEndDate:  activityEndDate,
-		CompanyLegalName: companyLegalName,
-		Location:         location,
-		EnvScore:         envScore,
+	productionActivity := &ProductionActivity{
+		ObjectType:        "pa",
+		ID:                productionActivityID,
+		ProductionUnitID:  productionUnitID,
+		CompanyID:         companyID,
+		ActivityTypeID:    activityTypeID,
+		InputBatches:      inputBatches,
+		OutputBatch:       outputBatch,
+		ActivityStartDate: civilActivityStartDate,
+		ActivityEndDate:   civilActivityEndDate,
+		ECS:               ECS,
+		SES:               SES,
 	}
 
-	prodActivityBytes, err := json.Marshal(prodActivity)
+	productionActivityBytes, err := json.Marshal(productionActivity)
 	if err != nil {
 		return "", err
 	}
 
-	err = ctx.GetStub().PutState(prodActivityID, prodActivityBytes)
+	err = ctx.GetStub().PutState(productionActivityID, productionActivityBytes)
 	if err != nil {
-		return "", fmt.Errorf("failed to put to world state: %v", err)
+		return "", fmt.Errorf("failed to put production activity to world state: %v", err)
 	}
 
-	return fmt.Sprintf("production activity [%s] & lot [%s] were successfully added to the ledger", prodActivityID, outputLot.ID), nil
+	return fmt.Sprintf("production activity [%s] & [%s] were successfully added to the ledger", productionActivityID, outputBatch.ID), nil
 }
 
-// ReadProdActivity retrieves an instance of ProdActivity from the world state
-func (c *StvgdContract) ReadProdActivity(ctx contractapi.TransactionContextInterface, prodActivityID string) (*ProdActivity, error) {
+// ReadProductionActivity retrieves an instance of ProductionActivity from the world state
+func (c *StvgdContract) ReadProductionActivity(ctx contractapi.TransactionContextInterface, productionActivityID string) (*ProductionActivity, error) {
 
-	exists, err := c.ProdActivityExists(ctx, prodActivityID)
+	exists, err := c.ProductionActivityExists(ctx, productionActivityID)
 	if err != nil {
 		return nil, fmt.Errorf("could not read from world state. %s", err)
 	} else if !exists {
-		return nil, fmt.Errorf("the production activity [%s] does not exist", prodActivityID)
+		return nil, fmt.Errorf("the production activity [%s] does not exist", productionActivityID)
 	}
 
-	prodActivityBytes, _ := ctx.GetStub().GetState(prodActivityID)
+	productionActivityBytes, _ := ctx.GetStub().GetState(productionActivityID)
 
-	prodActivity := new(ProdActivity)
+	productionActivity := new(ProductionActivity)
 
-	err = json.Unmarshal(prodActivityBytes, prodActivity)
+	err = json.Unmarshal(productionActivityBytes, productionActivity)
 
 	if err != nil {
-		return nil, fmt.Errorf("could not unmarshal world state data to type ProdActivity")
+		return nil, fmt.Errorf("could not unmarshal world state data to type ProductionActivity")
 	}
 
-	return prodActivity, nil
+	return productionActivity, nil
 }
 
 // GetAllProdActivities returns all production activities found in world state
-func (c *StvgdContract) GetAllProdActivities(ctx contractapi.TransactionContextInterface) ([]*ProdActivity, error) {
+func (c *StvgdContract) GetAllProdActivities(ctx contractapi.TransactionContextInterface) ([]*ProductionActivity, error) {
 	// range query with empty string for endKey does an
 	// open-ended query of all production activities in the chaincode namespace.
 	resultsIterator, err := ctx.GetStub().GetStateByRange("pa", "")
@@ -533,19 +614,19 @@ func (c *StvgdContract) GetAllProdActivities(ctx contractapi.TransactionContextI
 	}
 	defer resultsIterator.Close()
 
-	var prodActivities []*ProdActivity
+	var prodActivities []*ProductionActivity
 	for resultsIterator.HasNext() {
 		queryResponse, err := resultsIterator.Next()
 		if err != nil {
 			return nil, err
 		}
 
-		var prodActivity ProdActivity
-		err = json.Unmarshal(queryResponse.Value, &prodActivity)
+		var productionActivity ProductionActivity
+		err = json.Unmarshal(queryResponse.Value, &productionActivity)
 		if err != nil {
 			return nil, err
 		}
-		prodActivities = append(prodActivities, &prodActivity)
+		prodActivities = append(prodActivities, &productionActivity)
 	}
 
 	return prodActivities, nil
@@ -561,8 +642,8 @@ func (c *StvgdContract) DeleteAllProdActivities(ctx contractapi.TransactionConte
 		return "", fmt.Errorf("there are no productions activities in world state to delete")
 	}
 
-	for _, prodActivity := range prodActivities {
-		err = ctx.GetStub().DelState(prodActivity.ID)
+	for _, productionActivity := range prodActivities {
+		err = ctx.GetStub().DelState(productionActivity.ID)
 		if err != nil {
 			return "", fmt.Errorf("could not delete from world state. %s", err)
 		}
@@ -576,7 +657,7 @@ func (c *StvgdContract) DeleteAllProdActivities(ctx contractapi.TransactionConte
  * LOGISTICS ACTIVITY
  * -----------------------------------
  */
-
+/*
 // LogActivityExists returns true when logActivity with given ID exists in world state
 func (c *StvgdContract) LogActivityExists(ctx contractapi.TransactionContextInterface, logActivityID string) (bool, error) {
 	data, err := ctx.GetStub().GetState(logActivityID)
@@ -589,8 +670,8 @@ func (c *StvgdContract) LogActivityExists(ctx contractapi.TransactionContextInte
 }
 
 // CreateProdActivity creates a new instance of ProdActivity
-func (c *StvgdContract) CreateLogActivity(ctx contractapi.TransactionContextInterface, logActivityID,
-	transportationType, prodUnitFrom, prodUnitTo string, lots []string, distance, cost float32, dateSent, dateReceived string) (string, error) {
+func (c *StvgdContract) CreateLogActivity(ctx contractapi.TransactionContextInterface, logActivityID, transportationType,
+	prodUnitFrom, prodUnitTo string, lots []string, distance, cost float32, dateSent, dateReceived string, envScore float32) (string, error) {
 
 	// Checks if the logistic activity ID already exists
 	exists, err := c.LogActivityExists(ctx, logActivityID)
@@ -622,7 +703,7 @@ func (c *StvgdContract) CreateLogActivity(ctx contractapi.TransactionContextInte
 	}
 	civilDateReceived, err := civil.ParseDate(dateReceived)
 	if err != nil {
-		return "", fmt.Errorf("could not parse the sent date to correct format. %s", err)
+		return "", fmt.Errorf("could not parse the received date to correct format. %s", err)
 	}
 
 	// Checks if the sent date is before received date
@@ -675,6 +756,7 @@ func (c *StvgdContract) CreateLogActivity(ctx contractapi.TransactionContextInte
 		Cost:               cost,
 		DateSent:           dateSent,
 		DateReceived:       dateReceived,
+		EnvScore:           envScore,
 	}
 
 	logActivityBytes, err := json.Marshal(logActivity)
@@ -773,3 +855,7 @@ func (c *StvgdContract) DeleteAllLogActivities(ctx contractapi.TransactionContex
 
 	return "all the logistic activities were successfully deleted", nil
 }
+*/
+
+//TODO: ReceiveBatch
+//Updates id & internal-id

@@ -7,7 +7,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"testing"
 
 	"github.com/hyperledger/fabric-chaincode-go/shim"
@@ -54,25 +53,29 @@ func (mc *MockContext) GetStub() shim.ChaincodeStubInterface {
 
 /*
  * -----------------------------------
- * LOT
+ * BATCH
  * -----------------------------------
  */
 
-func configureLotStub() (*MockContext, *MockStub) {
+func configureBatchStub() (*MockContext, *MockStub) {
 	var nilBytes []byte
 
-	testLot := &Lot{
-		DocType:       "lot",
-		ID:            "lot01",
-		LotType:       "test-type",
-		ProdActivity:  "pa01",
-		Amount:        100,
-		Unit:          "KG",
-		ProdUnit:      "punit01",
-		LotInternalID: "lot01-iid01",
+	testBatch := &Batch{
+		ObjectType:           "batch",
+		ID:                   "batch01",
+		BatchTypeID:          "batchType01",
+		ProductionActivityID: "productionActivity01",
+		ProductionUnitID:     "productionUnit01",
+		BatchInternalID:      "batch01",
+		SupplierID:           "supplier01",
+		BatchComposition:     map[string]float32{"raw_material01": 100},
+		Quantity:             150,
+		Unit:                 "Kilograms",
+		ECS:                  5,
+		SES:                  -5,
 	}
 
-	lotBytes, _ := json.Marshal(testLot)
+	lotBytes, _ := json.Marshal(testBatch)
 
 	ms := new(MockStub)
 	ms.On("GetState", "statebad").Return(nilBytes, errors.New(getStateError))
@@ -88,79 +91,81 @@ func configureLotStub() (*MockContext, *MockStub) {
 	return mc, ms
 }
 
-func TestLotExists(t *testing.T) {
+func TestBatchExists(t *testing.T) {
 	var exists bool
 	var err error
 
-	ctx, _ := configureLotStub()
+	ctx, _ := configureBatchStub()
 	c := new(StvgdContract)
 
-	exists, err = c.LotExists(ctx, "statebad")
+	exists, err = c.BatchExists(ctx, "statebad")
 	assert.EqualError(t, err, getStateError)
 	assert.False(t, exists, "should return false on error")
 
-	exists, err = c.LotExists(ctx, "missingkey")
+	exists, err = c.BatchExists(ctx, "missingkey")
 	assert.Nil(t, err, "should not return error when can read from world state but no value for key")
 	assert.False(t, exists, "should return false when no value for key in world state")
 
-	exists, err = c.LotExists(ctx, "existingkey")
+	exists, err = c.BatchExists(ctx, "existingkey")
 	assert.Nil(t, err, "should not return error when can read from world state and value exists for key")
 	assert.True(t, exists, "should return true when value for key in world state")
 }
 
-func TestCreateLot(t *testing.T) {
+/*
+func TestCreateBatch(t *testing.T) {
 	var err error
 
-	ctx, stub := configureLotStub()
+	ctx, stub := configureBatchStub()
 	c := new(StvgdContract)
 
-	_, err = c.CreateLot(ctx, "statebad", "test-type", "", 100, "KG", "punit01", "lot01-iid01")
+	_, err = c.CreateBatch(ctx, "statebad", "test-type", "", 100, "KG", "punit01", "lot01-iid01")
 	assert.EqualError(t, err, fmt.Sprintf("could not read from world state. %s", getStateError), "should error when exists errors")
 
-	_, err = c.CreateLot(ctx, "existingkey", "test-type", "", 100, "KG", "punit01", "lot01-iid01")
+	_, err = c.CreateBatch(ctx, "existingkey", "test-type", "", 100, "KG", "punit01", "lot01-iid01")
 	assert.EqualError(t, err, "the lot existingkey already exists", "should error when exists returns true")
 
-	_, _ = c.CreateLot(ctx, "missingkey", "test-type", "", 100, "KG", "punit01", "lot01-iid01")
+	_, _ = c.CreateBatch(ctx, "missingkey", "test-type", "", 100, "KG", "punit01", "lot01-iid01")
 	stub.AssertCalled(t, "PutState", "missingkey", []byte("{\"docType\":\"lot\",\"ID\":\"missingkey\",\"lotType\":\"test-type\",\"amount\":100,\"unit\":\"KG\",\"prodUnit\":\"punit01\",\"lotInternalID\":\"lot01-iid01\"}"))
 }
 
-func TestReadLot(t *testing.T) {
-	var lot *Lot
+func TestReadBatch(t *testing.T) {
+	var lot *Batch
 	var err error
 
-	ctx, _ := configureLotStub()
+	ctx, _ := configureBatchStub()
 	c := new(StvgdContract)
 
-	lot, err = c.ReadLot(ctx, "statebad")
+	lot, err = c.ReadBatch(ctx, "statebad")
 	assert.EqualError(t, err, fmt.Sprintf("could not read from world state. %s", getStateError), "should error when exists errors when reading")
-	assert.Nil(t, lot, "should not return Lot when exists errors when reading")
+	assert.Nil(t, lot, "should not return Batch when exists errors when reading")
 
-	lot, err = c.ReadLot(ctx, "missingkey")
+	lot, err = c.ReadBatch(ctx, "missingkey")
 	assert.EqualError(t, err, "the lot missingkey does not exist", "should error when exists returns true when reading")
-	assert.Nil(t, lot, "should not return Lot when key does not exist in world state when reading")
+	assert.Nil(t, lot, "should not return Batch when key does not exist in world state when reading")
 
-	// No need for "existingkey" testing due to method being dependent on Lot type
-	/*
-		lot, err = c.ReadLot(ctx, "existingkey")
-		assert.EqualError(t, err, "could not unmarshal world state data to type Lot", "should error when data in key is not Lot")
-		assert.Nil(t, lot, "should not return Lot when data in key is not of type Lot")
-	*/
+	// No need for "existingkey" testing due to method being dependent on Batch type
 
-	lot, err = c.ReadLot(ctx, "lotkey")
-	expectedLot := &Lot{
-		DocType:       "lot",
-		ID:            "lot01",
-		LotType:       "test-type",
-		ProdActivity:  "pa01",
-		Amount:        100,
-		Unit:          "KG",
-		ProdUnit:      "punit01",
-		LotInternalID: "lot01-iid01",
+		//lot, err = c.ReadBatch(ctx, "existingkey")
+		//assert.EqualError(t, err, "could not unmarshal world state data to type Batch", "should error when data in key is not Batch")
+		//assert.Nil(t, lot, "should not return Batch when data in key is not of type Batch")
+
+
+	lot, err = c.ReadBatch(ctx, "lotkey")
+	expectedBatch := &Batch{
+		DocType:         "lot",
+		ID:              "lot01",
+		BatchType:       "test-type",
+		ProdActivity:    "pa01",
+		Amount:          100,
+		Unit:            "KG",
+		ProdUnit:        "punit01",
+		BatchInternalID: "lot01-iid01",
 	}
 	assert.Nil(t, err, "should not return error when Lot exists in world state when reading")
 	assert.Equal(t, expectedLot, lot, "should return deserialized Lot from world state")
 }
-
+*/
+/*
 //TODO: TestGetAllLots
 
 func TestUpdateLotAmount(t *testing.T) {
@@ -254,13 +259,13 @@ func configureProdActivityStub() (*MockContext, *MockStub) {
 
 	return mc, ms
 }
-
+*/
 /*
  * -----------------------------------
  * PRODUCTION ACTIVITY
  * -----------------------------------
  */
-
+/*
 func TestProdActivityExists(t *testing.T) {
 	var exists bool
 	var err error
@@ -280,7 +285,7 @@ func TestProdActivityExists(t *testing.T) {
 	assert.Nil(t, err, "should not return error when can read from world state and value exists for key")
 	assert.True(t, exists, "should return true when value for key in world state")
 }
-
+*/
 //TODO: TestCreateProdActivity
 
 //TODO: TestReadProdActivity
