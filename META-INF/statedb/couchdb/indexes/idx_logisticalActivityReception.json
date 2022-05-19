@@ -1,0 +1,13 @@
+{
+    "index": {
+        "fields": [
+            "docType",
+            "receivedBatch",
+            "activityStartDate",
+            "activityEndDate"
+        ]
+    },
+    "ddoc": "idx_logisticalActivityReceptionDoc",
+    "name": "idx_logisticalActivityReception",
+    "type": "json"
+}

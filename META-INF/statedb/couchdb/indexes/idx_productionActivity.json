@@ -1,0 +1,14 @@
+{
+    "index": {
+        "fields": [
+            "docType",
+            "inputBatches",
+            "outputBatch",
+            "activityStartDate",
+            "activityEndDate"
+        ]
+    },
+    "ddoc": "idx_productionActivityDoc",
+    "name": "idx_productionActivity",
+    "type": "json"
+}

@@ -257,6 +257,45 @@
 							"response": []
 						},
 						{
+							"name": "CreateBatch",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{bearer}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"method\": \"StvgdContract:CreateBatch\",\r\n    \"args\": [\r\n        \"batch004\",\r\n        \"FIBER\",\r\n        \"pa001\",\r\n        \"punit001\",\r\n        \"batchiid001\",\r\n        \"suppl001\",\r\n        \"KG\",\r\n        \"{\\\"cotton\\\":110}\",\r\n        \"100\",\r\n        \"5\",\r\n        \"6\"\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host:port}}/invoke/{{channel}}/{{chaincode}}",
+									"protocol": "http",
+									"host": [
+										"{{host:port}}"
+									],
+									"path": [
+										"invoke",
+										"{{channel}}",
+										"{{chaincode}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "ReadBatch",
 							"request": {
 								"auth": {
@@ -327,45 +366,6 @@
 									],
 									"path": [
 										"query",
-										"{{channel}}",
-										"{{chaincode}}"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "CreateBatch",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{bearer}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"method\": \"StvgdContract:CreateBatch\",\r\n    \"args\": [\"batch001\", \"btype001\", \"pa001\", \"punit001\", \"batchiid001\", \"suppl001\", \"KG\", \"{\\\"cotton\\\":100}\", \"100\", \"5\", \"6\"]\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://{{host:port}}/invoke/{{channel}}/{{chaincode}}",
-									"protocol": "http",
-									"host": [
-										"{{host:port}}"
-									],
-									"path": [
-										"invoke",
 										"{{channel}}",
 										"{{chaincode}}"
 									]
@@ -536,18 +536,723 @@
 					"item": [
 						{
 							"name": "Production",
-							"item": []
+							"item": [
+								{
+									"name": "ProductionActivityExists",
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{bearer}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"method\": \"StvgdContract:ProductionActivityExists\",\r\n    \"args\": [\"pa001\"]\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://{{host:port}}/query/{{channel}}/{{chaincode}}",
+											"protocol": "http",
+											"host": [
+												"{{host:port}}"
+											],
+											"path": [
+												"query",
+												"{{channel}}",
+												"{{chaincode}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "CreateProductionActivity",
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{bearer}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"method\": \"StvgdContract:CreateProductionActivity\",\r\n    \"args\": [\r\n        \"pa001\",\r\n        \"punit002\",\r\n        \"company001\",\r\n        \"SPINNING\",\r\n        \"2022-05-16T09:10:15.000000000\",\r\n        \"2022-05-16T16:10:15.000000000\",\r\n        \"{\\\"batch001\\\":50}\",\r\n        \"{\\\"docType\\\": \\\"batch\\\",\\\"ID\\\": \\\"batch003\\\",\\\"batchTypeID\\\": \\\"YARN\\\",\\\"productionActivityID\\\": \\\"pa001\\\",\\\"productionUnitID\\\": \\\"punit002\\\",\\\"batchInternalID\\\": \\\"batchiid001\\\",\\\"supplierID\\\": \\\"suppl001\\\",\\\"batchCompostion\\\": {\\\"cotton\\\": 50, \\\"polyester\\\": 70},\\\"quantity\\\": 100,\\\"unit\\\": \\\"KG\\\",\\\"ecs\\\": 8,\\\"ses\\\": 7}\",\r\n        \"5\",\r\n        \"9\"\r\n    ]\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://{{host:port}}/invoke/{{channel}}/{{chaincode}}",
+											"protocol": "http",
+											"host": [
+												"{{host:port}}"
+											],
+											"path": [
+												"invoke",
+												"{{channel}}",
+												"{{chaincode}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "ReadProductionActivity",
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{bearer}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"method\": \"StvgdContract:ReadProductionActivity\",\r\n    \"args\": [\"pa001\"]\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://{{host:port}}/query/{{channel}}/{{chaincode}}",
+											"protocol": "http",
+											"host": [
+												"{{host:port}}"
+											],
+											"path": [
+												"query",
+												"{{channel}}",
+												"{{chaincode}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "GetAllProductionActivities",
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{bearer}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"method\": \"StvgdContract:GetAllProdActivities\",\r\n    \"args\": []\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://{{host:port}}/query/{{channel}}/{{chaincode}}",
+											"protocol": "http",
+											"host": [
+												"{{host:port}}"
+											],
+											"path": [
+												"query",
+												"{{channel}}",
+												"{{chaincode}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "DeleteProductionActivity",
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{bearer}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"method\": \"StvgdContract:DeleteProductionActivity\",\r\n    \"args\": [\"pa001\"]\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://{{host:port}}/invoke/{{channel}}/{{chaincode}}",
+											"protocol": "http",
+											"host": [
+												"{{host:port}}"
+											],
+											"path": [
+												"invoke",
+												"{{channel}}",
+												"{{chaincode}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "DeleteAllProductionActivities",
+									"request": {
+										"auth": {
+											"type": "bearer",
+											"bearer": [
+												{
+													"key": "token",
+													"value": "{{bearer}}",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"method\": \"StvgdContract:DeleteAllProductionActivities\",\r\n    \"args\": []\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://{{host:port}}/invoke/{{channel}}/{{chaincode}}",
+											"protocol": "http",
+											"host": [
+												"{{host:port}}"
+											],
+											"path": [
+												"invoke",
+												"{{channel}}",
+												"{{chaincode}}"
+											]
+										}
+									},
+									"response": []
+								}
+							]
 						},
 						{
 							"name": "Logistical",
 							"item": [
 								{
 									"name": "Transport",
-									"item": []
+									"item": [
+										{
+											"name": "LogisticalActivityTransportExists",
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": [
+														{
+															"key": "token",
+															"value": "{{bearer}}",
+															"type": "string"
+														}
+													]
+												},
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"method\": \"StvgdContract:LogisticalActivityTransportExists\",\r\n    \"args\": [\"lat001\"]\r\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "http://{{host:port}}/query/{{channel}}/{{chaincode}}",
+													"protocol": "http",
+													"host": [
+														"{{host:port}}"
+													],
+													"path": [
+														"query",
+														"{{channel}}",
+														"{{chaincode}}"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "CreateLogisticalActivityTransport",
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": [
+														{
+															"key": "token",
+															"value": "{{bearer}}",
+															"type": "string"
+														}
+													]
+												},
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"method\": \"StvgdContract:CreateLogisticalActivityTransport\",\r\n    \"args\": [\"lat001\", \"...\"]\r\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "http://{{host:port}}/invoke/{{channel}}/{{chaincode}}",
+													"protocol": "http",
+													"host": [
+														"{{host:port}}"
+													],
+													"path": [
+														"invoke",
+														"{{channel}}",
+														"{{chaincode}}"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "ReadLogisticalActivityTransport",
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": [
+														{
+															"key": "token",
+															"value": "{{bearer}}",
+															"type": "string"
+														}
+													]
+												},
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"method\": \"StvgdContract:ReadLogisticalActivityTransport\",\r\n    \"args\": [\"lat001\"]\r\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "http://{{host:port}}/query/{{channel}}/{{chaincode}}",
+													"protocol": "http",
+													"host": [
+														"{{host:port}}"
+													],
+													"path": [
+														"query",
+														"{{channel}}",
+														"{{chaincode}}"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "GetAllLogisticalActivitiesTransport",
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": [
+														{
+															"key": "token",
+															"value": "{{bearer}}",
+															"type": "string"
+														}
+													]
+												},
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"method\": \"StvgdContract:GetAllLogisticalActivitiesTransport\",\r\n    \"args\": []\r\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "http://{{host:port}}/query/{{channel}}/{{chaincode}}",
+													"protocol": "http",
+													"host": [
+														"{{host:port}}"
+													],
+													"path": [
+														"query",
+														"{{channel}}",
+														"{{chaincode}}"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "DeleteLogisticalActivityTransport",
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": [
+														{
+															"key": "token",
+															"value": "{{bearer}}",
+															"type": "string"
+														}
+													]
+												},
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"method\": \"StvgdContract:DeleteLogisticalActivityTransport\",\r\n    \"args\": [\"lat001\"]\r\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "http://{{host:port}}/invoke/{{channel}}/{{chaincode}}",
+													"protocol": "http",
+													"host": [
+														"{{host:port}}"
+													],
+													"path": [
+														"invoke",
+														"{{channel}}",
+														"{{chaincode}}"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "DeleteAllLogisticalActivitiesTransport",
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": [
+														{
+															"key": "token",
+															"value": "{{bearer}}",
+															"type": "string"
+														}
+													]
+												},
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"method\": \"StvgdContract:DeleteAllLogisticalActivitiesTransport\",\r\n    \"args\": []\r\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "http://{{host:port}}/invoke/{{channel}}/{{chaincode}}",
+													"protocol": "http",
+													"host": [
+														"{{host:port}}"
+													],
+													"path": [
+														"invoke",
+														"{{channel}}",
+														"{{chaincode}}"
+													]
+												}
+											},
+											"response": []
+										}
+									]
 								},
 								{
 									"name": "Reception",
-									"item": []
+									"item": [
+										{
+											"name": "LogisticalActivityReceptionExists",
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": [
+														{
+															"key": "token",
+															"value": "{{bearer}}",
+															"type": "string"
+														}
+													]
+												},
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"method\": \"StvgdContract:LogisticalActivityReceptionExists\",\r\n    \"args\": [\"lar001\"]\r\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "http://{{host:port}}/query/{{channel}}/{{chaincode}}",
+													"protocol": "http",
+													"host": [
+														"{{host:port}}"
+													],
+													"path": [
+														"query",
+														"{{channel}}",
+														"{{chaincode}}"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "CreateLogisticalActivityReception",
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": [
+														{
+															"key": "token",
+															"value": "{{bearer}}",
+															"type": "string"
+														}
+													]
+												},
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"method\": \"StvgdContract:CreateLogisticalActivityReception\",\r\n    \"args\": [\"lar001\", \"...\"]\r\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "http://{{host:port}}/invoke/{{channel}}/{{chaincode}}",
+													"protocol": "http",
+													"host": [
+														"{{host:port}}"
+													],
+													"path": [
+														"invoke",
+														"{{channel}}",
+														"{{chaincode}}"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "ReadLogisticalActivityReception",
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": [
+														{
+															"key": "token",
+															"value": "{{bearer}}",
+															"type": "string"
+														}
+													]
+												},
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"method\": \"StvgdContract:ReadLogisticalActivityReception\",\r\n    \"args\": [\"lar001\"]\r\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "http://{{host:port}}/query/{{channel}}/{{chaincode}}",
+													"protocol": "http",
+													"host": [
+														"{{host:port}}"
+													],
+													"path": [
+														"query",
+														"{{channel}}",
+														"{{chaincode}}"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "GetAllLogisticalActivitiesReception",
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": [
+														{
+															"key": "token",
+															"value": "{{bearer}}",
+															"type": "string"
+														}
+													]
+												},
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"method\": \"StvgdContract:GetAllLogisticalActivitiesReception\",\r\n    \"args\": []\r\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "http://{{host:port}}/query/{{channel}}/{{chaincode}}",
+													"protocol": "http",
+													"host": [
+														"{{host:port}}"
+													],
+													"path": [
+														"query",
+														"{{channel}}",
+														"{{chaincode}}"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "DeleteLogisticalActivityReception",
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": [
+														{
+															"key": "token",
+															"value": "{{bearer}}",
+															"type": "string"
+														}
+													]
+												},
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"method\": \"StvgdContract:DeleteLogisticalActivityReception\",\r\n    \"args\": [\"lar001\"]\r\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "http://{{host:port}}/invoke/{{channel}}/{{chaincode}}",
+													"protocol": "http",
+													"host": [
+														"{{host:port}}"
+													],
+													"path": [
+														"invoke",
+														"{{channel}}",
+														"{{chaincode}}"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "DeleteAllLogisticalActivitiesReception",
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": [
+														{
+															"key": "token",
+															"value": "{{bearer}}",
+															"type": "string"
+														}
+													]
+												},
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"method\": \"StvgdContract:DeleteAllLogisticalActivitiesReception\",\r\n    \"args\": []\r\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "http://{{host:port}}/invoke/{{channel}}/{{chaincode}}",
+													"protocol": "http",
+													"host": [
+														"{{host:port}}"
+													],
+													"path": [
+														"invoke",
+														"{{channel}}",
+														"{{chaincode}}"
+													]
+												}
+											},
+											"response": []
+										}
+									]
 								}
 							]
 						}

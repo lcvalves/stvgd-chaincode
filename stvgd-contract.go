@@ -7,11 +7,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"time"
 
 	"cloud.google.com/go/civil"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // StvgdContract contract for managing CRUD for Stvgd
@@ -128,6 +130,214 @@ func (c *StvgdContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 } */
 
 /*
+ * AUX FUNCTIONS
+ * ####################################
+ */
+
+func validateDates(startDate, endDate string) ([]civil.DateTime, error) {
+	// Date parsing
+	civilActivityStartDate, err := civil.ParseDateTime(startDate)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse the activity start date to correct format. %s", err)
+	}
+	civilActivityEndDate, err := civil.ParseDateTime(endDate)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse the activity end date to correct format. %s", err)
+	}
+
+	// Checks if the sent date is before received date
+	if civilActivityStartDate.After(civilActivityEndDate) {
+		return nil, fmt.Errorf("activity start date can't be after the activity end date")
+	}
+
+	return []civil.DateTime{civilActivityStartDate, civilActivityEndDate}, nil
+}
+
+/*
+ * -----------------------------------
+ - RICH QUERIES - Batch
+ * -----------------------------------
+*/
+// constructQueryResponseFromIterator constructs a slice of batches from the resultsIterator
+func constructQueryResponseFromIteratorBatch(resultsIterator shim.StateQueryIteratorInterface) ([]*Batch, error) {
+	var batches []*Batch
+	for resultsIterator.HasNext() {
+		queryResult, err := resultsIterator.Next()
+		if err != nil {
+			return nil, err
+		}
+		var batch Batch
+		err = json.Unmarshal(queryResult.Value, &batch)
+		if err != nil {
+			return nil, err
+		}
+		batches = append(batches, &batch)
+	}
+
+	return batches, nil
+}
+
+// getQueryResultForQueryString_batch executes the passed in query string.
+// The result set is built and returned as a byte array containing the JSON results.
+func getQueryResultForQueryStringBatch(ctx contractapi.TransactionContextInterface, queryString string) ([]*Batch, error) {
+	resultsIterator, err := ctx.GetStub().GetQueryResult(queryString)
+	if err != nil {
+		return nil, err
+	}
+	defer resultsIterator.Close()
+
+	return constructQueryResponseFromIteratorBatch(resultsIterator)
+}
+
+/*
+ * -----------------------------------
+ - RICH QUERIES - Production Activity
+ * -----------------------------------
+*/
+
+// constructQueryResponseFromIteratorProductionActivity constructs a slice of production activities from the resultsIterator
+func constructQueryResponseFromIteratorProductionActivity(resultsIterator shim.StateQueryIteratorInterface) ([]*ProductionActivity, error) {
+	var productionActivities []*ProductionActivity
+	for resultsIterator.HasNext() {
+		queryResult, err := resultsIterator.Next()
+		if err != nil {
+			return nil, err
+		}
+		var productionActivity ProductionActivity
+		err = json.Unmarshal(queryResult.Value, &productionActivity)
+		if err != nil {
+			return nil, err
+		}
+		productionActivities = append(productionActivities, &productionActivity)
+	}
+
+	return productionActivities, nil
+}
+
+// getQueryResultForQueryStringProductionActivity executes the passed in query string.
+// The result set is built and returned as a byte array containing the JSON results.
+func getQueryResultForQueryStringProductionActivity(ctx contractapi.TransactionContextInterface, queryString string) ([]*ProductionActivity, error) {
+	resultsIterator, err := ctx.GetStub().GetQueryResult(queryString)
+	if err != nil {
+		return nil, err
+	}
+	defer resultsIterator.Close()
+
+	return constructQueryResponseFromIteratorProductionActivity(resultsIterator)
+}
+
+/*
+ * -----------------------------------
+ - RICH QUERIES - Logistical Activities Transport
+ * -----------------------------------
+*/
+
+// constructQueryResponseFromIteratorTransport constructs a slice of batches from the resultsIterator
+func constructQueryResponseFromIteratorTransport(resultsIterator shim.StateQueryIteratorInterface) ([]*LogisticalActivityTransport, error) {
+	var transports []*LogisticalActivityTransport
+	for resultsIterator.HasNext() {
+		queryResult, err := resultsIterator.Next()
+		if err != nil {
+			return nil, err
+		}
+		var transport LogisticalActivityTransport
+		err = json.Unmarshal(queryResult.Value, &transport)
+		if err != nil {
+			return nil, err
+		}
+		transports = append(transports, &transport)
+	}
+
+	return transports, nil
+}
+
+// getQueryResultForQueryStringTransport executes the passed in query string.
+// The result set is built and returned as a byte array containing the JSON results.
+func getQueryResultForQueryStringTransport(ctx contractapi.TransactionContextInterface, queryString string) ([]*LogisticalActivityTransport, error) {
+	resultsIterator, err := ctx.GetStub().GetQueryResult(queryString)
+	if err != nil {
+		return nil, err
+	}
+	defer resultsIterator.Close()
+
+	return constructQueryResponseFromIteratorTransport(resultsIterator)
+}
+
+/*
+ * -----------------------------------
+ - RICH QUERIES - Logistical Activities Registration
+ * -----------------------------------
+*/
+
+// constructQueryResponseFromIteratorRegistration constructs a slice of registrations from the resultsIterator
+func constructQueryResponseFromIteratorRegistration(resultsIterator shim.StateQueryIteratorInterface) ([]*LogisticalActivityRegistration, error) {
+	var registrations []*LogisticalActivityRegistration
+	for resultsIterator.HasNext() {
+		queryResult, err := resultsIterator.Next()
+		if err != nil {
+			return nil, err
+		}
+		var registration LogisticalActivityRegistration
+		err = json.Unmarshal(queryResult.Value, &registration)
+		if err != nil {
+			return nil, err
+		}
+		registrations = append(registrations, &registration)
+	}
+
+	return registrations, nil
+}
+
+// getQueryResultForQueryStringRegistration executes the passed in query string.
+// The result set is built and returned as a byte array containing the JSON results.
+func getQueryResultForQueryStringRegistration(ctx contractapi.TransactionContextInterface, queryString string) ([]*LogisticalActivityRegistration, error) {
+	resultsIterator, err := ctx.GetStub().GetQueryResult(queryString)
+	if err != nil {
+		return nil, err
+	}
+	defer resultsIterator.Close()
+
+	return constructQueryResponseFromIteratorRegistration(resultsIterator)
+}
+
+/*
+ * -----------------------------------
+ - RICH QUERIES - Logistical Activities Reception
+ * -----------------------------------
+*/
+
+// constructQueryResponseFromIteratorReception constructs a slice of receptions from the resultsIterator
+func constructQueryResponseFromIteratorReception(resultsIterator shim.StateQueryIteratorInterface) ([]*LogisticalActivityReception, error) {
+	var receptions []*LogisticalActivityReception
+	for resultsIterator.HasNext() {
+		queryResult, err := resultsIterator.Next()
+		if err != nil {
+			return nil, err
+		}
+		var reception LogisticalActivityReception
+		err = json.Unmarshal(queryResult.Value, &reception)
+		if err != nil {
+			return nil, err
+		}
+		receptions = append(receptions, &reception)
+	}
+
+	return receptions, nil
+}
+
+// getQueryResultForQueryStringReception executes the passed in query string.
+// The result set is built and returned as a byte array containing the JSON results.
+func getQueryResultForQueryStringReception(ctx contractapi.TransactionContextInterface, queryString string) ([]*LogisticalActivityReception, error) {
+	resultsIterator, err := ctx.GetStub().GetQueryResult(queryString)
+	if err != nil {
+		return nil, err
+	}
+	defer resultsIterator.Close()
+
+	return constructQueryResponseFromIteratorReception(resultsIterator)
+}
+
+/*
  * -----------------------------------
  * BATCH
  * -----------------------------------
@@ -145,17 +355,38 @@ func (c *StvgdContract) BatchExists(ctx contractapi.TransactionContextInterface,
 }
 
 // CreateBatch creates a new instance of Batch
-func (c *StvgdContract) CreateBatch(ctx contractapi.TransactionContextInterface, batchID, batchTypeID, productionActivityID, productionUnitID, batchInternalID, supplierID, unit string, batchComposition map[string]float32, quantity, ecs, ses float32) (string, error) {
+func (c *StvgdContract) CreateBatch(ctx contractapi.TransactionContextInterface, batchID, productionActivityID, productionUnitID, batchInternalID, supplierID string, unit Unit, batchTypeID BatchType, batchComposition map[string]float32, quantity, ecs, ses float32) (string, error) {
 
 	exists, err := c.BatchExists(ctx, batchID)
 	if err != nil {
 		return "", fmt.Errorf("could not read from world state. %s", err)
 	} else if exists {
-		return "", fmt.Errorf("the batch [%s] already exists", batchID)
+		return "", fmt.Errorf("[%s] already exists", batchID)
 	}
 
 	if quantity < 0 {
-		return "", fmt.Errorf("the batch quantity should be greater than 0")
+		return "", fmt.Errorf("batch quantity should be greater than 0")
+	}
+
+	// Validate scores ( -10 <= ECS & SES <= 10)
+	switch {
+	case ecs <= -10 || ecs >= 10:
+		return "", fmt.Errorf("ecs should be between -10 & 10")
+	case ses <= -10 || ses >= 10:
+		return "", fmt.Errorf("ecs should be between -10 & 10")
+	}
+
+	var percentageSum float32 = 0.00 // Local variable for percentage sum validation
+
+	for _, percentage := range batchComposition {
+		percentageSum += percentage
+		if percentageSum > 100 {
+			return "", fmt.Errorf("the batch composition percentagem sum should be equal to 100")
+		}
+	}
+
+	if percentageSum != 100 {
+		return "", fmt.Errorf("the batch composition percentagem sum should equal to 100")
 	}
 
 	batch := &Batch{
@@ -209,37 +440,6 @@ func (c *StvgdContract) ReadBatch(ctx contractapi.TransactionContextInterface, b
 	return batch, nil
 }
 
-// constructQueryResponseFromIterator constructs a slice of batches from the resultsIterator
-func constructQueryResponseFromIterator(resultsIterator shim.StateQueryIteratorInterface) ([]*Batch, error) {
-	var batches []*Batch
-	for resultsIterator.HasNext() {
-		queryResult, err := resultsIterator.Next()
-		if err != nil {
-			return nil, err
-		}
-		var batch Batch
-		err = json.Unmarshal(queryResult.Value, &batch)
-		if err != nil {
-			return nil, err
-		}
-		batches = append(batches, &batch)
-	}
-
-	return batches, nil
-}
-
-// getQueryResultForQueryString executes the passed in query string.
-// The result set is built and returned as a byte array containing the JSON results.
-func getQueryResultForQueryString(ctx contractapi.TransactionContextInterface, queryString string) ([]*Batch, error) {
-	resultsIterator, err := ctx.GetStub().GetQueryResult(queryString)
-	if err != nil {
-		return nil, err
-	}
-	defer resultsIterator.Close()
-
-	return constructQueryResponseFromIterator(resultsIterator)
-}
-
 // GetAllBatches queries for all batches.
 // This is an example of a parameterized query where the query logic is baked into the chaincode,
 // and accepting a single query parameter (docType).
@@ -247,10 +447,9 @@ func getQueryResultForQueryString(ctx contractapi.TransactionContextInterface, q
 // Example: Parameterized rich query
 func (c *StvgdContract) GetAllBatches(ctx contractapi.TransactionContextInterface) ([]*Batch, error) {
 	queryString := `{"selector":{"docType":"batch"}}`
-	return getQueryResultForQueryString(ctx, queryString)
+	return getQueryResultForQueryStringBatch(ctx, queryString)
 }
 
-/*
 // GetAssetHistory returns the chain of custody for a batch since issuance.
 func (c *StvgdContract) GetBatchHistory(ctx contractapi.TransactionContextInterface, batchID string) ([]HistoryQueryResult, error) {
 	log.Printf("GetAssetHistory: ID %v", batchID)
@@ -296,7 +495,6 @@ func (c *StvgdContract) GetBatchHistory(ctx contractapi.TransactionContextInterf
 
 	return records, nil
 }
-*/
 
 // UpdateBatchQuantity updates the quantity of a Batch from the world state
 func (c *StvgdContract) UpdateBatchQuantity(ctx contractapi.TransactionContextInterface, batchID string, newQuantity float32) (string, error) {
@@ -357,6 +555,58 @@ func (c *StvgdContract) UpdateBatchQuantity(ctx contractapi.TransactionContextIn
 	}
 }
 
+// UpdateBatchInternalID updates the internal id of a Batch from the world state
+func (c *StvgdContract) UpdateBatchInternalID(ctx contractapi.TransactionContextInterface, batchID, newBatchInternalID string) (string, error) {
+
+	// Verifies if Batch that has batchID already exists
+	exists, err := c.BatchExists(ctx, batchID)
+	if err != nil {
+		return "", fmt.Errorf("could not read batch from world state. %s", err)
+	} else if !exists {
+		return "", fmt.Errorf("%s does not exist", batchID)
+	}
+
+	outdatedBatchBytes, _ := ctx.GetStub().GetState(batchID) // Gets "old" Batch bytes from batchID
+
+	outdatedBatch := new(Batch) // Initialize outdated/"old" Batch object
+
+	// Parses the JSON-encoded data in bytes (outdatedBatchBytes) to the "old" Batch object (outdatedBatch)
+	err = json.Unmarshal(outdatedBatchBytes, outdatedBatch)
+	if err != nil {
+		return "", fmt.Errorf("could not unmarshal batch world state data to type Batch")
+	}
+
+	// Checks if quantity >= 0
+	if newBatchInternalID == outdatedBatch.BatchInternalID {
+		return "", fmt.Errorf("the new batch internal ID should be different from the previous one [%s]", outdatedBatch.BatchInternalID)
+	} else {
+		// Initialize updated/"new" Batch object
+		updatedBatch := &Batch{
+			ObjectType:           outdatedBatch.ObjectType,
+			ID:                   outdatedBatch.ID,
+			BatchTypeID:          outdatedBatch.BatchTypeID,
+			ProductionActivityID: outdatedBatch.ProductionActivityID,
+			ProductionUnitID:     outdatedBatch.ProductionUnitID,
+			BatchInternalID:      newBatchInternalID,
+			SupplierID:           outdatedBatch.SupplierID,
+			BatchComposition:     outdatedBatch.BatchComposition,
+			Quantity:             outdatedBatch.Quantity,
+			Unit:                 outdatedBatch.Unit,
+			ECS:                  outdatedBatch.ECS,
+			SES:                  outdatedBatch.SES,
+		}
+
+		updatedBatchBytes, _ := json.Marshal(updatedBatch) // Encodes the JSON updatedBatch data to bytes
+
+		err = ctx.GetStub().PutState(batchID, updatedBatchBytes) // Updates world state with newly updated Batch
+		if err != nil {
+			return "", fmt.Errorf("could not write batch to world state. %s", err)
+		} else {
+			return fmt.Sprintf("[%s]'s internal id was successfully updated to %s", batchID, updatedBatch.BatchInternalID), nil
+		}
+	}
+}
+
 // TransferBatch transfers a batch by setting a new production unit id on the batch
 func (c *StvgdContract) TransferBatch(ctx contractapi.TransactionContextInterface, batchID, newProductionUnitID string) (string, error) {
 
@@ -380,7 +630,7 @@ func (c *StvgdContract) TransferBatch(ctx contractapi.TransactionContextInterfac
 
 	// Checks if new owner is different
 	if newProductionUnitID == outdatedBatch.ProductionUnitID {
-		return "", fmt.Errorf("cannot transfer a batch to the current owner/production unit %s[]", outdatedBatch.ProductionUnitID)
+		return "", fmt.Errorf("cannot transfer a batch to the current owner / production unit [%s]", outdatedBatch.ProductionUnitID)
 	} else {
 		// Initialize updated/"new" Batch object
 		updatedBatch := &Batch{
@@ -489,19 +739,25 @@ func (c *StvgdContract) CreateProductionActivity(ctx contractapi.TransactionCont
 		return "", fmt.Errorf("production unit's ID [%s] must be the same as output batch's production unit's ID [%s]", productionUnitID, outputBatch.ProductionUnitID)
 	}
 
-	// Date parsing
-	civilActivityStartDate, err := civil.ParseDateTime(activityStartDate)
-	if err != nil {
-		return "", fmt.Errorf("could not parse the activity start date to correct format. %s", err)
-	}
-	civilActivityEndDate, err := civil.ParseDateTime(activityEndDate)
-	if err != nil {
-		return "", fmt.Errorf("could not parse the activity end date to correct format. %s", err)
+	// Activity type validation
+	var activityType ActivityType
+	switch activityTypeID {
+	case "SPINNING":
+		activityType = Spinning
+	case "WEAVING":
+		activityType = Weaving
+	case "KNITTING":
+		activityType = Knitting
+	case "DYEING_FINISHING":
+		activityType = DyeingFinishing
+	case "CONFECTION":
+		activityType = Confection
 	}
 
-	// Checks if the sent date is before received date
-	if civilActivityStartDate.After(civilActivityEndDate) {
-		return "", fmt.Errorf("activity start date can't be after the activity end date")
+	// Validate dates
+	civilDates, err := validateDates(activityStartDate, activityEndDate)
+	if err != nil {
+		return "", fmt.Errorf("could not validate dates. %s", err)
 	}
 
 	// Input batches audit
@@ -526,9 +782,9 @@ func (c *StvgdContract) CreateProductionActivity(ctx contractapi.TransactionCont
 			// Validate inserted quantities (0 <= quantity(inputBatch) <= batch.Quantity)
 			switch {
 			case quantity <= 0:
-				return "", fmt.Errorf("input batches' quantities must be greater than 0 (input quantity for batch [%s] is %.2f)", batchID, quantity)
+				return "", fmt.Errorf("input batches' quantities must be greater than 0 (input quantity for [%s] is %.2f)", batchID, quantity)
 			case quantity > batch.Quantity:
-				return "", fmt.Errorf("input batches' quantities must not exceed the batch's total quantity (batch [%s] max quantity is %.2f)", batchID, batch.Quantity)
+				return "", fmt.Errorf("input batches' quantities must not exceed the batch's total quantity ([%s] max quantity is %.2f)", batchID, batch.Quantity)
 			}
 
 			// Subtract batch's quantity with input batches' quantity //! CURRENTLY NOT WORKING
@@ -549,7 +805,7 @@ func (c *StvgdContract) CreateProductionActivity(ctx contractapi.TransactionCont
 	}
 
 	// Create production activity's output batch
-	_, err = c.CreateBatch(ctx, outputBatch.ID, outputBatch.BatchTypeID, productionActivityID, outputBatch.ProductionUnitID, outputBatch.BatchInternalID, outputBatch.SupplierID, outputBatch.Unit, outputBatch.BatchComposition, outputBatch.Quantity, outputBatch.ECS, outputBatch.SES)
+	_, err = c.CreateBatch(ctx, outputBatch.ID, productionActivityID, outputBatch.ProductionUnitID, outputBatch.BatchInternalID, outputBatch.SupplierID, outputBatch.Unit, outputBatch.BatchTypeID, outputBatch.BatchComposition, outputBatch.Quantity, outputBatch.ECS, outputBatch.SES)
 	if err != nil {
 		return "", fmt.Errorf("could not write batch to world state. %s", err)
 	}
@@ -559,11 +815,11 @@ func (c *StvgdContract) CreateProductionActivity(ctx contractapi.TransactionCont
 		ID:                productionActivityID,
 		ProductionUnitID:  productionUnitID,
 		CompanyID:         companyID,
-		ActivityTypeID:    activityTypeID,
+		ActivityTypeID:    activityType,
 		InputBatches:      inputBatches,
 		OutputBatch:       outputBatch,
-		ActivityStartDate: civilActivityStartDate,
-		ActivityEndDate:   civilActivityEndDate,
+		ActivityStartDate: civilDates[0],
+		ActivityEndDate:   civilDates[1],
 		ECS:               ECS,
 		SES:               SES,
 	}
@@ -605,7 +861,7 @@ func (c *StvgdContract) ReadProductionActivity(ctx contractapi.TransactionContex
 }
 
 // GetAllProdActivities returns all production activities found in world state
-func (c *StvgdContract) GetAllProdActivities(ctx contractapi.TransactionContextInterface) ([]*ProductionActivity, error) {
+func (c *StvgdContract) GetAllProductionActivities(ctx contractapi.TransactionContextInterface) ([]*ProductionActivity, error) {
 	// range query with empty string for endKey does an
 	// open-ended query of all production activities in the chaincode namespace.
 	resultsIterator, err := ctx.GetStub().GetStateByRange("pa", "")
@@ -633,11 +889,11 @@ func (c *StvgdContract) GetAllProdActivities(ctx contractapi.TransactionContextI
 }
 
 // DeleteAllProdActivities deletes all production activities found in world state
-func (c *StvgdContract) DeleteAllProdActivities(ctx contractapi.TransactionContextInterface) (string, error) {
+func (c *StvgdContract) DeleteAllProductionActivities(ctx contractapi.TransactionContextInterface) (string, error) {
 
-	prodActivities, err := c.GetAllProdActivities(ctx)
+	prodActivities, err := c.GetAllProductionActivities(ctx)
 	if err != nil {
-		return "", fmt.Errorf("could not read from world state. %s", err)
+		return "", fmt.Errorf("could not read production activities from world state. %s", err)
 	} else if len(prodActivities) == 0 {
 		return "", fmt.Errorf("there are no productions activities in world state to delete")
 	}
@@ -645,7 +901,7 @@ func (c *StvgdContract) DeleteAllProdActivities(ctx contractapi.TransactionConte
 	for _, productionActivity := range prodActivities {
 		err = ctx.GetStub().DelState(productionActivity.ID)
 		if err != nil {
-			return "", fmt.Errorf("could not delete from world state. %s", err)
+			return "", fmt.Errorf("could not delete production activities from world state. %s", err)
 		}
 	}
 
@@ -657,6 +913,81 @@ func (c *StvgdContract) DeleteAllProdActivities(ctx contractapi.TransactionConte
  * LOGISTICS ACTIVITY
  * -----------------------------------
  */
+
+/*
+ * -----------------------------------
+ - TRANSPORT
+ * -----------------------------------
+*/
+
+/*
+ * -----------------------------------
+ - RECEPTION
+ * -----------------------------------
+*/
+
+/*
+ * -----------------------------------
+ - REGISTRATION
+ * -----------------------------------
+*/
+
+// LogActivityExists returns true when logActivity with given ID exists in world state
+func (c *StvgdContract) LogisiticalActivityRegistrationExists(ctx contractapi.TransactionContextInterface, logisticalActivityRegistrationID string) (bool, error) {
+	data, err := ctx.GetStub().GetState(logisticalActivityRegistrationID)
+
+	if err != nil {
+		return false, err
+	}
+
+	return data != nil, nil
+}
+
+func (c *StvgdContract) CreateLogisiticalActivityRegistration(ctx contractapi.TransactionContextInterface, logisticalActivityRegistrationID, productionUnitID, activityStartDate, activityEndDate string, newBatch Batch) (string, error) {
+
+	// Checks if the logistic activity ID already exists
+	exists, err := c.LogisiticalActivityRegistrationExists(ctx, logisticalActivityRegistrationID)
+	if err != nil {
+		return "", fmt.Errorf("could not read from world state. %s", err)
+	} else if exists {
+		return "", fmt.Errorf("the logistic activity [%s] already exists", logisticalActivityRegistrationID)
+	}
+
+	// Validate dates
+	civilDates, err := validateDates(activityStartDate, activityEndDate)
+	if err != nil {
+		return "", fmt.Errorf("could not validate dates. %s", err)
+	}
+
+	// Create production activity's output batch
+	_, err = c.CreateBatch(ctx, newBatch.ID, "", newBatch.ProductionUnitID, newBatch.BatchInternalID, newBatch.SupplierID, newBatch.Unit, newBatch.BatchTypeID, newBatch.BatchComposition, newBatch.Quantity, newBatch.ECS, newBatch.SES)
+	if err != nil {
+		return "", fmt.Errorf("could not write batch to world state. %s", err)
+	}
+
+	logisticalActivityRegistration := &LogisticalActivityRegistration{
+		ObjectType:        "lareg",
+		ID:                logisticalActivityRegistrationID,
+		ProductionUnitID:  productionUnitID,
+		NewBatch:          newBatch,
+		ActivityStartDate: civilDates[0],
+		ActivityEndDate:   civilDates[1],
+	}
+
+	logisticalActivityRegistrationBytes, err := json.Marshal(logisticalActivityRegistration)
+	if err != nil {
+		return "", err
+	}
+
+	err = ctx.GetStub().PutState(logisticalActivityRegistrationID, logisticalActivityRegistrationBytes)
+	if err != nil {
+		return "", fmt.Errorf("failed to put production activity to world state: %v", err)
+	}
+
+	return fmt.Sprintf("registration [%s] & [%s] were successfully added to the ledger", logisticalActivityRegistrationID, newBatch.ID), nil
+
+}
+
 /*
 // LogActivityExists returns true when logActivity with given ID exists in world state
 func (c *StvgdContract) LogActivityExists(ctx contractapi.TransactionContextInterface, logActivityID string) (bool, error) {
@@ -859,3 +1190,66 @@ func (c *StvgdContract) DeleteAllLogActivities(ctx contractapi.TransactionContex
 
 //TODO: ReceiveBatch
 //Updates id & internal-id
+/*
+// ReadBatch retrieves an instance of Batch from the world state
+func (c *StvgdContract) TraceBatch(ctx contractapi.TransactionContextInterface, batchID string) (*[]ProductionActivity, *[]LogisticalActivityReception, *[]LogisticalActivityTransport, error) {
+
+	exists, err := c.BatchExists(ctx, batchID)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("could not read batch from world state. %s", err)
+	} else if !exists {
+		return nil, nil, nil, fmt.Errorf("[%s] does not exist", batchID)
+	}
+
+	batchBytes, _ := ctx.GetStub().GetState(batchID)
+
+	batch := new(Batch)
+
+	err = json.Unmarshal(batchBytes, batch)
+
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("could not unmarshal world state data to type Batch")
+	} */
+/*
+   * FOR
+    * GET BATCH LATEST ACTIVITY TYPE
+    * - IF PRODUCTION OR TRANSPORT THEN
+    * --> FOR EACH BATCH_ID IN INPUT_LOTS (PRODUCTION ACTIVITIES & TRANSPORT ACTIVITIES)
+    * - IF RECEPTION THEN
+    * --> GET
+    * - IF REGISTRATION THEN
+    * --> QueryLogisticalActivityRegistration(batchID)
+    * GET BATCH BY ID
+    * GET
+   *
+   *
+   *
+   *
+   *
+   *
+   *
+   * ADD activities []string
+   * - Append activity_id to batch
+   *
+   *
+   *
+*/
+/*
+	productionActivities, err := c.GetBatchProductionActivities(ctx)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("could not read production activities from world state. %s", err)
+	}
+
+	logisticalActivitiesReception, err := c.GetBatchLogisticalActivitiesReception(ctx)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("could not read production activities from world state. %s", err)
+	}
+
+	logisticalActivitiesTransport, err := c.GetBatchLogisticalActivitiesTransport(ctx)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("could not read production activities from world state. %s", err)
+	}
+
+	return productionActivities, logisticalActivitiesReception, logisticalActivitiesTransport, nil
+}
+*/

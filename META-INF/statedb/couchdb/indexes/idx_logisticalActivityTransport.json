@@ -1,0 +1,14 @@
+{
+    "index": {
+        "fields": [
+            "docType",
+            "inputBatch",
+            "remainingBatch",
+            "activityStartDate",
+            "activityEndDate"
+        ]
+    },
+    "ddoc": "idx_logisticalActivityTransportDoc",
+    "name": "idx_logisticalActivityTransport",
+    "type": "json"
+}

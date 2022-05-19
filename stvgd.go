@@ -6,10 +6,10 @@ package main
 
 import "cloud.google.com/go/civil"
 
-//* CURRENT MODEL VERSION: on-chain_struct_model_v9
+//* CURRENT MODEL VERSION: on-chain_struct_model_v10
 
 // ENUMS
-/* type Unit string
+type Unit string
 
 const (
 	Kilograms     Unit = "KG"
@@ -52,20 +52,19 @@ const (
 	Cut            BatchType = "CUT"
 	FinishedPiece  BatchType = "FINISHED_PIECE"
 )
-*/
 
 // Batch stores information about the batches in the supply chain
 type Batch struct {
-	ObjectType           string             `json:"docType"`                                             // docType ("batch") is used to distinguish the various types of objects in state database
-	ID                   string             `json:"ID"`                                                  // the field tags are needed to keep case from bouncing around
-	BatchTypeID          string             `json:"batchTypeID"`                                         //? Convert to enum
+	ObjectType           string             `json:"docType"` // docType ("batch") is used to distinguish the various types of objects in state database
+	ID                   string             `json:"ID"`      // the field tags are needed to keep case from bouncing around
+	BatchTypeID          BatchType          `json:"batchTypeID"`
 	ProductionActivityID string             `json:"productionActivityID,omitempty" metadata:",optional"` // Only mandatory when batch is produced within the system's supply chain
 	ProductionUnitID     string             `json:"productionUnitID"`                                    // Current owner
 	BatchInternalID      string             `json:"batchInternalID"`
 	SupplierID           string             `json:"supplierID"`
 	BatchComposition     map[string]float32 `json:"batchCompostion"` // i.e. {raw_material_id: %}
 	Quantity             float32            `json:"quantity"`
-	Unit                 string             `json:"unit"`
+	Unit                 Unit               `json:"unit"`
 	ECS                  float32            `json:"ecs"`
 	SES                  float32            `json:"ses"`
 }
@@ -76,8 +75,8 @@ type ProductionActivity struct {
 	ID                string             `json:"ID"`      // the field tags are needed to keep case from bouncing around
 	ProductionUnitID  string             `json:"productionUnitID"`
 	CompanyID         string             `json:"companyID"`
-	ActivityTypeID    string             `json:"activityTypeID"`
-	InputBatches      map[string]float32 `json:"inputBatches,omitempty" metadata:",optional"` // inputLots nullable for ProdActivities that create new lots as raw material not sourced from outside the system
+	ActivityTypeID    ActivityType       `json:"activityTypeID"`
+	InputBatches      map[string]float32 `json:"inputBatches"`
 	OutputBatch       Batch              `json:"outputBatch"`
 	ActivityStartDate civil.DateTime     `json:"activityStartDate"`
 	ActivityEndDate   civil.DateTime     `json:"activityEndDate"`
@@ -91,7 +90,7 @@ type LogisticalActivityTransport struct {
 	ID                          string             `json:"ID"`      // the field tags are needed to keep case from bouncing around
 	OriginProductionUnitID      string             `json:"OriginProductionUnitID"`
 	DestinationProductionUnitID string             `json:"DestinationProductionUnitID"`
-	TransportationTypeID        string             `json:"transportationTypeID"`
+	TransportationTypeID        TransportationType `json:"transportationTypeID"`
 	InputBatch                  map[string]float32 `json:"inputBatches"`                                  // slice of lots being shipped
 	RemainingBatch              Batch              `json:"remainingBatch,omitempty" metadata:",optional"` // Only mandatory when shipped batch is partially sent (inputBatch[i].quantity < batch.quantity WHERE batch.id = i)
 	Distance                    float32            `json:"distance"`                                      // in kilometers
@@ -105,11 +104,22 @@ type LogisticalActivityTransport struct {
 
 // LogisticalActivityReception stores information about the batch receptions in the supply chain companies/production units
 type LogisticalActivityReception struct {
-	ObjectType         string         `json:"docType"` // docType ("lar") is used to distinguish the various types of objects in state database
+	ObjectType         string         `json:"docType"` // docType ("larec") is used to distinguish the various types of objects in state database
 	ID                 string         `json:"ID"`      // the field tags are needed to keep case from bouncing around
+	ProductionUnitID   string         `json:"productionUnitID"`
 	NewBatchInternalID string         `json:"newBatchInternalID"`
 	ReceivedBatch      Batch          `json:"receivedBatch"` // Only mandatory when shipped batch is partially sent (inputBatch[i].quantity < batch.quantity WHERE batch.id = i)
 	IsAccepted         bool           `json:"acceptedQuantity"`
 	ActivityStartDate  civil.DateTime `json:"activityStartDate"`
 	ActivityEndDate    civil.DateTime `json:"activityEndDate"`
+}
+
+// LogisticalActivityReception stores information about the batch receptions in the supply chain companies/production units
+type LogisticalActivityRegistration struct {
+	ObjectType        string         `json:"docType"` // docType ("lareg") is used to distinguish the various types of objects in state database
+	ID                string         `json:"ID"`      // the field tags are needed to keep case from bouncing around
+	ProductionUnitID  string         `json:"productionUnitID"`
+	NewBatch          Batch          `json:"newBatch"`
+	ActivityStartDate civil.DateTime `json:"activityStartDate"`
+	ActivityEndDate   civil.DateTime `json:"activityEndDate"`
 }
