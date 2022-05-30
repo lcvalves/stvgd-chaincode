@@ -2,7 +2,8 @@
 	"info": {
 		"_postman_id": "a7872161-0ee9-4f46-bb7d-fd8fe2896622",
 		"name": "fablo-rest",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "14379153"
 	},
 	"item": [
 		{
@@ -273,7 +274,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"method\": \"StvgdContract:CreateBatch\",\r\n    \"args\": [\r\n        \"batch004\",\r\n        \"FIBER\",\r\n        \"pa001\",\r\n        \"punit001\",\r\n        \"batchiid001\",\r\n        \"suppl001\",\r\n        \"KG\",\r\n        \"{\\\"cotton\\\":110}\",\r\n        \"100\",\r\n        \"5\",\r\n        \"6\"\r\n    ]\r\n}",
+									"raw": "{\r\n    \"method\": \"StvgdContract:CreateBatch\",\r\n    \"args\": [\r\n        \"batch001\",\r\n        \"\",\r\n        \"punit001\",\r\n        \"batchiid001\",\r\n        \"suppl001\",\r\n        \"KG\",\r\n        \"FIBER\",\r\n        \"{\\\"cotton\\\":100}\",\r\n        \"100\",\r\n        \"-1\",\r\n        \"5\"\r\n    ]\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -374,6 +375,45 @@
 							"response": []
 						},
 						{
+							"name": "GetBatchHistory",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{bearer}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"method\": \"StvgdContract:GetBatchHistory\",\r\n    \"args\": [\"batch003\"]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host:port}}/query/{{channel}}/{{chaincode}}",
+									"protocol": "http",
+									"host": [
+										"{{host:port}}"
+									],
+									"path": [
+										"query",
+										"{{channel}}",
+										"{{chaincode}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "UpdateBatchQuantity",
 							"request": {
 								"auth": {
@@ -390,7 +430,46 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"method\": \"StvgdContract:UpdateBatchQuantity\",\r\n    \"args\": [\"batch001\", \"50\"]\r\n}",
+									"raw": "{\r\n    \"method\": \"StvgdContract:UpdateBatchQuantity\",\r\n    \"args\": [\"batch002\", \"0\"]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host:port}}/invoke/{{channel}}/{{chaincode}}",
+									"protocol": "http",
+									"host": [
+										"{{host:port}}"
+									],
+									"path": [
+										"invoke",
+										"{{channel}}",
+										"{{chaincode}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "UpdateBatchInternalID",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{bearer}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"method\": \"StvgdContract:UpdateBatchInternalID\",\r\n    \"args\": [\"batch001\", \"batch001-iid\"]\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -593,7 +672,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\r\n    \"method\": \"StvgdContract:CreateProductionActivity\",\r\n    \"args\": [\r\n        \"pa001\",\r\n        \"punit002\",\r\n        \"company001\",\r\n        \"SPINNING\",\r\n        \"2022-05-16T09:10:15.000000000\",\r\n        \"2022-05-16T16:10:15.000000000\",\r\n        \"{\\\"batch001\\\":50}\",\r\n        \"{\\\"docType\\\": \\\"batch\\\",\\\"ID\\\": \\\"batch003\\\",\\\"batchTypeID\\\": \\\"YARN\\\",\\\"productionActivityID\\\": \\\"pa001\\\",\\\"productionUnitID\\\": \\\"punit002\\\",\\\"batchInternalID\\\": \\\"batchiid001\\\",\\\"supplierID\\\": \\\"suppl001\\\",\\\"batchCompostion\\\": {\\\"cotton\\\": 50, \\\"polyester\\\": 70},\\\"quantity\\\": 100,\\\"unit\\\": \\\"KG\\\",\\\"ecs\\\": 8,\\\"ses\\\": 7}\",\r\n        \"5\",\r\n        \"9\"\r\n    ]\r\n}",
+											"raw": "{\r\n    \"method\": \"StvgdContract:CreateProductionActivity\",\r\n    \"args\": [\r\n        \"pa002\",\r\n        \"punit002\",\r\n        \"company001\",\r\n        \"SPINNING\",\r\n        \"2022-05-16T15:10:15\",\r\n        \"2022-05-16T16:10:15\",\r\n        \"{\\\"batch001\\\":25}\",\r\n        \"{\\\"docType\\\": \\\"batch\\\",\\\"ID\\\": \\\"batch003\\\",\\\"batchTypeID\\\": \\\"YARN\\\",\\\"productionActivityID\\\": \\\"pa002\\\",\\\"productionUnitID\\\": \\\"punit002\\\",\\\"batchInternalID\\\": \\\"batchiid001\\\",\\\"supplierID\\\": \\\"suppl001\\\",\\\"batchCompostion\\\": {\\\"cotton\\\": 50, \\\"polyester\\\": 50},\\\"quantity\\\": 100,\\\"unit\\\": \\\"KG\\\",\\\"ecs\\\": 8,\\\"ses\\\": 7}\",\r\n        \"5\",\r\n        \"9\"\r\n    ]\r\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -671,7 +750,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\r\n    \"method\": \"StvgdContract:GetAllProdActivities\",\r\n    \"args\": []\r\n}",
+											"raw": "{\r\n    \"method\": \"StvgdContract:GetAllProductionActivities\",\r\n    \"args\": []\r\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -1231,6 +1310,245 @@
 												"body": {
 													"mode": "raw",
 													"raw": "{\r\n    \"method\": \"StvgdContract:DeleteAllLogisticalActivitiesReception\",\r\n    \"args\": []\r\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "http://{{host:port}}/invoke/{{channel}}/{{chaincode}}",
+													"protocol": "http",
+													"host": [
+														"{{host:port}}"
+													],
+													"path": [
+														"invoke",
+														"{{channel}}",
+														"{{chaincode}}"
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "Registration",
+									"item": [
+										{
+											"name": "LogisticalActivityRegistrationExists",
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": [
+														{
+															"key": "token",
+															"value": "{{bearer}}",
+															"type": "string"
+														}
+													]
+												},
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"method\": \"StvgdContract:LogisticalActivityRegistrationExists\",\r\n    \"args\": [\"lareg001\"]\r\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "http://{{host:port}}/query/{{channel}}/{{chaincode}}",
+													"protocol": "http",
+													"host": [
+														"{{host:port}}"
+													],
+													"path": [
+														"query",
+														"{{channel}}",
+														"{{chaincode}}"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "CreateLogisticalActivityRegistration",
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": [
+														{
+															"key": "token",
+															"value": "{{bearer}}",
+															"type": "string"
+														}
+													]
+												},
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"method\": \"StvgdContract:CreateLogisticalActivityRegistration\",\r\n    \"args\": [\"lareg001\", \"...\"]\r\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "http://{{host:port}}/invoke/{{channel}}/{{chaincode}}",
+													"protocol": "http",
+													"host": [
+														"{{host:port}}"
+													],
+													"path": [
+														"invoke",
+														"{{channel}}",
+														"{{chaincode}}"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "ReadLogisticalActivityRegistration",
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": [
+														{
+															"key": "token",
+															"value": "{{bearer}}",
+															"type": "string"
+														}
+													]
+												},
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"method\": \"StvgdContract:ReadLogisticalActivityRegistration\",\r\n    \"args\": [\"lareg001\"]\r\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "http://{{host:port}}/query/{{channel}}/{{chaincode}}",
+													"protocol": "http",
+													"host": [
+														"{{host:port}}"
+													],
+													"path": [
+														"query",
+														"{{channel}}",
+														"{{chaincode}}"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "GetAllLogisticalActivitiesRegistration",
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": [
+														{
+															"key": "token",
+															"value": "{{bearer}}",
+															"type": "string"
+														}
+													]
+												},
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"method\": \"StvgdContract:GetAllLogisticalActivitiesRegistration\",\r\n    \"args\": []\r\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "http://{{host:port}}/query/{{channel}}/{{chaincode}}",
+													"protocol": "http",
+													"host": [
+														"{{host:port}}"
+													],
+													"path": [
+														"query",
+														"{{channel}}",
+														"{{chaincode}}"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "DeleteLogisticalActivityRegistration",
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": [
+														{
+															"key": "token",
+															"value": "{{bearer}}",
+															"type": "string"
+														}
+													]
+												},
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"method\": \"StvgdContract:DeleteLogisticalActivityRegistration\",\r\n    \"args\": [\"lareg001\"]\r\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "http://{{host:port}}/invoke/{{channel}}/{{chaincode}}",
+													"protocol": "http",
+													"host": [
+														"{{host:port}}"
+													],
+													"path": [
+														"invoke",
+														"{{channel}}",
+														"{{chaincode}}"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "DeleteAllLogisticalActivitiesRegistration",
+											"request": {
+												"auth": {
+													"type": "bearer",
+													"bearer": [
+														{
+															"key": "token",
+															"value": "{{bearer}}",
+															"type": "string"
+														}
+													]
+												},
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"method\": \"StvgdContract:DeleteAllLogisticalActivitiesRegistration\",\r\n    \"args\": []\r\n}",
 													"options": {
 														"raw": {
 															"language": "json"

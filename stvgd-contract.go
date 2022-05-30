@@ -134,6 +134,7 @@ func (c *StvgdContract) InitLedger(ctx contractapi.TransactionContextInterface) 
  * ####################################
  */
 
+// Date validation
 func validateDates(startDate, endDate string) ([]civil.DateTime, error) {
 	// Date parsing
 	civilActivityStartDate, err := civil.ParseDateTime(startDate)
@@ -151,6 +152,98 @@ func validateDates(startDate, endDate string) ([]civil.DateTime, error) {
 	}
 
 	return []civil.DateTime{civilActivityStartDate, civilActivityEndDate}, nil
+}
+
+// Activity type validation
+func validateActivityType(activityTypeID string) (ActivityType, error) {
+	var activityType ActivityType
+	switch activityTypeID {
+	case "SPINNING":
+		activityType = Spinning
+	case "WEAVING":
+		activityType = Weaving
+	case "KNITTING":
+		activityType = Knitting
+	case "DYEING_FINISHING":
+		activityType = DyeingFinishing
+	case "CONFECTION":
+		activityType = Confection
+	default:
+		return "", fmt.Errorf("activity type not found")
+	}
+
+	return activityType, nil
+}
+
+// Unit validation
+func validateUnit(unitID string) (Unit, error) {
+	var unit Unit
+	switch unitID {
+	case "KG":
+		unit = Kilograms
+	case "L":
+		unit = Liters
+	case "M":
+		unit = Meters
+	case "M2":
+		unit = SquaredMeters
+	default:
+		return "", fmt.Errorf("unit not found")
+	}
+
+	return unit, nil
+}
+
+// Transportation type validation
+func validateTransportationType(transportationTypeID string) (TransportationType, error) {
+	var transportationType TransportationType
+	switch transportationTypeID {
+	case "ROAD":
+		transportationType = Road
+	case "MARITIME":
+		transportationType = Maritime
+	case "AIR":
+		transportationType = Air
+	case "RAIL":
+		transportationType = Rail
+	case "INTERMODAL":
+		transportationType = Intermodal
+	default:
+		return "", fmt.Errorf("transportation type not found")
+	}
+
+	return transportationType, nil
+}
+
+// Batch type validation
+func validateBatchType(batchTypeID string) (BatchType, error) {
+	var batchType BatchType
+	switch batchTypeID {
+	case "FIBER":
+		batchType = Fiber
+	case "YARN":
+		batchType = Yarn
+	case "MESH":
+		batchType = Mesh
+	case "FABRIC":
+		batchType = Fabric
+	case "DYED_MESH":
+		batchType = DyedMesh
+	case "FINISHED_MESH":
+		batchType = FinishedMesh
+	case "DYED_FABRIC":
+		batchType = DyedFabric
+	case "FINISHED_FABRIC":
+		batchType = FinishedFabric
+	case "CUT":
+		batchType = Cut
+	case "FINISHED_PIECE":
+		batchType = FinishedPiece
+	default:
+		return "", fmt.Errorf("batch type not found")
+	}
+
+	return batchType, nil
 }
 
 /*
@@ -355,7 +448,7 @@ func (c *StvgdContract) BatchExists(ctx contractapi.TransactionContextInterface,
 }
 
 // CreateBatch creates a new instance of Batch
-func (c *StvgdContract) CreateBatch(ctx contractapi.TransactionContextInterface, batchID, productionActivityID, productionUnitID, batchInternalID, supplierID string, unit Unit, batchTypeID BatchType, batchComposition map[string]float32, quantity, ecs, ses float32) (string, error) {
+func (c *StvgdContract) CreateBatch(ctx contractapi.TransactionContextInterface, batchID, productionActivityID, productionUnitID, batchInternalID, supplierID, unit, batchTypeID string, batchComposition map[string]float32, quantity, ecs, ses float32) (string, error) {
 
 	exists, err := c.BatchExists(ctx, batchID)
 	if err != nil {
@@ -364,8 +457,33 @@ func (c *StvgdContract) CreateBatch(ctx contractapi.TransactionContextInterface,
 		return "", fmt.Errorf("[%s] already exists", batchID)
 	}
 
+	// Validate batch type
+	validBatchType, err := validateBatchType(batchTypeID)
+	if err != nil {
+		return "", fmt.Errorf("could not validate batch type. %s", err)
+	}
+
+	// Validate batch composition
+	var percentageSum float32 = 0.00 // Local variable for percentage sum validation
+	for _, percentage := range batchComposition {
+		percentageSum += percentage
+		if percentageSum > 100 {
+			return "", fmt.Errorf("the batch composition percentagem sum should be equal to 100")
+		}
+	}
+	if percentageSum != 100 {
+		return "", fmt.Errorf("the batch composition percentagem sum should equal to 100")
+	}
+
+	// Validate quantity
 	if quantity < 0 {
 		return "", fmt.Errorf("batch quantity should be greater than 0")
+	}
+
+	// Validate unit
+	validUnit, err := validateUnit(unit)
+	if err != nil {
+		return "", fmt.Errorf("could not validate unit. %s", err)
 	}
 
 	// Validate scores ( -10 <= ECS & SES <= 10)
@@ -376,30 +494,17 @@ func (c *StvgdContract) CreateBatch(ctx contractapi.TransactionContextInterface,
 		return "", fmt.Errorf("ecs should be between -10 & 10")
 	}
 
-	var percentageSum float32 = 0.00 // Local variable for percentage sum validation
-
-	for _, percentage := range batchComposition {
-		percentageSum += percentage
-		if percentageSum > 100 {
-			return "", fmt.Errorf("the batch composition percentagem sum should be equal to 100")
-		}
-	}
-
-	if percentageSum != 100 {
-		return "", fmt.Errorf("the batch composition percentagem sum should equal to 100")
-	}
-
 	batch := &Batch{
 		ObjectType:           "batch",
 		ID:                   batchID,
-		BatchTypeID:          batchTypeID,
+		BatchTypeID:          validBatchType,
 		ProductionActivityID: productionActivityID,
 		ProductionUnitID:     productionUnitID,
 		BatchInternalID:      batchInternalID,
 		SupplierID:           supplierID,
 		BatchComposition:     batchComposition,
 		Quantity:             quantity,
-		Unit:                 unit,
+		Unit:                 validUnit,
 		ECS:                  ecs,
 		SES:                  ses,
 	}
@@ -739,19 +844,10 @@ func (c *StvgdContract) CreateProductionActivity(ctx contractapi.TransactionCont
 		return "", fmt.Errorf("production unit's ID [%s] must be the same as output batch's production unit's ID [%s]", productionUnitID, outputBatch.ProductionUnitID)
 	}
 
-	// Activity type validation
-	var activityType ActivityType
-	switch activityTypeID {
-	case "SPINNING":
-		activityType = Spinning
-	case "WEAVING":
-		activityType = Weaving
-	case "KNITTING":
-		activityType = Knitting
-	case "DYEING_FINISHING":
-		activityType = DyeingFinishing
-	case "CONFECTION":
-		activityType = Confection
+	// Validate activity type
+	validActivityType, err := validateActivityType(activityTypeID)
+	if err != nil {
+		return "", fmt.Errorf("could not validate activity type. %s", err)
 	}
 
 	// Validate dates
@@ -805,7 +901,7 @@ func (c *StvgdContract) CreateProductionActivity(ctx contractapi.TransactionCont
 	}
 
 	// Create production activity's output batch
-	_, err = c.CreateBatch(ctx, outputBatch.ID, productionActivityID, outputBatch.ProductionUnitID, outputBatch.BatchInternalID, outputBatch.SupplierID, outputBatch.Unit, outputBatch.BatchTypeID, outputBatch.BatchComposition, outputBatch.Quantity, outputBatch.ECS, outputBatch.SES)
+	_, err = c.CreateBatch(ctx, outputBatch.ID, productionActivityID, outputBatch.ProductionUnitID, outputBatch.BatchInternalID, outputBatch.SupplierID, string(outputBatch.Unit), string(outputBatch.BatchTypeID), outputBatch.BatchComposition, outputBatch.Quantity, outputBatch.ECS, outputBatch.SES)
 	if err != nil {
 		return "", fmt.Errorf("could not write batch to world state. %s", err)
 	}
@@ -815,7 +911,7 @@ func (c *StvgdContract) CreateProductionActivity(ctx contractapi.TransactionCont
 		ID:                productionActivityID,
 		ProductionUnitID:  productionUnitID,
 		CompanyID:         companyID,
-		ActivityTypeID:    activityType,
+		ActivityTypeID:    validActivityType,
 		InputBatches:      inputBatches,
 		OutputBatch:       outputBatch,
 		ActivityStartDate: civilDates[0],
@@ -960,7 +1056,7 @@ func (c *StvgdContract) CreateLogisiticalActivityRegistration(ctx contractapi.Tr
 	}
 
 	// Create production activity's output batch
-	_, err = c.CreateBatch(ctx, newBatch.ID, "", newBatch.ProductionUnitID, newBatch.BatchInternalID, newBatch.SupplierID, newBatch.Unit, newBatch.BatchTypeID, newBatch.BatchComposition, newBatch.Quantity, newBatch.ECS, newBatch.SES)
+	_, err = c.CreateBatch(ctx, newBatch.ID, "", newBatch.ProductionUnitID, newBatch.BatchInternalID, newBatch.SupplierID, string(newBatch.Unit), string(newBatch.BatchTypeID), newBatch.BatchComposition, newBatch.Quantity, newBatch.ECS, newBatch.SES)
 	if err != nil {
 		return "", fmt.Errorf("could not write batch to world state. %s", err)
 	}

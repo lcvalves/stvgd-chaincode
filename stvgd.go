@@ -15,7 +15,7 @@ const (
 	Kilograms     Unit = "KG"
 	Liters        Unit = "L"
 	Meters        Unit = "M"
-	SquaredMeters Unit = "M^2"
+	SquaredMeters Unit = "M2"
 )
 
 type ActivityType string
