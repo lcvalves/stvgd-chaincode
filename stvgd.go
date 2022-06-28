@@ -6,7 +6,7 @@ package main
 
 import "cloud.google.com/go/civil"
 
-//* CURRENT MODEL VERSION: on-chain_struct_model_v10
+//* CURRENT MODEL VERSION: on-chain_struct_model_v11
 
 // ENUMS
 type Unit string
@@ -91,7 +91,7 @@ type LogisticalActivityTransport struct {
 	OriginProductionUnitID      string             `json:"OriginProductionUnitID"`
 	DestinationProductionUnitID string             `json:"DestinationProductionUnitID"`
 	TransportationTypeID        TransportationType `json:"transportationTypeID"`
-	InputBatch                  map[string]float32 `json:"inputBatches"`                                  // slice of lots being shipped
+	InputBatch                  map[string]float32 `json:"inputBatches"`                                  // slice of batches being shipped
 	RemainingBatch              Batch              `json:"remainingBatch,omitempty" metadata:",optional"` // Only mandatory when shipped batch is partially sent (inputBatch[i].quantity < batch.quantity WHERE batch.id = i)
 	Distance                    float32            `json:"distance"`                                      // in kilometers
 	Cost                        float32            `json:"cost"`
@@ -104,14 +104,14 @@ type LogisticalActivityTransport struct {
 
 // LogisticalActivityReception stores information about the batch receptions in the supply chain companies/production units
 type LogisticalActivityReception struct {
-	ObjectType         string         `json:"docType"` // docType ("larec") is used to distinguish the various types of objects in state database
-	ID                 string         `json:"ID"`      // the field tags are needed to keep case from bouncing around
-	ProductionUnitID   string         `json:"productionUnitID"`
-	NewBatchInternalID string         `json:"newBatchInternalID"`
-	ReceivedBatch      Batch          `json:"receivedBatch"` // Only mandatory when shipped batch is partially sent (inputBatch[i].quantity < batch.quantity WHERE batch.id = i)
-	IsAccepted         bool           `json:"acceptedQuantity"`
-	ActivityStartDate  civil.DateTime `json:"activityStartDate"`
-	ActivityEndDate    civil.DateTime `json:"activityEndDate"`
+	ObjectType        string         `json:"docType"` // docType ("larec") is used to distinguish the various types of objects in state database
+	ID                string         `json:"ID"`      // the field tags are needed to keep case from bouncing around
+	ProductionUnitID  string         `json:"productionUnitID"`
+	NewBatch          Batch          `json:"newBatch,omitempty" metadata:",optional"` // Mandatory when batch is accepted (isAccepted = true)
+	ReceivedBatch     Batch          `json:"receivedBatch"`
+	IsAccepted        bool           `json:"isAccepted"`
+	ActivityStartDate civil.DateTime `json:"activityStartDate"`
+	ActivityEndDate   civil.DateTime `json:"activityEndDate"`
 }
 
 // LogisticalActivityReception stores information about the batch receptions in the supply chain companies/production units

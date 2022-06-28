@@ -9,7 +9,7 @@
 			"_parent": {
 				"$ref": "AAAAAAFF+h6SjaM2Hec="
 			},
-			"name": "Eco-Gamified Class Model (B2C/C2C DApp)",
+			"name": "Eco-Gamified Class Model (B2C2C DApp)",
 			"ownedElements": [
 				{
 					"_type": "UMLClassDiagram",
@@ -76,7 +76,7 @@
 											"top": 112,
 											"width": 295.46435546875,
 											"height": 13,
-											"text": "(from Eco-Gamified Class Model (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Class Model (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -357,7 +357,7 @@
 											"top": 752,
 											"width": 295.46435546875,
 											"height": 13,
-											"text": "(from Eco-Gamified Class Model (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Class Model (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -586,7 +586,7 @@
 											"top": 1520,
 											"width": 295.46435546875,
 											"height": 13,
-											"text": "(from Eco-Gamified Class Model (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Class Model (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -902,7 +902,7 @@
 											"top": 112,
 											"width": 295.46435546875,
 											"height": 13,
-											"text": "(from Eco-Gamified Class Model (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Class Model (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -1525,7 +1525,7 @@
 											"top": 1536,
 											"width": 295.46435546875,
 											"height": 13,
-											"text": "(from Eco-Gamified Class Model (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Class Model (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -1701,7 +1701,7 @@
 											"top": 1536,
 											"width": 295.46435546875,
 											"height": 13,
-											"text": "(from Eco-Gamified Class Model (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Class Model (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -1877,7 +1877,7 @@
 											"top": 1184,
 											"width": 295.46435546875,
 											"height": 13,
-											"text": "(from Eco-Gamified Class Model (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Class Model (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -2078,7 +2078,7 @@
 								"$ref": "AAAAAAF6iqMo/3T0A9M="
 							},
 							"lineStyle": 2,
-							"points": "840:1400;840:1368;896:1368;896:1324",
+							"points": "840:1400;840:1368;896:1368;896:1316",
 							"showVisibility": true,
 							"nameLabel": {
 								"$ref": "AAAAAAF6iqRMbXmLSaQ="
@@ -2172,7 +2172,7 @@
 								"$ref": "AAAAAAF6iqOxpHX2xtU="
 							},
 							"lineStyle": 2,
-							"points": "944:1400;944:1368;896:1368;896:1324",
+							"points": "944:1400;944:1368;896:1368;896:1316",
 							"showVisibility": true,
 							"nameLabel": {
 								"$ref": "AAAAAAF6iqRTLnn2yms="
@@ -2290,7 +2290,7 @@
 							"top": 1592,
 							"width": 193,
 							"height": 38,
-							"text": "DRAFT v0.3.2"
+							"text": "DRAFT v0.3.4"
 						},
 						{
 							"_type": "UMLClassView",
@@ -2349,7 +2349,7 @@
 											"top": 512,
 											"width": 295.46435546875,
 											"height": 13,
-											"text": "(from Eco-Gamified Class Model (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Class Model (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -2940,7 +2940,7 @@
 											"top": 1824,
 											"width": 434.005859375,
 											"height": 13,
-											"text": "(from Eco-Gamified Class Model (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Class Model (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -3465,7 +3465,7 @@
 											"top": 688,
 											"width": 295.46435546875,
 											"height": 13,
-											"text": "(from Eco-Gamified Class Model (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Class Model (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -4018,7 +4018,7 @@
 											"top": 992,
 											"width": 295.46435546875,
 											"height": 13,
-											"text": "(from Eco-Gamified Class Model (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Class Model (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -4330,7 +4330,7 @@
 											"visible": false,
 											"font": "Arial;13;0",
 											"left": 1262.05859375,
-											"top": 848,
+											"top": 832,
 											"height": 13
 										},
 										{
@@ -4341,10 +4341,10 @@
 											},
 											"font": "Arial;13;3",
 											"left": 869,
-											"top": 1287,
+											"top": 1279,
 											"width": 58.51904296875,
 											"height": 13,
-											"text": "Cosmetic"
+											"text": "Aesthetic"
 										},
 										{
 											"_type": "LabelView",
@@ -4355,10 +4355,10 @@
 											"visible": false,
 											"font": "Arial;13;0",
 											"left": 1262.05859375,
-											"top": 848,
+											"top": 832,
 											"width": 295.46435546875,
 											"height": 13,
-											"text": "(from Eco-Gamified Class Model (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Class Model (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -4369,14 +4369,14 @@
 											"visible": false,
 											"font": "Arial;13;0",
 											"left": 1262.05859375,
-											"top": 848,
+											"top": 832,
 											"height": 13,
 											"horizontalAlignment": 1
 										}
 									],
 									"font": "Arial;13;0",
 									"left": 864,
-									"top": 1280,
+									"top": 1272,
 									"width": 68.51904296875,
 									"height": 25,
 									"stereotypeLabel": {
@@ -4403,7 +4403,7 @@
 									},
 									"font": "Arial;13;0",
 									"left": 864,
-									"top": 1305,
+									"top": 1297,
 									"width": 68.51904296875,
 									"height": 10
 								},
@@ -4418,7 +4418,7 @@
 									},
 									"font": "Arial;13;0",
 									"left": 864,
-									"top": 1315,
+									"top": 1307,
 									"width": 68.51904296875,
 									"height": 10
 								},
@@ -4434,7 +4434,7 @@
 									"visible": false,
 									"font": "Arial;13;0",
 									"left": 591.029296875,
-									"top": 392,
+									"top": 384,
 									"width": 10,
 									"height": 10
 								},
@@ -4450,7 +4450,7 @@
 									"visible": false,
 									"font": "Arial;13;0",
 									"left": 591.029296875,
-									"top": 392,
+									"top": 384,
 									"width": 10,
 									"height": 10
 								}
@@ -4458,7 +4458,7 @@
 							"font": "Arial;13;0",
 							"containerChangeable": true,
 							"left": 864,
-							"top": 1280,
+							"top": 1272,
 							"width": 68.51904296875,
 							"height": 45,
 							"nameCompartment": {
@@ -4534,7 +4534,7 @@
 											"top": 896,
 											"width": 295.46435546875,
 											"height": 13,
-											"text": "(from Eco-Gamified Class Model (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Class Model (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -4788,7 +4788,7 @@
 								"$ref": "AAAAAAF6rUArZWF8JRc="
 							},
 							"lineStyle": 2,
-							"points": "896:1280;896:1256;952:1256;952:1223",
+							"points": "896:1272;896:1256;952:1256;952:1223",
 							"showVisibility": true,
 							"nameLabel": {
 								"$ref": "AAAAAAF6rULgb243S44="
@@ -5070,7 +5070,7 @@
 											"top": 832,
 											"width": 295.46435546875,
 											"height": 13,
-											"text": "(from Eco-Gamified Class Model (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Class Model (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -5637,7 +5637,7 @@
 											"top": 784,
 											"width": 295.46435546875,
 											"height": 13,
-											"text": "(from Eco-Gamified Class Model (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Class Model (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -5927,7 +5927,7 @@
 											"top": 992,
 											"width": 295.46435546875,
 											"height": 13,
-											"text": "(from Eco-Gamified Class Model (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Class Model (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -6195,7 +6195,7 @@
 											"top": 698,
 											"width": 295.46435546875,
 											"height": 13,
-											"text": "(from Eco-Gamified Class Model (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Class Model (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -6956,11 +6956,11 @@
 							},
 							"fontColor": "#ff0000",
 							"font": "Arial;22;0",
-							"left": 1752,
-							"top": 488,
-							"width": 196.390625,
-							"height": 56,
-							"text": "Blockchain Data"
+							"left": 1576,
+							"top": 392,
+							"width": 177,
+							"height": 34,
+							"text": "Traceability Data"
 						},
 						{
 							"_type": "UMLTextView",
@@ -6996,8 +6996,8 @@
 							},
 							"fontColor": "#0000ff",
 							"font": "Arial;22;0",
-							"left": 512,
-							"top": 304,
+							"left": 528,
+							"top": 296,
 							"width": 121,
 							"height": 34,
 							"text": "User Data"
@@ -7018,7 +7018,7 @@
 									"lineColor": "#0000ff",
 									"fillColor": "#0000ff",
 									"font": "Arial;13;0",
-									"left": 523,
+									"left": 539,
 									"top": 341,
 									"width": 1,
 									"height": 13
@@ -7032,7 +7032,7 @@
 									"lineColor": "#0000ff",
 									"fillColor": "#0000ff",
 									"font": "Arial;13;1",
-									"left": 517,
+									"left": 533,
 									"top": 341,
 									"width": 1,
 									"height": 13
@@ -7041,9 +7041,9 @@
 							"lineColor": "#0000ff",
 							"fillColor": "#0000ff",
 							"font": "Arial;13;0",
-							"left": 512,
+							"left": 528,
 							"top": 336,
-							"width": 633,
+							"width": 617,
 							"height": 585,
 							"nameLabel": {
 								"$ref": "AAAAAAF6zUcU7yhrpzo="
@@ -7069,7 +7069,7 @@
 									"fillColor": "#ff0000",
 									"font": "Arial;13;0",
 									"left": 899,
-									"top": 469,
+									"top": 437,
 									"width": 1,
 									"height": 13
 								},
@@ -7083,7 +7083,7 @@
 									"fillColor": "#ff0000",
 									"font": "Arial;13;1",
 									"left": 893,
-									"top": 469,
+									"top": 437,
 									"width": 1,
 									"height": 13
 								}
@@ -7092,9 +7092,9 @@
 							"fillColor": "#ff0000",
 							"font": "Arial;13;0",
 							"left": 888,
-							"top": 464,
+							"top": 432,
 							"width": 865,
-							"height": 321,
+							"height": 353,
 							"nameLabel": {
 								"$ref": "AAAAAAF6zUfsUizWgxA="
 							},
@@ -7209,7 +7209,7 @@
 											"top": -517,
 											"width": 295.46435546875,
 											"height": 13,
-											"text": "(from Eco-Gamified Class Model (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Class Model (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -7713,7 +7713,7 @@
 											"top": -80,
 											"width": 295.46435546875,
 											"height": 13,
-											"text": "(from Eco-Gamified Class Model (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Class Model (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -9253,7 +9253,7 @@
 					"_parent": {
 						"$ref": "AAAAAAF6ihNsz0/uf24="
 					},
-					"name": "Cosmetic",
+					"name": "Aesthetic",
 					"ownedElements": [
 						{
 							"_type": "UMLGeneralization",
@@ -9643,7 +9643,7 @@
 			"_parent": {
 				"$ref": "AAAAAAFF+h6SjaM2Hec="
 			},
-			"name": "Eco-Gamified Use Case Diagram (B2C/C2C DApp)",
+			"name": "Eco-Gamified Use Case Diagram (B2C2C DApp)",
 			"ownedElements": [
 				{
 					"_type": "UMLUseCaseDiagram",
@@ -9710,7 +9710,7 @@
 											"top": -304,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -9811,7 +9811,7 @@
 											"top": 1808,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -9830,7 +9830,7 @@
 									"font": "Arial;13;0",
 									"left": 720.5,
 									"top": 1284.5,
-									"width": 116,
+									"width": 116.68505859375,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF8LUIqNl/Jv8k="
@@ -10010,7 +10010,7 @@
 											"top": 1584,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -10029,7 +10029,7 @@
 									"font": "Arial;13;0",
 									"left": 694,
 									"top": 1204.5,
-									"width": 142,
+									"width": 142.92626953125,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF8LUNAlV/+57k="
@@ -10209,7 +10209,7 @@
 											"top": 400,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -10389,7 +10389,7 @@
 											"top": 2016,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -10663,7 +10663,7 @@
 											"top": -80,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -11029,7 +11029,7 @@
 											"top": 1760,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -11209,7 +11209,7 @@
 											"top": 1616,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -11228,7 +11228,7 @@
 									"font": "Arial;13;0",
 									"left": 680.5,
 									"top": 1364.5,
-									"width": 193,
+									"width": 193.49169921875,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF8MilJ/jd4L3w="
@@ -11408,7 +11408,7 @@
 											"top": 1792,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -11427,7 +11427,7 @@
 									"font": "Arial;13;0",
 									"left": 721,
 									"top": 1476.5,
-									"width": 119,
+									"width": 119.8017578125,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF8Mi4E4z1Ux5k="
@@ -11975,7 +11975,7 @@
 											"top": 928,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -11994,7 +11994,7 @@
 									"font": "Arial;13;0",
 									"left": 352.5,
 									"top": 1132.5,
-									"width": 194,
+									"width": 194.9326171875,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF8Mm73otYxPi4="
@@ -12269,7 +12269,7 @@
 											"top": 1168,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -12288,7 +12288,7 @@
 									"font": "Arial;13;0",
 									"left": 864.5,
 									"top": 1132.5,
-									"width": 115,
+									"width": 116.18994140625,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF8MneuWuGUMEA="
@@ -14002,7 +14002,7 @@
 											"top": 528,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -14021,7 +14021,7 @@
 									"font": "Arial;13;0",
 									"left": 404.5,
 									"top": 556.5,
-									"width": 175,
+									"width": 175.43896484375,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF8Moqg8DCJ/lI="
@@ -14201,7 +14201,7 @@
 											"top": 448,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -14220,7 +14220,7 @@
 									"font": "Arial;13;0",
 									"left": 643.5,
 									"top": 612.5,
-									"width": 91,
+									"width": 92.33544921875,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF8MosAVDHWeUg="
@@ -14386,7 +14386,7 @@
 											"top": 651.5,
 											"width": 128,
 											"height": 13,
-											"text": "Buy cosmetic assets"
+											"text": "Buy aesthetic assets"
 										},
 										{
 											"_type": "LabelView",
@@ -14400,7 +14400,7 @@
 											"top": 304,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -14419,7 +14419,7 @@
 									"font": "Arial;13;0",
 									"left": 413,
 									"top": 644.5,
-									"width": 138,
+									"width": 138.62255859375,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF8Mos4WDJtgHU="
@@ -14599,7 +14599,7 @@
 											"top": 144,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -14618,7 +14618,7 @@
 									"font": "Arial;13;0",
 									"left": 642,
 									"top": 684.5,
-									"width": 124,
+									"width": 124.84814453125,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF8MotWazMEFpA="
@@ -14798,7 +14798,7 @@
 											"top": 288,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -14817,7 +14817,7 @@
 									"font": "Arial;13;0",
 									"left": 640,
 									"top": 732.5,
-									"width": 115,
+									"width": 115.498046875,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF8MouRVzObXn4="
@@ -15644,7 +15644,7 @@
 											"top": 208,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -15663,7 +15663,7 @@
 									"font": "Arial;13;0",
 									"left": 483,
 									"top": 292.5,
-									"width": 91,
+									"width": 91.64990234375,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF8MpHikXJQ6P0="
@@ -15843,7 +15843,7 @@
 											"top": 240,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -15862,7 +15862,7 @@
 									"font": "Arial;13;0",
 									"left": 567,
 									"top": 372.5,
-									"width": 111,
+									"width": 111.12451171875,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF8MqDtt3ZKflc="
@@ -16040,7 +16040,7 @@
 											"top": 336,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -16058,7 +16058,7 @@
 									"font": "Arial;13;0",
 									"left": 473,
 									"top": 476.5,
-									"width": 119,
+									"width": 119.79541015625,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF8MqFIiHdKdxU="
@@ -16238,7 +16238,7 @@
 											"top": 112,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -16257,7 +16257,7 @@
 									"font": "Arial;13;0",
 									"left": 817,
 									"top": 380.5,
-									"width": 123,
+									"width": 124.13720703125,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF8MqFu+XgL6Iw="
@@ -16437,7 +16437,7 @@
 											"top": 112,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -16456,7 +16456,7 @@
 									"font": "Arial;13;0",
 									"left": 822,
 									"top": 444.5,
-									"width": 114,
+									"width": 114.787109375,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF8MqHMFXjMLwI="
@@ -16636,7 +16636,7 @@
 											"top": 112,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -16655,7 +16655,7 @@
 									"font": "Arial;13;0",
 									"left": 811.5,
 									"top": 500.5,
-									"width": 135,
+									"width": 136.419921875,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF8MqHi9HmNCJY="
@@ -16835,7 +16835,7 @@
 											"top": 96,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -16854,7 +16854,7 @@
 									"font": "Arial;13;0",
 									"left": 805.5,
 									"top": 556.5,
-									"width": 146,
+									"width": 146.54443359375,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF8MqIPPnpOIUU="
@@ -17544,10 +17544,10 @@
 							},
 							"font": "Arial;22;0",
 							"left": 704,
-							"top": 1616,
+							"top": 1608,
 							"width": 145,
 							"height": 34,
-							"text": "Draft v0.2.1"
+							"text": "Draft v0.2.2"
 						},
 						{
 							"_type": "UMLAssociationView",
@@ -17879,7 +17879,7 @@
 											"top": 736,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -17898,7 +17898,7 @@
 									"font": "Arial;13;0",
 									"left": 416,
 									"top": 836.5,
-									"width": 192,
+									"width": 192.9521484375,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF8Z5oESzHwof8="
@@ -18349,7 +18349,7 @@
 											"top": 208,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -18368,7 +18368,7 @@
 									"font": "Arial;13;0",
 									"left": 716.5,
 									"top": 796.5,
-									"width": 137,
+									"width": 137.3466796875,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF8Z5tgNkCeV0o="
@@ -18548,7 +18548,7 @@
 											"top": 272,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -18567,7 +18567,7 @@
 									"font": "Arial;13;0",
 									"left": 718.5,
 									"top": 884.5,
-									"width": 146,
+									"width": 146.728515625,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF8Z5t8h0F0cDI="
@@ -18933,7 +18933,7 @@
 											"top": 320,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -18952,7 +18952,7 @@
 									"font": "Arial;13;0",
 									"left": 447.5,
 									"top": 988.5,
-									"width": 112,
+									"width": 112.5908203125,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF8Z50V41s96Qc="
@@ -19401,7 +19401,7 @@
 											"top": 80,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -19420,7 +19420,7 @@
 									"font": "Arial;13;0",
 									"left": 431,
 									"top": 916.5,
-									"width": 185,
+									"width": 186.49658203125,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF8Z51rol4O5RY="
@@ -19869,7 +19869,7 @@
 											"top": -32,
 											"width": 333.75341796875,
 											"height": 13,
-											"text": "(from Eco-Gamified Use Case Diagram (B2C/C2C DApp))"
+											"text": "(from Eco-Gamified Use Case Diagram (B2C2C DApp))"
 										},
 										{
 											"_type": "LabelView",
@@ -19888,7 +19888,7 @@
 									"font": "Arial;13;0",
 									"left": 399,
 									"top": 772.5,
-									"width": 187,
+									"width": 187.0234375,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF8mM4Dbx44d98="
@@ -20939,7 +20939,7 @@
 					"_parent": {
 						"$ref": "AAAAAAF8JT+vjPHJlZ4="
 					},
-					"name": "Buy cosmetic assets",
+					"name": "Buy aesthetic assets",
 					"ownedElements": [
 						{
 							"_type": "UMLGeneralization",
@@ -21246,7 +21246,7 @@
 					"_parent": {
 						"$ref": "AAAAAAF+4zJQs8bkwCI="
 					},
-					"name": "class-model-v9",
+					"name": "class-model-v11",
 					"defaultDiagram": true,
 					"ownedViews": [
 						{
@@ -23464,7 +23464,7 @@
 								"$ref": "AAAAAAF+5GnCntj/Wf8="
 							},
 							"lineStyle": 2,
-							"points": "368:296;368:274"
+							"points": "368:304;368:274"
 						},
 						{
 							"_type": "UMLNoteView",
@@ -26439,7 +26439,7 @@
 											"visible": false,
 											"font": "Arial;13;0",
 											"left": 493,
-											"top": 149,
+											"top": 165,
 											"width": 167.298828125,
 											"height": 13
 										},
@@ -26451,7 +26451,7 @@
 											},
 											"font": "Arial;13;1",
 											"left": 285,
-											"top": 303,
+											"top": 311,
 											"width": 201.9951171875,
 											"height": 13,
 											"text": "Logistical_Activity_Reception"
@@ -26465,7 +26465,7 @@
 											"visible": false,
 											"font": "Arial;13;0",
 											"left": 424,
-											"top": -464,
+											"top": -448,
 											"width": 234.78076171875,
 											"height": 13,
 											"text": "(from main)"
@@ -26479,14 +26479,14 @@
 											"visible": false,
 											"font": "Arial;13;0",
 											"left": 424,
-											"top": -464,
+											"top": -448,
 											"height": 13,
 											"horizontalAlignment": 1
 										}
 									],
 									"font": "Arial;13;0",
 									"left": 280,
-									"top": 296,
+									"top": 304,
 									"width": 211.9951171875,
 									"height": 25,
 									"stereotypeLabel": {
@@ -26523,7 +26523,7 @@
 											},
 											"font": "Arial;13;0",
 											"left": 285,
-											"top": 326,
+											"top": 334,
 											"width": 201.9951171875,
 											"height": 13,
 											"underline": true,
@@ -26541,7 +26541,7 @@
 											},
 											"font": "Arial;13;0",
 											"left": 285,
-											"top": 341,
+											"top": 349,
 											"width": 201.9951171875,
 											"height": 13,
 											"text": "~id: string {id, unique}",
@@ -26558,27 +26558,10 @@
 											},
 											"font": "Arial;13;0",
 											"left": 285,
-											"top": 356,
+											"top": 364,
 											"width": 201.9951171875,
 											"height": 13,
 											"text": "~production_unit_id: string {id}",
-											"horizontalAlignment": 0
-										},
-										{
-											"_type": "UMLAttributeView",
-											"_id": "AAAAAAF+5Gs4p9qd7OE=",
-											"_parent": {
-												"$ref": "AAAAAAF+5GnCn9kFi50="
-											},
-											"model": {
-												"$ref": "AAAAAAF+5Gs4mNqU5LI="
-											},
-											"font": "Arial;13;0",
-											"left": 285,
-											"top": 371,
-											"width": 201.9951171875,
-											"height": 13,
-											"text": "~new_batch_internal_id: string {id}",
 											"horizontalAlignment": 0
 										},
 										{
@@ -26592,7 +26575,7 @@
 											},
 											"font": "Arial;13;0",
 											"left": 285,
-											"top": 386,
+											"top": 379,
 											"width": 201.9951171875,
 											"height": 13,
 											"text": "~isAccepted: bool",
@@ -26609,7 +26592,7 @@
 											},
 											"font": "Arial;13;0",
 											"left": 285,
-											"top": 401,
+											"top": 394,
 											"width": 201.9951171875,
 											"height": 13,
 											"text": "~activity_start_date: civil.DateTime",
@@ -26626,7 +26609,7 @@
 											},
 											"font": "Arial;13;0",
 											"left": 285,
-											"top": 416,
+											"top": 409,
 											"width": 201.9951171875,
 											"height": 13,
 											"text": "~activity_end_date: civil.DateTime",
@@ -26635,9 +26618,9 @@
 									],
 									"font": "Arial;13;0",
 									"left": 280,
-									"top": 321,
+									"top": 329,
 									"width": 211.9951171875,
-									"height": 113
+									"height": 98
 								},
 								{
 									"_type": "UMLOperationCompartmentView",
@@ -26650,7 +26633,7 @@
 									},
 									"font": "Arial;13;0",
 									"left": 280,
-									"top": 434,
+									"top": 427,
 									"width": 211.9951171875,
 									"height": 10
 								},
@@ -26666,7 +26649,7 @@
 									"visible": false,
 									"font": "Arial;13;0",
 									"left": 208,
-									"top": -384,
+									"top": -376,
 									"width": 10,
 									"height": 10
 								},
@@ -26682,7 +26665,7 @@
 									"visible": false,
 									"font": "Arial;13;0",
 									"left": 208,
-									"top": -384,
+									"top": -376,
 									"width": 10,
 									"height": 10
 								}
@@ -26693,9 +26676,9 @@
 							"font": "Arial;13;0",
 							"containerChangeable": true,
 							"left": 280,
-							"top": 296,
+							"top": 304,
 							"width": 211.9951171875,
-							"height": 148,
+							"height": 133,
 							"nameCompartment": {
 								"$ref": "AAAAAAF+5GnCntkA3Hg="
 							},
@@ -26741,6 +26724,277 @@
 							},
 							"lineStyle": 2,
 							"points": "344:592;344:565"
+						},
+						{
+							"_type": "UMLAssociationView",
+							"_id": "AAAAAAGBgWv1zUu6azs=",
+							"_parent": {
+								"$ref": "AAAAAAF+4zJQs8bll/c="
+							},
+							"model": {
+								"$ref": "AAAAAAGBgWv1y0u24nc="
+							},
+							"subViews": [
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGBgWv1zUu7uoA=",
+									"_parent": {
+										"$ref": "AAAAAAGBgWv1zUu6azs="
+									},
+									"model": {
+										"$ref": "AAAAAAGBgWv1y0u24nc="
+									},
+									"visible": false,
+									"font": "Arial;13;0",
+									"left": 678,
+									"top": 345,
+									"height": 13,
+									"alpha": 1.5707963267948966,
+									"distance": 15,
+									"hostEdge": {
+										"$ref": "AAAAAAGBgWv1zUu6azs="
+									},
+									"edgePosition": 1
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGBgWv1zku8jHo=",
+									"_parent": {
+										"$ref": "AAAAAAGBgWv1zUu6azs="
+									},
+									"model": {
+										"$ref": "AAAAAAGBgWv1y0u24nc="
+									},
+									"visible": null,
+									"font": "Arial;13;0",
+									"left": 693,
+									"top": 345,
+									"height": 13,
+									"alpha": 1.5707963267948966,
+									"distance": 30,
+									"hostEdge": {
+										"$ref": "AAAAAAGBgWv1zUu6azs="
+									},
+									"edgePosition": 1
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGBgWv1zku9jVc=",
+									"_parent": {
+										"$ref": "AAAAAAGBgWv1zUu6azs="
+									},
+									"model": {
+										"$ref": "AAAAAAGBgWv1y0u24nc="
+									},
+									"visible": false,
+									"font": "Arial;13;0",
+									"left": 649,
+									"top": 346,
+									"height": 13,
+									"alpha": -1.5707963267948966,
+									"distance": 15,
+									"hostEdge": {
+										"$ref": "AAAAAAGBgWv1zUu6azs="
+									},
+									"edgePosition": 1
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGBgWv1zku+/Jo=",
+									"_parent": {
+										"$ref": "AAAAAAGBgWv1zUu6azs="
+									},
+									"model": {
+										"$ref": "AAAAAAGBgWv1y0u3RxI="
+									},
+									"visible": false,
+									"font": "Arial;13;0",
+									"left": 516,
+									"top": 331,
+									"height": 13,
+									"alpha": 0.5235987755982988,
+									"distance": 30,
+									"hostEdge": {
+										"$ref": "AAAAAAGBgWv1zUu6azs="
+									},
+									"edgePosition": 2
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGBgWv1zku/ebQ=",
+									"_parent": {
+										"$ref": "AAAAAAGBgWv1zUu6azs="
+									},
+									"model": {
+										"$ref": "AAAAAAGBgWv1y0u3RxI="
+									},
+									"visible": false,
+									"font": "Arial;13;0",
+									"left": 519,
+									"top": 317,
+									"height": 13,
+									"alpha": 0.7853981633974483,
+									"distance": 40,
+									"hostEdge": {
+										"$ref": "AAAAAAGBgWv1zUu6azs="
+									},
+									"edgePosition": 2
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGBgWv1zkvA5Fs=",
+									"_parent": {
+										"$ref": "AAAAAAGBgWv1zUu6azs="
+									},
+									"model": {
+										"$ref": "AAAAAAGBgWv1y0u3RxI="
+									},
+									"visible": false,
+									"font": "Arial;13;0",
+									"left": 512,
+									"top": 358,
+									"height": 13,
+									"alpha": -0.5235987755982988,
+									"distance": 25,
+									"hostEdge": {
+										"$ref": "AAAAAAGBgWv1zUu6azs="
+									},
+									"edgePosition": 2
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGBgWv1zkvBWlU=",
+									"_parent": {
+										"$ref": "AAAAAAGBgWv1zUu6azs="
+									},
+									"model": {
+										"$ref": "AAAAAAGBgWv1y0u4ZjE="
+									},
+									"font": "Arial;13;0",
+									"left": 582,
+									"top": 336,
+									"width": 70.4716796875,
+									"height": 13,
+									"alpha": -5.539429581199628,
+									"distance": 67.94115100585212,
+									"hostEdge": {
+										"$ref": "AAAAAAGBgWv1zUu6azs="
+									},
+									"text": "~new_batch"
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGBgWv1zkvC0/E=",
+									"_parent": {
+										"$ref": "AAAAAAGBgWv1zUu6azs="
+									},
+									"model": {
+										"$ref": "AAAAAAGBgWv1y0u4ZjE="
+									},
+									"visible": false,
+									"font": "Arial;13;0",
+									"left": 692,
+									"top": 357,
+									"height": 13,
+									"alpha": -0.7853981633974483,
+									"distance": 40,
+									"hostEdge": {
+										"$ref": "AAAAAAGBgWv1zUu6azs="
+									}
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGBgWv1zkvD9wc=",
+									"_parent": {
+										"$ref": "AAAAAAGBgWv1zUu6azs="
+									},
+									"model": {
+										"$ref": "AAAAAAGBgWv1y0u4ZjE="
+									},
+									"font": "Arial;13;0",
+									"left": 641,
+									"top": 364,
+									"width": 21.68359375,
+									"height": 13,
+									"alpha": 0.5235987755982988,
+									"distance": 25,
+									"hostEdge": {
+										"$ref": "AAAAAAGBgWv1zUu6azs="
+									},
+									"text": "0..1"
+								},
+								{
+									"_type": "UMLQualifierCompartmentView",
+									"_id": "AAAAAAGBgWv1zkvE/QI=",
+									"_parent": {
+										"$ref": "AAAAAAGBgWv1zUu6azs="
+									},
+									"model": {
+										"$ref": "AAAAAAGBgWv1y0u3RxI="
+									},
+									"visible": false,
+									"font": "Arial;13;0",
+									"width": 10,
+									"height": 10
+								},
+								{
+									"_type": "UMLQualifierCompartmentView",
+									"_id": "AAAAAAGBgWv1z0vF7K0=",
+									"_parent": {
+										"$ref": "AAAAAAGBgWv1zUu6azs="
+									},
+									"model": {
+										"$ref": "AAAAAAGBgWv1y0u4ZjE="
+									},
+									"visible": false,
+									"font": "Arial;13;0",
+									"width": 10,
+									"height": 10
+								}
+							],
+							"font": "Arial;13;0",
+							"head": {
+								"$ref": "AAAAAAF+4zSXHcdt0/o="
+							},
+							"tail": {
+								"$ref": "AAAAAAF+5GnCntj/Wf8="
+							},
+							"lineStyle": 2,
+							"points": "491:352;664:352;664:392",
+							"showVisibility": true,
+							"nameLabel": {
+								"$ref": "AAAAAAGBgWv1zUu7uoA="
+							},
+							"stereotypeLabel": {
+								"$ref": "AAAAAAGBgWv1zku8jHo="
+							},
+							"propertyLabel": {
+								"$ref": "AAAAAAGBgWv1zku9jVc="
+							},
+							"tailRoleNameLabel": {
+								"$ref": "AAAAAAGBgWv1zku+/Jo="
+							},
+							"tailPropertyLabel": {
+								"$ref": "AAAAAAGBgWv1zku/ebQ="
+							},
+							"tailMultiplicityLabel": {
+								"$ref": "AAAAAAGBgWv1zkvA5Fs="
+							},
+							"headRoleNameLabel": {
+								"$ref": "AAAAAAGBgWv1zkvBWlU="
+							},
+							"headPropertyLabel": {
+								"$ref": "AAAAAAGBgWv1zkvC0/E="
+							},
+							"headMultiplicityLabel": {
+								"$ref": "AAAAAAGBgWv1zkvD9wc="
+							},
+							"tailQualifiersCompartment": {
+								"$ref": "AAAAAAGBgWv1zkvE/QI="
+							},
+							"headQualifiersCompartment": {
+								"$ref": "AAAAAAGBgWv1z0vF7K0="
+							}
 						}
 					]
 				},
@@ -27307,6 +27561,37 @@
 										"visibility": "package",
 										"multiplicity": "1"
 									}
+								},
+								{
+									"_type": "UMLAssociation",
+									"_id": "AAAAAAGBgWv1y0u24nc=",
+									"_parent": {
+										"$ref": "AAAAAAF+5GnCntj9MN0="
+									},
+									"end1": {
+										"_type": "UMLAssociationEnd",
+										"_id": "AAAAAAGBgWv1y0u3RxI=",
+										"_parent": {
+											"$ref": "AAAAAAGBgWv1y0u24nc="
+										},
+										"reference": {
+											"$ref": "AAAAAAF+5GnCntj9MN0="
+										},
+										"navigable": false
+									},
+									"end2": {
+										"_type": "UMLAssociationEnd",
+										"_id": "AAAAAAGBgWv1y0u4ZjE=",
+										"_parent": {
+											"$ref": "AAAAAAGBgWv1y0u24nc="
+										},
+										"name": "new_batch",
+										"reference": {
+											"$ref": "AAAAAAF+4zSXHMdri2I="
+										},
+										"visibility": "package",
+										"multiplicity": "0..1"
+									}
 								}
 							],
 							"attributes": [
@@ -27341,17 +27626,6 @@
 										"$ref": "AAAAAAF+5GnCntj9MN0="
 									},
 									"name": "production_unit_id",
-									"visibility": "package",
-									"type": "string",
-									"isID": true
-								},
-								{
-									"_type": "UMLAttribute",
-									"_id": "AAAAAAF+5Gs4mNqU5LI=",
-									"_parent": {
-										"$ref": "AAAAAAF+5GnCntj9MN0="
-									},
-									"name": "new_batch_internal_id",
 									"visibility": "package",
 									"type": "string",
 									"isID": true

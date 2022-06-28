@@ -1,7 +1,5 @@
 ## [fablo](https://github.com/hyperledger-labs/fablo)
 
----
-
 ###### Correr comandos na diretoria
 > `/home/infos/stvgd/chaincodes/stvgd-chaincode`
 
@@ -17,7 +15,6 @@
 - Atualiza e instancia o chaincode nos peers da rede.
 - Versão segue padrão `x.y.z` (última versão do chaincode atual no final do ficheiro `fablo-config.json`).
 
----
 ## [go](https://go.dev/doc/install)
 
 > `bash: 'go' command not found`
@@ -29,7 +26,6 @@ Caso o erro persista, proceder à reinstalação do `go`:
 2. De seguida, correr `sudo tar -C /usr/local -xzf go1.18.2.linux-amd64.tar.gz`.
 3. E por final, tentar de novo `export PATH=$PATH:/usr/local/go/bin`.
 
----
 ## [Fablo REST](https://github.com/softwaremill/fablo-rest)
 
 Importar o ficheiro `chaincodes/stvgd-chaincode/fablo-rest.postman_collection.json` para o Postman.
@@ -62,8 +58,6 @@ Após obter o token, é possível fazer pedidos de métodos *CRUD* + *Queries* �
 
 ⚠️ O token expira de validade após alguns minutos e é necessário fazer o pedido **Enroll** ou **Reenroll** de novo
 
----
-
 ## Estrutura pedidos
 
 ##### ⚠️ Métodos CRUD das Logistical Activities ainda não estão finalizados! ⚠️
@@ -83,6 +77,8 @@ No corpo do pedido temos o JSON com a seguinte estrutura:
 > É possível converter JSON para JSON stringified neste [link](https://onlinetexttools.com/json-stringify-text)
 
 ℹ️ O campo *args* **é obrigatoriamente um array de strings.** Independentemente do tipo de dados dos atributos da função definida, no pedido são sempre enviadas strings. Os comentários nas templates JSON abaixo apenas indicam o tipo de dados dos campos na struct do modelo do chaincode.
+
+---
 
 ### 📦 Batch
 
@@ -436,5 +432,3 @@ No corpo do pedido temos o JSON com a seguinte estrutura:
     ...
 }
 ```
-
----
