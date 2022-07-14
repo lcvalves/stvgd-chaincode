@@ -1,11 +1,8 @@
 {
     "index": {
         "fields": [
-            "docType",
-            "inputBatches",
-            "outputBatch",
-            "activityStartDate",
-            "activityEndDate"
+            "objType",
+            "traceability"
         ]
     },
     "ddoc": "idx_batchDoc",

@@ -11,7 +11,7 @@ import (
 
 func main() {
 	stvgdContract := new(StvgdContract)
-	stvgdContract.Info.Version = "0.4.0"
+	stvgdContract.Info.Version = "12"
 	stvgdContract.Info.Description = "STVgoDigital Contract"
 	stvgdContract.Info.License = new(metadata.LicenseMetadata)
 	stvgdContract.Info.License.Name = "Apache-2.0"
@@ -22,7 +22,7 @@ func main() {
 
 	chaincode, err := contractapi.NewChaincode(stvgdContract)
 	chaincode.Info.Title = "STVgoDigital Chaincode"
-	chaincode.Info.Version = "0.4.0"
+	chaincode.Info.Version = "12"
 
 	if err != nil {
 		panic("Could not create chaincode from StvgdContract." + err.Error())

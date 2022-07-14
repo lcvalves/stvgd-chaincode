@@ -61,18 +61,17 @@ func configureBatchStub() (*MockContext, *MockStub) {
 	var nilBytes []byte
 
 	testBatch := &Batch{
-		ObjectType:           "batch",
-		ID:                   "batch01",
-		BatchTypeID:          "batchType01",
-		ProductionActivityID: "productionActivity01",
-		ProductionUnitID:     "productionUnit01",
-		BatchInternalID:      "batch01",
-		SupplierID:           "supplier01",
-		BatchComposition:     map[string]float32{"raw_material01": 100},
-		Quantity:             150,
-		Unit:                 "Kilograms",
-		ECS:                  5,
-		SES:                  -5,
+		ObjectType:       "batch",
+		ID:               "batch01",
+		BatchTypeID:      "batchType01",
+		ProductionUnitID: "productionUnit01",
+		BatchInternalID:  "batch01",
+		SupplierID:       "supplier01",
+		BatchComposition: map[string]float32{"raw_material01": 100},
+		Quantity:         150,
+		Unit:             "Kilograms",
+		ECS:              5,
+		SES:              -5,
 	}
 
 	lotBytes, _ := json.Marshal(testBatch)

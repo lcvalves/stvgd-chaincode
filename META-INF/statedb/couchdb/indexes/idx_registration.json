@@ -1,13 +1,13 @@
 {
     "index": {
         "fields": [
-            "docType",
+            "objType",
             "newBatch",
             "activityStartDate",
             "activityEndDate"
         ]
     },
-    "ddoc": "idx_logisticalActivityRegistrationDoc",
-    "name": "idx_logisticalActivityRegistration",
+    "ddoc": "idx_registrationDoc",
+    "name": "idx_registration",
     "type": "json"
 }
