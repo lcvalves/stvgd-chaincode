@@ -14,19 +14,20 @@ import (
  * -----------------------------------
  */
 
-// Registration stores information about the batch receptions in the supply chain companies/production units
+// Registration stores information about the batch registrations in the supply chain companies/production units
 type Registration struct {
-	ObjectType        string         `json:"objType"` // objType ("rg") is used to distinguish the various types of objects in state database
-	ID                string         `json:"ID"`      // the field tags are needed to keep case from bouncing around
-	ProductionUnitID  string         `json:"productionUnitID"`
-	NewBatch          Batch          `json:"newBatch"`
-	ActivityStartDate civil.DateTime `json:"activityStartDate"`
-	ActivityEndDate   civil.DateTime `json:"activityEndDate"`
+	DocType          string         `json:"docType"` // docType ("rg") is used to distinguish the various types of objects in state database
+	ID               string         `json:"ID"`      // the field tags are needed to keep case from bouncing around
+	ProductionUnitID string         `json:"productionUnitID"`
+	ActivityDate     civil.DateTime `json:"activityDate"`
+	NewBatch         Batch          `json:"newBatch"`
+	ECS              float32        `json:"ecs"` // from non-recorded activities to 1st current owner on the value chain
+	SES              float32        `json:"ses"` // from non-recorded activities to 1st current owner on the value chain
 }
 
 /*
  * -----------------------------------
- * TRANSACTIONS
+ * TRANSACTIONS / METHODS
  * -----------------------------------
  */
 
@@ -43,52 +44,57 @@ func (c *StvgdContract) RegistrationExists(ctx contractapi.TransactionContextInt
 }
 
 // CreateRegistration creates a new instance of Registration
-func (c *StvgdContract) CreateRegistration(ctx contractapi.TransactionContextInterface, registrationID, productionUnitID, activityStartDate, activityEndDate string, newBatch Batch) (string, error) {
+func (c *StvgdContract) CreateRegistration(ctx contractapi.TransactionContextInterface, registrationID, activityDate string, ECS, SES float32, newBatch Batch) (string, error) {
 
-	// Checks if the registrationy ID already exists
+	// Activity prefix validation
+	activityPrefix, err := validateActivityType(registrationID)
+	if err != nil {
+		return "", fmt.Errorf("%w", err)
+	} else if activityPrefix != "rg" {
+		return "", fmt.Errorf("activity ID prefix must match its type (should be [rg-...])")
+	}
+
+	// Checks if the registration ID already exists
 	exists, err := c.RegistrationExists(ctx, registrationID)
 	if err != nil {
-		return "", fmt.Errorf("could not read from world state. %s", err)
+		return "", fmt.Errorf("could not read from world state: %w", err)
 	} else if exists {
 		return "", fmt.Errorf("registration [%s] already exists", registrationID)
 	}
 
 	// Validate dates
-	civilDates, err := validateDates(activityStartDate, activityEndDate)
+	civilDate, err := civil.ParseDateTime(activityDate)
 	if err != nil {
-		return "", fmt.Errorf("could not validate dates. %s", err)
+		return "", fmt.Errorf("could not validate dates: %w", err)
 	}
 
-	// Checks equality in production unit IDs
-	if productionUnitID != newBatch.ProductionUnitID {
-		return "", fmt.Errorf("production unit's ID [%s] must be the same as output batch's production unit's ID [%s]", productionUnitID, newBatch.ProductionUnitID)
+	// Validate scores
+	validScores, err := validateScores(ECS, SES)
+	if !validScores {
+		return "", fmt.Errorf("invalid scores: %w", err)
 	}
 
 	// Validate new batch
-	validBatch, err := validateBatch(ctx, newBatch.ID, newBatch.ProductionUnitID, newBatch.BatchInternalID, newBatch.SupplierID, string(newBatch.Unit), string(newBatch.BatchTypeID), newBatch.BatchComposition, newBatch.Quantity, newBatch.ECS, newBatch.SES)
-	if !validBatch {
-		return "", fmt.Errorf("failed to validate batch to world state: %v", err)
-	}
-
-	// Setup Traceability
-	activities := make([]string, 0)
-	activities = append(activities, registrationID)
-	newBatch.Traceability = Traceability{
-		Activities:    activities,
-		ParentBatches: make([]string, 0),
+	isValidBatch, err := validateBatch(ctx, newBatch.ID, newBatch.ProductionUnitID, newBatch.BatchInternalID, newBatch.SupplierID, string(newBatch.Unit), string(newBatch.BatchType), newBatch.BatchComposition, newBatch.Quantity, newBatch.ECS, newBatch.SES, newBatch.IsInTransit)
+	if !isValidBatch {
+		return "", fmt.Errorf("failed to validate batch to world state: %w", err)
 	}
 
 	// Instatiate registration
 	registration := &Registration{
-		ObjectType:        "rg",
-		ID:                registrationID,
-		ProductionUnitID:  productionUnitID,
-		NewBatch:          newBatch,
-		ActivityStartDate: civilDates[0],
-		ActivityEndDate:   civilDates[1],
+		DocType:          "rg",
+		ID:               registrationID,
+		ProductionUnitID: newBatch.ProductionUnitID,
+		NewBatch:         newBatch,
+		ActivityDate:     civilDate,
+		ECS:              ECS,
+		SES:              SES,
 	}
 
-	// Marshal batch to bytes
+	// Setup & append traceability to new batch
+	newBatch.Traceability = append(newBatch.Traceability, registration)
+
+	// Marshal new batch to bytes
 	batchBytes, err := json.Marshal(newBatch)
 	if err != nil {
 		return "", err
@@ -96,8 +102,9 @@ func (c *StvgdContract) CreateRegistration(ctx contractapi.TransactionContextInt
 	// Put batchBytes in world state
 	err = ctx.GetStub().PutState(newBatch.ID, batchBytes)
 	if err != nil {
-		return "", fmt.Errorf("failed to put batch to world state: %v", err)
+		return "", fmt.Errorf("failed to put batch to world state: %w", err)
 	}
+
 	// Marshal registration to bytes
 	registrationBytes, err := json.Marshal(registration)
 	if err != nil {
@@ -106,11 +113,10 @@ func (c *StvgdContract) CreateRegistration(ctx contractapi.TransactionContextInt
 	// Put registrationBytes in world state
 	err = ctx.GetStub().PutState(registrationID, registrationBytes)
 	if err != nil {
-		return "", fmt.Errorf("failed to put registration to world state: %v", err)
+		return "", fmt.Errorf("failed to put registration to world state: %w", err)
 	}
 
 	return fmt.Sprintf("registration [%s] & batch [%s] were successfully added to the ledger", registrationID, newBatch.ID), nil
-
 }
 
 // ReadRegistration retrieves an instance of Registration from the world state
@@ -119,7 +125,7 @@ func (c *StvgdContract) ReadRegistration(ctx contractapi.TransactionContextInter
 	// Checks if the registration ID already exists
 	exists, err := c.RegistrationExists(ctx, registrationID)
 	if err != nil {
-		return nil, fmt.Errorf("could not read registration from world state. %s", err)
+		return nil, fmt.Errorf("could not read registration from world state: %w", err)
 	} else if !exists {
 		return nil, fmt.Errorf("registration [%s] does not exist", registrationID)
 	}
@@ -131,7 +137,7 @@ func (c *StvgdContract) ReadRegistration(ctx contractapi.TransactionContextInter
 	// Unmarshal registrationBytes to JSON
 	err = json.Unmarshal(registrationBytes, registration)
 	if err != nil {
-		return nil, fmt.Errorf("could not unmarshal world state data to type Registration")
+		return nil, fmt.Errorf("could not unmarshal world state data to type Registration: %w", err)
 	}
 
 	return registration, nil
@@ -139,29 +145,8 @@ func (c *StvgdContract) ReadRegistration(ctx contractapi.TransactionContextInter
 
 // GetAllRegistrations returns all registrations found in world state
 func (c *StvgdContract) GetAllRegistrations(ctx contractapi.TransactionContextInterface) ([]*Registration, error) {
-	// range query with empty string for endKey does an open-ended query of all registrations in the chaincode namespace.
-	resultsIterator, err := ctx.GetStub().GetStateByRange("rg", "")
-	if err != nil {
-		return nil, err
-	}
-	defer resultsIterator.Close()
-
-	var registrations []*Registration
-	for resultsIterator.HasNext() {
-		queryResponse, err := resultsIterator.Next()
-		if err != nil {
-			return nil, err
-		}
-
-		var registration Registration
-		err = json.Unmarshal(queryResponse.Value, &registration)
-		if err != nil {
-			return nil, err
-		}
-		registrations = append(registrations, &registration)
-	}
-
-	return registrations, nil
+	queryString := `{"selector":{"docType":"rg"}}`
+	return getQueryResultForQueryStringRegistration(ctx, queryString)
 }
 
 // DeleteRegistration deletes an instance of Registration from the world state
@@ -170,7 +155,7 @@ func (c *StvgdContract) DeleteRegistration(ctx contractapi.TransactionContextInt
 	// Checks if the registration ID already exists
 	exists, err := c.RegistrationExists(ctx, registrationID)
 	if err != nil {
-		return "", fmt.Errorf("could not read registration from world state. %s", err)
+		return "", fmt.Errorf("could not read registration from world state: %w", err)
 	} else if !exists {
 		return "", fmt.Errorf("registration [%s] does not exist", registrationID)
 	}
@@ -178,7 +163,7 @@ func (c *StvgdContract) DeleteRegistration(ctx contractapi.TransactionContextInt
 	// Deletes registration in the world state
 	err = ctx.GetStub().DelState(registrationID)
 	if err != nil {
-		return "", fmt.Errorf("could not delete registration from world state. %s", err)
+		return "", fmt.Errorf("could not delete registration from world state: %w", err)
 	} else {
 		return fmt.Sprintf("registration [%s] deleted successfully", registrationID), nil
 	}
@@ -190,7 +175,7 @@ func (c *StvgdContract) DeleteAllRegistrations(ctx contractapi.TransactionContex
 	// Gets all the registrations in world state
 	registrations, err := c.GetAllRegistrations(ctx)
 	if err != nil {
-		return "", fmt.Errorf("could not read registrations from world state. %s", err)
+		return "", fmt.Errorf("could not read registrations from world state: %w", err)
 	} else if len(registrations) == 0 {
 		return "", fmt.Errorf("there are no registrations in world state to delete")
 	}
@@ -200,7 +185,7 @@ func (c *StvgdContract) DeleteAllRegistrations(ctx contractapi.TransactionContex
 		// Delete each registration from world state
 		err = ctx.GetStub().DelState(registration.ID)
 		if err != nil {
-			return "", fmt.Errorf("could not delete registrations from world state. %s", err)
+			return "", fmt.Errorf("could not delete registrations from world state: %w", err)
 		}
 	}
 

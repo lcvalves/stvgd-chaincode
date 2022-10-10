@@ -37,6 +37,7 @@ const (
 	FinishedFabric BatchType = "FINISHED_FABRIC"
 	Cut            BatchType = "CUT"
 	FinishedPiece  BatchType = "FINISHED_PIECE"
+	Other          BatchType = "OTHER"
 )
 
 /*
@@ -45,30 +46,31 @@ const (
  * -----------------------------------
  */
 
-type Traceability struct {
-	Activities    []string `json:"activities"`
-	ParentBatches []string `json:"parentBatches"`
-}
-
 // Batch stores information about the batches in the supply chain
 type Batch struct {
-	ObjectType       string             `json:"objType"` // docType ("b") is used to distinguish the various types of objects in state database
+	DocType          string             `json:"docType"` // docType ("b") is used to distinguish the various types of objects in state database
 	ID               string             `json:"ID"`      // the field tags are needed to keep case from bouncing around
-	BatchTypeID      BatchType          `json:"batchTypeID"`
-	ProductionUnitID string             `json:"productionUnitID"` // Current owner
+	BatchType        BatchType          `json:"batchType"`
+	ProductionUnitID string             `json:"productionUnitID"` // current/latest owner
 	BatchInternalID  string             `json:"batchInternalID"`
 	SupplierID       string             `json:"supplierID"`
-	BatchComposition map[string]float32 `json:"batchCompostion"` // i.e. {raw_material_id: %}
-	Traceability     Traceability       `json:"traceability,omitempty" metadata:",optional"`
+	IsInTransit      bool               `json:"isInTransit" metadata:",optional"`
 	Quantity         float32            `json:"quantity"`
 	Unit             Unit               `json:"unit"`
 	ECS              float32            `json:"ecs"`
 	SES              float32            `json:"ses"`
+	BatchComposition map[string]float32 `json:"batchComposition"` // i.e. {raw_material_id: %}
+	Traceability     []interface{}      `json:"traceability,omitempty" metadata:",optional"`
+}
+
+type InputBatch struct {
+	Batch    *Batch  `json:"batch"`
+	Quantity float32 `json:"quantity"`
 }
 
 /*
  * -----------------------------------
- * TRANSACTIONS
+ * TRANSACTIONS / METHODS
  * -----------------------------------
  */
 
@@ -111,8 +113,8 @@ func (c *StvgdContract) ReadBatch(ctx contractapi.TransactionContextInterface, b
 // and accepting a single query parameter (docType).
 // Only available on state databases that support rich query (e.g. CouchDB)
 // Example: Parameterized rich query
-func (c *StvgdContract) GetAllBatches(ctx contractapi.TransactionContextInterface) ([]*Batch, error) {
-	queryString := `{"selector":{"objType":"b"}}`
+func (c *StvgdContract) GetAvailableBatches(ctx contractapi.TransactionContextInterface) ([]*Batch, error) {
+	queryString := `{"selector":{"docType":"b"}}`
 	return getQueryResultForQueryStringBatch(ctx, queryString)
 }
 
@@ -162,6 +164,12 @@ func (c *StvgdContract) GetBatchHistory(ctx contractapi.TransactionContextInterf
 	return records, nil
 }
 
+// TraceBatchByInternalID lists the batch's traceability
+func (c *StvgdContract) TraceBatchByInternalID(ctx contractapi.TransactionContextInterface, batchInternalID string) ([]*Batch, error) {
+	queryString := `{"selector":{"batchInternalID":"` + batchInternalID + `"}}`
+	return getQueryResultForQueryStringBatch(ctx, queryString)
+}
+
 // DeleteBatch deletes an instance of Batch from the world state
 func (c *StvgdContract) DeleteBatch(ctx contractapi.TransactionContextInterface, batchID string) (string, error) {
 	exists, err := c.BatchExists(ctx, batchID)
@@ -177,4 +185,27 @@ func (c *StvgdContract) DeleteBatch(ctx contractapi.TransactionContextInterface,
 	} else {
 		return fmt.Sprintf("[%s] deleted successfully", batchID), nil
 	}
+}
+
+// DeleteAllBatches deletes all registrations found in world state
+func (c *StvgdContract) DeleteAllBatches(ctx contractapi.TransactionContextInterface) (string, error) {
+
+	// Gets all the registrations in world state
+	registrations, err := c.GetAvailableBatches(ctx)
+	if err != nil {
+		return "", fmt.Errorf("could not read registrations from world state. %s", err)
+	} else if len(registrations) == 0 {
+		return "", fmt.Errorf("there are no registrations in world state to delete")
+	}
+
+	// Iterate through registrations slice
+	for _, registration := range registrations {
+		// Delete each registration from world state
+		err = ctx.GetStub().DelState(registration.ID)
+		if err != nil {
+			return "", fmt.Errorf("could not delete registrations from world state. %s", err)
+		}
+	}
+
+	return "all batches deleted successfully", nil
 }

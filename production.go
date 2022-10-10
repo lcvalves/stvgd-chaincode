@@ -32,22 +32,22 @@ const (
 
 // Production stores information about the production activities in the supply chain
 type Production struct {
-	ObjectType        string             `json:"docType"` // docType ("p") is used to distinguish the various types of objects in state database
-	ID                string             `json:"ID"`      // the field tags are needed to keep case from bouncing around
-	ProductionUnitID  string             `json:"productionUnitID"`
-	CompanyID         string             `json:"companyID"`
-	ProductionTypeID  ProductionType     `json:"productionTypeID"`
-	InputBatches      map[string]float32 `json:"inputBatches"`
-	OutputBatch       Batch              `json:"outputBatch"`
-	ActivityStartDate civil.DateTime     `json:"activityStartDate"`
-	ActivityEndDate   civil.DateTime     `json:"activityEndDate"`
-	ECS               float32            `json:"ecs"`
-	SES               float32            `json:"ses"`
+	DocType           string                `json:"docType"` // docType ("p") is used to distinguish the various types of objects in state database
+	ID                string                `json:"ID"`      // the field tags are needed to keep case from bouncing around
+	ProductionUnitID  string                `json:"productionUnitID"`
+	CompanyID         string                `json:"companyID"`
+	ProductionType    ProductionType        `json:"productionType"`
+	ActivityStartDate civil.DateTime        `json:"activityStartDate"`
+	ActivityEndDate   civil.DateTime        `json:"activityEndDate"`
+	ECS               float32               `json:"ecs"`
+	SES               float32               `json:"ses"`
+	OutputBatch       Batch                 `json:"outputBatch"`
+	InputBatches      map[string]InputBatch `json:"inputBatches"`
 }
 
 /*
  * -----------------------------------
- * TRANSACTIONS
+ * TRANSACTIONS / METHODS
  * -----------------------------------
  */
 
@@ -64,32 +64,45 @@ func (c *StvgdContract) ProductionExists(ctx contractapi.TransactionContextInter
 }
 
 // CreateProduction creates a new instance of Production
-func (c *StvgdContract) CreateProduction(ctx contractapi.TransactionContextInterface, productionID, productionUnitID, companyID, productionTypeID, activityStartDate, activityEndDate string,
-	inputBatches map[string]float32, outputBatch Batch, ECS, SES float32) (string, error) {
+func (c *StvgdContract) CreateProduction(ctx contractapi.TransactionContextInterface, productionID, companyID, productionTypeID, activityStartDate, activityEndDate string, inputBatches map[string]float32, outputBatch Batch, ECS, SES float32) (string, error) {
+
+	// Activity prefix validation
+	activityPrefix, err := validateActivityType(productionID)
+	if err != nil {
+		return "", fmt.Errorf("%w", err)
+	} else if activityPrefix != "p" {
+		return "", fmt.Errorf("activity ID prefix must match its type (should be [p-...])")
+	}
 
 	// Checks if the production activity ID already exists
 	exists, err := c.ProductionExists(ctx, productionID)
 	if err != nil {
-		return "", fmt.Errorf("could not read production activity from world state. %s", err)
+		return "", fmt.Errorf("could not read production activity from world state: %w", err)
 	} else if exists {
 		return "", fmt.Errorf("production activity [%s] already exists", productionID)
 	}
 
-	// Checks equality in production IDs & production units
-	if productionUnitID != outputBatch.ProductionUnitID {
-		return "", fmt.Errorf("production unit's ID [%s] must be the same as output batch's production unit's ID [%s]", productionUnitID, outputBatch.ProductionUnitID)
+	// Validate company ID
+	if companyID == "" {
+		return "", fmt.Errorf("company ID must not be empty")
 	}
 
 	// Validate production type
 	validProductionType, err := validateProductionType(productionTypeID)
 	if err != nil {
-		return "", fmt.Errorf("could not validate activity type. %s", err)
+		return "", fmt.Errorf("could not validate activity type: %w", err)
 	}
 
 	// Validate dates
 	civilDates, err := validateDates(activityStartDate, activityEndDate)
 	if err != nil {
-		return "", fmt.Errorf("could not validate dates. %s", err)
+		return "", fmt.Errorf("could not validate dates: %w", err)
+	}
+
+	// Validate scores
+	validScores, err := validateScores(ECS, SES)
+	if !validScores {
+		return "", fmt.Errorf("invalid scores: %w", err)
 	}
 
 	// Input batches min length (1)
@@ -97,22 +110,17 @@ func (c *StvgdContract) CreateProduction(ctx contractapi.TransactionContextInter
 		return "", fmt.Errorf("production must have atleast 1 input batch")
 	}
 
-	// Validate scores
-	validScores, err := validateScores(ECS, SES)
-	if !validScores {
-		return "", fmt.Errorf("invalid scores. %s", err)
-	}
-
 	// Aux variables
-	activities := make([]string, 0)
-	parentBatches := make([]string, 0)
+	activities := make([]interface{}, 0)
+	auxTrace := make([]interface{}, 0, 1)
+	auxInputBatches := map[string]InputBatch{}
 
 	for batchID, quantity := range inputBatches { // In every single input batch
 
 		// Checks if the batch ID exists in world state
 		exists, err := c.BatchExists(ctx, batchID)
 		if err != nil {
-			return "", fmt.Errorf("could not read batch from world state. %s", err)
+			return "", fmt.Errorf("could not read batch from world state: %w", err)
 		} else if !exists {
 			return "", fmt.Errorf("batch [%s] does not exist", batchID)
 		}
@@ -120,7 +128,12 @@ func (c *StvgdContract) CreateProduction(ctx contractapi.TransactionContextInter
 		// Reads the batch
 		batch, err := c.ReadBatch(ctx, batchID)
 		if err != nil {
-			return "", fmt.Errorf("could not read batch from world state. %s", err)
+			return "", fmt.Errorf("could not read batch from world state: %w", err)
+		}
+
+		// Cannot use a batch that is in transit
+		if batch.IsInTransit {
+			return "", fmt.Errorf("batch [%s] currently in transit", batchID)
 		}
 
 		// Validate inserted quantities (0 <= quantity(inputBatch) <= batch.Quantity)
@@ -132,23 +145,27 @@ func (c *StvgdContract) CreateProduction(ctx contractapi.TransactionContextInter
 		}
 
 		// Append input batches traceability for output batch
-		activities = append(activities, batch.Traceability.Activities...)
-		parentBatches = append(parentBatches, batchID)
+		activities = append(activities, batch.Traceability...)
+		auxInputBatch := InputBatch{
+			Batch:    batch,
+			Quantity: quantity,
+		}
+		auxInputBatches[batchID] = auxInputBatch
 
 		// Initialize updated/"new" Batch object
 		updatedInputBatch := &Batch{
-			ObjectType:       batch.ObjectType,
+			DocType:          batch.DocType,
 			ID:               batch.ID,
-			BatchTypeID:      batch.BatchTypeID,
+			BatchType:        batch.BatchType,
 			ProductionUnitID: batch.ProductionUnitID,
 			BatchInternalID:  batch.BatchInternalID,
 			SupplierID:       batch.SupplierID,
-			BatchComposition: batch.BatchComposition,
-			Traceability:     batch.Traceability,
 			Quantity:         batch.Quantity - quantity,
 			Unit:             batch.Unit,
 			ECS:              batch.ECS,
 			SES:              batch.SES,
+			BatchComposition: batch.BatchComposition,
+			Traceability:     batch.Traceability,
 		}
 
 		// Marshal input batch to bytes
@@ -159,38 +176,43 @@ func (c *StvgdContract) CreateProduction(ctx contractapi.TransactionContextInter
 		// Put inputBatchBytes in world state
 		err = ctx.GetStub().PutState(updatedInputBatch.ID, inputBatchBytes)
 		if err != nil {
-			return "", fmt.Errorf("failed to put batch to world state: %v", err)
+			return "", fmt.Errorf("failed to put batch to world state: %w", err)
+		}
+
+		// If the entire batch is used, delete it
+		if updatedInputBatch.Quantity == 0 {
+			err = ctx.GetStub().DelState(updatedInputBatch.ID)
+			if err != nil {
+				return "", fmt.Errorf("could not delete batch from world state. %s", err)
+			}
 		}
 	}
 
 	// Validate output batch
-	validBatch, err := validateBatch(ctx, outputBatch.ID, outputBatch.ProductionUnitID, outputBatch.BatchInternalID, outputBatch.SupplierID,
-		string(outputBatch.Unit), string(outputBatch.BatchTypeID), outputBatch.BatchComposition, outputBatch.Quantity, outputBatch.ECS, outputBatch.SES)
-	if !validBatch {
-		return "", fmt.Errorf("failed to validate batch to world state: %v", err)
+	isValidBatch, err := validateBatch(ctx, outputBatch.ID, outputBatch.ProductionUnitID, outputBatch.BatchInternalID, outputBatch.SupplierID, string(outputBatch.Unit), string(outputBatch.BatchType), outputBatch.BatchComposition, outputBatch.Quantity, outputBatch.ECS, outputBatch.SES, outputBatch.IsInTransit)
+	if !isValidBatch {
+		return "", fmt.Errorf("failed to validate batch to world state: %w", err)
 	}
 
-	// Setup output batch Traceability
-	activities = append(activities, productionID)
-	outputBatch.Traceability = Traceability{
-		Activities:    activities,
-		ParentBatches: parentBatches,
-	}
-
-	// Instatiate production
+	// Instantiate production
 	production := &Production{
-		ObjectType:        "p",
+		DocType:           "p",
 		ID:                productionID,
-		ProductionUnitID:  productionUnitID,
+		ProductionUnitID:  outputBatch.ProductionUnitID,
 		CompanyID:         companyID,
-		ProductionTypeID:  validProductionType,
-		InputBatches:      inputBatches,
-		OutputBatch:       outputBatch,
+		ProductionType:    validProductionType,
 		ActivityStartDate: civilDates[0],
 		ActivityEndDate:   civilDates[1],
 		ECS:               ECS,
 		SES:               SES,
+		InputBatches:      auxInputBatches,
+		OutputBatch:       outputBatch,
 	}
+
+	// Setup & append traceability to output batch
+	activities = append(activities, production)
+	auxTrace = append(auxTrace, activities[len(activities)-1])
+	outputBatch.Traceability = auxTrace
 
 	// Marshal batch to bytes
 	batchBytes, err := json.Marshal(outputBatch)
@@ -200,7 +222,7 @@ func (c *StvgdContract) CreateProduction(ctx contractapi.TransactionContextInter
 	// Put batchBytes in world state
 	err = ctx.GetStub().PutState(outputBatch.ID, batchBytes)
 	if err != nil {
-		return "", fmt.Errorf("failed to put batch to world state: %v", err)
+		return "", fmt.Errorf("failed to put batch to world state: %w", err)
 	}
 
 	// Marshal production to bytes
@@ -211,7 +233,7 @@ func (c *StvgdContract) CreateProduction(ctx contractapi.TransactionContextInter
 	// Put productionBytes in world state
 	err = ctx.GetStub().PutState(productionID, productionBytes)
 	if err != nil {
-		return "", fmt.Errorf("failed to put production to world state: %v", err)
+		return "", fmt.Errorf("failed to put production to world state: %w", err)
 	}
 
 	return fmt.Sprintf("production activity [%s] & batch [%s] were successfully added to the ledger", productionID, outputBatch.ID), nil
@@ -241,31 +263,10 @@ func (c *StvgdContract) ReadProduction(ctx contractapi.TransactionContextInterfa
 	return production, nil
 }
 
-//! GetAllProductions returns all productions found in world state
+// ! GetAllProductions returns all productions found in world state
 func (c *StvgdContract) GetAllProductions(ctx contractapi.TransactionContextInterface) ([]*Production, error) {
-	// range query with empty string for endKey does an open-ended query of all productions in the chaincode namespace.
-	resultsIterator, err := ctx.GetStub().GetStateByRange("p", "")
-	if err != nil {
-		return nil, err
-	}
-	defer resultsIterator.Close()
-
-	var productions []*Production
-	for resultsIterator.HasNext() {
-		queryResponse, err := resultsIterator.Next()
-		if err != nil {
-			return nil, err
-		}
-
-		var production Production
-		err = json.Unmarshal(queryResponse.Value, &production)
-		if err != nil {
-			return nil, err
-		}
-		productions = append(productions, &production)
-	}
-
-	return productions, nil
+	queryString := `{"selector":{"docType":"p"}}`
+	return getQueryResultForQueryStringProduction(ctx, queryString)
 }
 
 // DeleteProduction deletes an instance of Production from the world state
@@ -288,7 +289,7 @@ func (c *StvgdContract) DeleteProduction(ctx contractapi.TransactionContextInter
 	}
 }
 
-//! DeleteAllProductions deletes all production found in world state
+// ! DeleteAllProductions deletes all production found in world state
 func (c *StvgdContract) DeleteAllProductions(ctx contractapi.TransactionContextInterface) (string, error) {
 
 	// Gets all the productions in world state

@@ -61,9 +61,9 @@ func configureBatchStub() (*MockContext, *MockStub) {
 	var nilBytes []byte
 
 	testBatch := &Batch{
-		ObjectType:       "batch",
+		DocType:          "batch",
 		ID:               "batch01",
-		BatchTypeID:      "batchType01",
+		BatchType:        "batchType01",
 		ProductionUnitID: "productionUnit01",
 		BatchInternalID:  "batch01",
 		SupplierID:       "supplier01",
