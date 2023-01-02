@@ -7,11 +7,13 @@ package main
 import (
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/hyperledger/fabric-contract-api-go/metadata"
+
+	app "github.com/lcvalves/stvgd-chaincode/pkg/app"
 )
 
 func main() {
-	stvgdContract := new(StvgdContract)
-	stvgdContract.Info.Version = "13"
+	stvgdContract := new(app.StvgdContract)
+	stvgdContract.Info.Version = "14"
 	stvgdContract.Info.Description = "STVgoDigital Contract"
 	stvgdContract.Info.License = new(metadata.LicenseMetadata)
 	stvgdContract.Info.License.Name = "Apache-2.0"
@@ -22,7 +24,7 @@ func main() {
 
 	chaincode, err := contractapi.NewChaincode(stvgdContract)
 	chaincode.Info.Title = "STVgoDigital Chaincode"
-	chaincode.Info.Version = "13"
+	chaincode.Info.Version = "14"
 
 	if err != nil {
 		panic("Could not create chaincode from StvgdContract." + err.Error())

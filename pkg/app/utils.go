@@ -1,67 +1,133 @@
-package main
+package app
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"time"
 
-	"cloud.google.com/go/civil"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+	"github.com/lcvalves/stvgd-chaincode/pkg/domain"
 )
 
-// StvgdContract contract for managing CRUD for Stvgd
+// StvgdContract contract for managing CRUD for STVgoDigital value chain operations
 type StvgdContract struct {
 	contractapi.Contract
 }
 
 // HistoryQueryResult structure used for returning result of history query
 type HistoryQueryResult struct {
-	Record    *Batch    `json:"record"`
-	TxId      string    `json:"txId"`
-	Timestamp time.Time `json:"timestamp"`
-	IsDelete  bool      `json:"isDelete"`
+	Record    *domain.Batch `json:"record"`
+	TxId      string        `json:"txId"`
+	Timestamp time.Time     `json:"timestamp"`
+	IsDelete  bool          `json:"isDelete"`
 }
 
 /*
  * -----------------------------------
- - AUX Functions
+ * AUX Functions
  * -----------------------------------
-*/
+ */
 
-// Date validation
-func validateDates(startDate, endDate string) ([]civil.DateTime, error) {
-	// Date parsing
-	civilActivityStartDate, err := civil.ParseDateTime(startDate)
-	if err != nil {
-		return nil, fmt.Errorf("could not parse the activity start date to correct format. %s", err)
-	}
-	civilActivityEndDate, err := civil.ParseDateTime(endDate)
-	if err != nil {
-		return nil, fmt.Errorf("could not parse the activity end date to correct format. %s", err)
-	}
-
-	// Checks if the sent date is before received date
-	if civilActivityStartDate.After(civilActivityEndDate) {
-		return nil, fmt.Errorf("activity start date can't be after the activity end date")
-	}
-
-	return []civil.DateTime{civilActivityStartDate, civilActivityEndDate}, nil
-}
-
-// Scores validation
-func validateScores(ecs, ses float32) (bool, error) {
-	// Range validate ECS
-	if ecs < -10.0 || ecs > 10.0 {
-		return false, fmt.Errorf("environmental & circular score out of bounds (should be between -10 & 10)")
-	}
-	// Range validate SES
-	if ses < -10.0 || ses > 10.0 {
-		return false, fmt.Errorf("social & economic score out of bounds (should be between -10 & 10)")
+// Score validation
+func validateScore(score float32) (bool, error) {
+	// Range validate score
+	if score < -10.0 || score > 10.0 {
+		return false, fmt.Errorf("score out of bounds (should be between -10 & 10)")
 	}
 	return true, nil
 }
 
+// TxTimestamp RFC3339 Time formatting
+func getTxTimestampRFC3339Time(stub shim.ChaincodeStubInterface) (time.Time, error) {
+	timestamp, err := stub.GetTxTimestamp()
+	if err != nil {
+		return time.Now(), err
+	}
+	tm := time.Unix(timestamp.Seconds, int64(timestamp.Nanos))
+	//return tm.Format(time.RFC3339), nil
+	return tm, nil
+}
+
+// GetSubmittingClientIdentity returns the name and issuer of the identity that
+// invokes the smart contract. This function base64 decodes the identity string
+// before returning the value to the client or smart contract.
+func getSubmittingClientIdentity(ctx contractapi.TransactionContextInterface) (string, error) {
+
+	b64ID, err := ctx.GetClientIdentity().GetID()
+	if err != nil {
+		return "", fmt.Errorf("failed to read clientID: %v", err)
+	}
+	decodeID, err := base64.StdEncoding.DecodeString(b64ID)
+	if err != nil {
+		return "", fmt.Errorf("failed to base64 decode clientID: %v", err)
+	}
+	return string(decodeID), nil
+}
+
+func iterate(data interface{}) interface{} {
+	d := reflect.ValueOf(data)
+	if reflect.ValueOf(data).Kind() == reflect.Slice {
+		returnSlice := make([]interface{}, d.Len())
+		for i := 0; i < d.Len(); i++ {
+			returnSlice[i] = iterate(d.Index(i).Interface())
+		}
+		return returnSlice
+	} else if reflect.ValueOf(data).Kind() == reflect.Map {
+		tmpData := make(map[string]interface{})
+		for _, k := range d.MapKeys() {
+			tmpData[k.String()] = iterate(d.MapIndex(k).Interface())
+		}
+		return tmpData
+	} else {
+		return data
+	}
+}
+
+/*
+func iterate(data interface{}, field string) interface{} {
+
+	// reads value of input data
+	d := reflect.ValueOf(data)
+
+	// based on kind
+	switch reflect.ValueOf(data).Kind() {
+	case reflect.Slice: // if slice
+
+		returnSlice := make([]interface{}, d.Len())
+
+		// iterate through slice
+		for i := 0; i < d.Len(); i++ {
+
+			// calls iterate on slice's first element tracebility[0]
+			returnSlice[i] = iterate(d.Index(i).Interface(), field)
+		}
+
+		return returnSlice
+
+	case reflect.Map: // if map
+
+		tmpData := make(map[string]interface{})
+
+		// if field is not key in map
+		if d.FieldByName(field).IsZero() {
+
+			// iterate through map keys
+			for _, v := range d.MapKeys() {
+
+				// calls iterate on maps's first key: docType = "t"
+				tmpData[v.String()] = iterate(d.MapIndex(v).Interface(), field)
+			}
+			return tmpData
+		} else {
+			return d.FieldByName(field)
+		}
+	}
+	return data
+}
+*/
 /*
  * -----------------------------------
  - ACTIVITIES Validation
@@ -97,19 +163,19 @@ func validateActivityType(activityID string) (string, error) {
 }
 
 // Production type validation
-func validateProductionType(productionTypeID string) (ProductionType, error) {
-	var productionType ProductionType
+func validateProductionType(productionTypeID string) (domain.ProductionType, error) {
+	var productionType domain.ProductionType
 	switch productionTypeID {
 	case "SPINNING":
-		productionType = Spinning
+		productionType = domain.Spinning
 	case "WEAVING":
-		productionType = Weaving
+		productionType = domain.Weaving
 	case "KNITTING":
-		productionType = Knitting
+		productionType = domain.Knitting
 	case "DYEING_FINISHING":
-		productionType = DyeingFinishing
+		productionType = domain.DyeingFinishing
 	case "CONFECTION":
-		productionType = Confection
+		productionType = domain.Confection
 	default:
 		return "", fmt.Errorf("production type not found")
 	}
@@ -117,25 +183,25 @@ func validateProductionType(productionTypeID string) (ProductionType, error) {
 	return productionType, nil
 }
 
-// Transportation type validation
-func validateTransportationType(transportationTypeID string) (TransportationType, error) {
-	var transportationType TransportationType
-	switch transportationTypeID {
+// Transport type validation
+func validateTransportType(transportTypeID string) (domain.TransportType, error) {
+	var transportType domain.TransportType
+	switch transportTypeID {
 	case "ROAD":
-		transportationType = Road
+		transportType = domain.Road
 	case "MARITIME":
-		transportationType = Maritime
+		transportType = domain.Maritime
 	case "AIR":
-		transportationType = Air
+		transportType = domain.Air
 	case "RAIL":
-		transportationType = Rail
+		transportType = domain.Rail
 	case "INTERMODAL":
-		transportationType = Intermodal
+		transportType = domain.Intermodal
 	default:
-		return "", fmt.Errorf("transportation type not found")
+		return "", fmt.Errorf("transport type not found")
 	}
 
-	return transportationType, nil
+	return transportType, nil
 }
 
 /*
@@ -144,16 +210,68 @@ func validateTransportationType(transportationTypeID string) (TransportationType
  * -----------------------------------
 */
 
-// validateBatch validates batch for correct inputs/fields on Registration & Production activities
-func validateBatch(ctx contractapi.TransactionContextInterface, batchID, productionUnitID, batchInternalID, supplierID, unit, batchType string, batchComposition map[string]float32, quantity, ecs, ses float32, isInTransit bool) (bool, error) {
-
-	// Batch prefix validation
-	switch batchID[0:2] {
-	case "b-":
+// Batch type validation
+func validateBatchType(batchTypeID string) (domain.BatchType, error) {
+	var batchType domain.BatchType
+	switch batchTypeID {
+	case "FIBER":
+		batchType = domain.Fiber
+	case "YARN":
+		batchType = domain.Yarn
+	case "MESH":
+		batchType = domain.Mesh
+	case "FABRIC":
+		batchType = domain.Fabric
+	case "DYED_MESH":
+		batchType = domain.DyedMesh
+	case "FINISHED_MESH":
+		batchType = domain.FinishedMesh
+	case "DYED_FABRIC":
+		batchType = domain.DyedFabric
+	case "FINISHED_FABRIC":
+		batchType = domain.FinishedFabric
+	case "CUT":
+		batchType = domain.Cut
+	case "FINISHED_PIECE":
+		batchType = domain.FinishedPiece
+	case "OTHER":
+		batchType = domain.Other
 	default:
-		return false, fmt.Errorf("incorrect batch prefix. (should be [b-...])")
+		return "", fmt.Errorf("batch type not found")
 	}
 
+	return batchType, nil
+}
+
+// Unit validation
+func validateUnit(unitID string) (domain.Unit, error) {
+	var unit domain.Unit
+	switch unitID {
+	case "KG":
+		unit = domain.Kilograms
+	case "L":
+		unit = domain.Liters
+	case "M":
+		unit = domain.Meters
+	case "M2":
+		unit = domain.SquaredMeters
+	default:
+		return "", fmt.Errorf("unit not found")
+	}
+
+	return unit, nil
+}
+
+// validateBatch validates batch for correct inputs/fields on Registration & Production activities
+func validateBatch(ctx contractapi.TransactionContextInterface, batchID, productionUnitID, batchInternalID, supplierID, unit, batchType string, batchComposition map[string]float32, quantity, finalScore float32, isInTransit bool) (bool, error) {
+
+	/* 	// Batch prefix validation
+	   	switch batchID[0:2] {
+	   	case "b-":
+	   	default:
+	   		return false, fmt.Errorf("incorrect batch prefix. (should be [b-...])")
+	   	}
+	*/
 	// Verifies if Batch has a batchID that already exists
 	data, err := ctx.GetStub().GetState(batchID)
 	if err != nil {
@@ -221,8 +339,8 @@ func validateBatch(ctx contractapi.TransactionContextInterface, batchID, product
 		return false, fmt.Errorf("unit is not valid")
 	}
 
-	// Validate scores (-10 <= ECS & SES <= 10)
-	validScores, err := validateScores(ecs, ses)
+	// Validate scores (-10 <= SCORE <= 10)
+	validScores, err := validateScore(finalScore)
 	if !validScores {
 		return false, fmt.Errorf("invalid scores: %w", err)
 	}
@@ -238,7 +356,7 @@ func validateBatch(ctx contractapi.TransactionContextInterface, batchID, product
 
 // getQueryResultForQueryString_batch executes the passed in query string.
 // The result set is built and returned as a byte array containing the JSON results.
-func getQueryResultForQueryStringBatch(ctx contractapi.TransactionContextInterface, queryString string) ([]*Batch, error) {
+func getQueryResultForQueryStringBatch(ctx contractapi.TransactionContextInterface, queryString string) ([]*domain.Batch, error) {
 	resultsIterator, err := ctx.GetStub().GetQueryResult(queryString)
 	if err != nil {
 		return nil, err
@@ -249,14 +367,14 @@ func getQueryResultForQueryStringBatch(ctx contractapi.TransactionContextInterfa
 }
 
 // constructQueryResponseFromIterator constructs a slice of batches from the resultsIterator
-func constructQueryResponseFromIteratorBatch(resultsIterator shim.StateQueryIteratorInterface) ([]*Batch, error) {
-	var batches []*Batch
+func constructQueryResponseFromIteratorBatch(resultsIterator shim.StateQueryIteratorInterface) ([]*domain.Batch, error) {
+	var batches []*domain.Batch
 	for resultsIterator.HasNext() {
 		queryResult, err := resultsIterator.Next()
 		if err != nil {
 			return nil, err
 		}
-		var batch Batch
+		var batch domain.Batch
 		err = json.Unmarshal(queryResult.Value, &batch)
 		if err != nil {
 			return nil, err
@@ -275,7 +393,7 @@ func constructQueryResponseFromIteratorBatch(resultsIterator shim.StateQueryIter
 
 // getQueryResultForQueryStringRegistration executes the passed in query string.
 // The result set is built and returned as a byte array containing the JSON results.
-func getQueryResultForQueryStringRegistration(ctx contractapi.TransactionContextInterface, queryString string) ([]*Registration, error) {
+func getQueryResultForQueryStringRegistration(ctx contractapi.TransactionContextInterface, queryString string) ([]*domain.Registration, error) {
 	resultsIterator, err := ctx.GetStub().GetQueryResult(queryString)
 	if err != nil {
 		return nil, err
@@ -286,14 +404,14 @@ func getQueryResultForQueryStringRegistration(ctx contractapi.TransactionContext
 }
 
 // constructQueryResponseFromIteratorRegistration constructs a slice of registrations from the resultsIterator
-func constructQueryResponseFromIteratorRegistration(resultsIterator shim.StateQueryIteratorInterface) ([]*Registration, error) {
-	var registrations []*Registration
+func constructQueryResponseFromIteratorRegistration(resultsIterator shim.StateQueryIteratorInterface) ([]*domain.Registration, error) {
+	var registrations []*domain.Registration
 	for resultsIterator.HasNext() {
 		queryResult, err := resultsIterator.Next()
 		if err != nil {
 			return nil, err
 		}
-		var registration Registration
+		var registration domain.Registration
 		err = json.Unmarshal(queryResult.Value, &registration)
 		if err != nil {
 			return nil, err
@@ -312,7 +430,7 @@ func constructQueryResponseFromIteratorRegistration(resultsIterator shim.StateQu
 
 // getQueryResultForQueryStringProduction executes the passed in query string.
 // The result set is built and returned as a byte array containing the JSON results.
-func getQueryResultForQueryStringProduction(ctx contractapi.TransactionContextInterface, queryString string) ([]*Production, error) {
+func getQueryResultForQueryStringProduction(ctx contractapi.TransactionContextInterface, queryString string) ([]*domain.Production, error) {
 	resultsIterator, err := ctx.GetStub().GetQueryResult(queryString)
 	if err != nil {
 		return nil, err
@@ -323,14 +441,14 @@ func getQueryResultForQueryStringProduction(ctx contractapi.TransactionContextIn
 }
 
 // constructQueryResponseFromIteratorProduction constructs a slice of production activities from the resultsIterator
-func constructQueryResponseFromIteratorProduction(resultsIterator shim.StateQueryIteratorInterface) ([]*Production, error) {
-	var productions []*Production
+func constructQueryResponseFromIteratorProduction(resultsIterator shim.StateQueryIteratorInterface) ([]*domain.Production, error) {
+	var productions []*domain.Production
 	for resultsIterator.HasNext() {
 		queryResult, err := resultsIterator.Next()
 		if err != nil {
 			return nil, err
 		}
-		var production Production
+		var production domain.Production
 		err = json.Unmarshal(queryResult.Value, &production)
 		if err != nil {
 			return nil, err
@@ -349,7 +467,7 @@ func constructQueryResponseFromIteratorProduction(resultsIterator shim.StateQuer
 
 // getQueryResultForQueryStringTransport executes the passed in query string.
 // The result set is built and returned as a byte array containing the JSON results.
-func getQueryResultForQueryStringTransport(ctx contractapi.TransactionContextInterface, queryString string) ([]*Transport, error) {
+func getQueryResultForQueryStringTransport(ctx contractapi.TransactionContextInterface, queryString string) ([]*domain.Transport, error) {
 	resultsIterator, err := ctx.GetStub().GetQueryResult(queryString)
 	if err != nil {
 		return nil, err
@@ -360,14 +478,14 @@ func getQueryResultForQueryStringTransport(ctx contractapi.TransactionContextInt
 }
 
 // constructQueryResponseFromIteratorTransport constructs a slice of batches from the resultsIterator
-func constructQueryResponseFromIteratorTransport(resultsIterator shim.StateQueryIteratorInterface) ([]*Transport, error) {
-	var transports []*Transport
+func constructQueryResponseFromIteratorTransport(resultsIterator shim.StateQueryIteratorInterface) ([]*domain.Transport, error) {
+	var transports []*domain.Transport
 	for resultsIterator.HasNext() {
 		queryResult, err := resultsIterator.Next()
 		if err != nil {
 			return nil, err
 		}
-		var transport Transport
+		var transport domain.Transport
 		err = json.Unmarshal(queryResult.Value, &transport)
 		if err != nil {
 			return nil, err
@@ -386,7 +504,7 @@ func constructQueryResponseFromIteratorTransport(resultsIterator shim.StateQuery
 
 // getQueryResultForQueryStringReception executes the passed in query string.
 // The result set is built and returned as a byte array containing the JSON results.
-func getQueryResultForQueryStringReception(ctx contractapi.TransactionContextInterface, queryString string) ([]*Reception, error) {
+func getQueryResultForQueryStringReception(ctx contractapi.TransactionContextInterface, queryString string) ([]*domain.Reception, error) {
 	resultsIterator, err := ctx.GetStub().GetQueryResult(queryString)
 	if err != nil {
 		return nil, err
@@ -397,14 +515,14 @@ func getQueryResultForQueryStringReception(ctx contractapi.TransactionContextInt
 }
 
 // constructQueryResponseFromIteratorReception constructs a slice of receptions from the resultsIterator
-func constructQueryResponseFromIteratorReception(resultsIterator shim.StateQueryIteratorInterface) ([]*Reception, error) {
-	var receptions []*Reception
+func constructQueryResponseFromIteratorReception(resultsIterator shim.StateQueryIteratorInterface) ([]*domain.Reception, error) {
+	var receptions []*domain.Reception
 	for resultsIterator.HasNext() {
 		queryResult, err := resultsIterator.Next()
 		if err != nil {
 			return nil, err
 		}
-		var reception Reception
+		var reception domain.Reception
 		err = json.Unmarshal(queryResult.Value, &reception)
 		if err != nil {
 			return nil, err

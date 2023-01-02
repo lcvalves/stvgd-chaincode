@@ -1,31 +1,12 @@
-package main
+package app
 
 import (
 	"encoding/json"
 	"fmt"
 
-	"cloud.google.com/go/civil"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+	"github.com/lcvalves/stvgd-chaincode/pkg/domain"
 )
-
-/*
- * -----------------------------------
- * STRUCTS
- * -----------------------------------
- */
-
-// Reception stores information about the batch receptions in the supply chain companies/production units
-type Reception struct {
-	DocType          string         `json:"docType"` // docType ("rc") is used to distinguish the various types of objects in state database
-	ID               string         `json:"ID"`      // the field tags are needed to keep case from bouncing around
-	ProductionUnitID string         `json:"productionUnitID"`
-	IsAccepted       bool           `json:"isAccepted"`
-	ActivityDate     civil.DateTime `json:"activityDate"`
-	ReceivedBatch    Batch          `json:"receivedBatch"`
-	ECS              float32        `json:"ecs"`
-	SES              float32        `json:"ses"`
-	NewBatch         Batch          `json:"newBatch,omitempty" metadata:",optional"` // Mandatory when batch is accepted (isAccepted = true)
-}
 
 /*
  * -----------------------------------
@@ -46,7 +27,7 @@ func (c *StvgdContract) ReceptionExists(ctx contractapi.TransactionContextInterf
 }
 
 // CreateReception creates a new instance of Reception
-func (c *StvgdContract) CreateReception(ctx contractapi.TransactionContextInterface, receptionID, productionUnitID, activityDate, receivedBatchID, newBatchID, newBatchInternalID string, isAccepted bool, ECS, SES float32) (string, error) {
+func (c *StvgdContract) CreateReception(ctx contractapi.TransactionContextInterface, receptionID, productionUnitInternalID, activityDate, receivedBatchID, newBatchID, newBatchInternalID string, isAccepted bool, transportScore, SES, distance, cost float32) (string, error) {
 
 	// Activity prefix validation
 	activityPrefix, err := validateActivityType(receptionID)
@@ -64,6 +45,24 @@ func (c *StvgdContract) CreateReception(ctx contractapi.TransactionContextInterf
 		return "", fmt.Errorf("reception activity [%s] already exists", receptionID)
 	}
 
+	// Timestamp when the transaction was created, have the same value across all endorsers
+	txTimestamp, err := getTxTimestampRFC3339Time(ctx.GetStub())
+	if err != nil {
+		return "", fmt.Errorf("could not get transaction timestamp: %w", err)
+	}
+
+	// Get company MSP ID
+	mspID, err := ctx.GetClientIdentity().GetMSPID()
+	if err != nil {
+		return "", fmt.Errorf("could not get MSP ID: %w", err)
+	}
+
+	// Get issuer client ID
+	clientID, err := getSubmittingClientIdentity(ctx)
+	if err != nil {
+		return "", fmt.Errorf("could not get issuer's client ID: %w", err)
+	}
+
 	// Reads the batch
 	receivedBatch, err := c.ReadBatch(ctx, receivedBatchID)
 	if err != nil {
@@ -76,99 +75,93 @@ func (c *StvgdContract) CreateReception(ctx contractapi.TransactionContextInterf
 	}
 
 	// Validate production unit ID
-	if productionUnitID == "" {
-		return "", fmt.Errorf("production unit ID must not be empty")
+	if productionUnitInternalID == "" {
+		return "", fmt.Errorf("production unit internal ID must not be empty")
 	}
 
+	// production unit ID composite key
+	productionUnitID := mspID + ":" + productionUnitInternalID
+
+	_ = iterate(receivedBatch.Traceability)
+	/*
+		//TODO: check last transport destination
+		// ValueOf(transporID)
+		transportDestination := iterate(receivedBatch.Traceability)
+
+		if true {
+			return fmt.Sprintf("%v", transportDestination), nil
+		}
+
+			// Read transport
+			transport, err := c.ReadTransport(ctx, reflect.ValueOf(transportID).String())
+			if err != nil {
+				return "", fmt.Errorf("could not read transport from world state: %w", err)
+			}
+
+				//TODO: Checks if reception's produciton unit is the destination of the corresponding transport
+				if transport.DestinationProductionUnitID != productionUnitID {
+					return "", fmt.Errorf("received batch [%s] destination [%s] is not equal to the issuer's production unit [%s]", receivedBatch.ID, transport, transport.DestinationProductionUnitID, productionUnitID)
+				}
+	*/
 	// Checks difference in production unit ID & receivedBatch.destination production IDs
-	if productionUnitID == receivedBatch.ProductionUnitID {
-		return "", fmt.Errorf("production unit ID [%s] must be different from batch's production unit ID [%s]", productionUnitID, receivedBatch.ProductionUnitID)
+	// Avoids transport to self production unit
+	if productionUnitID == receivedBatch.LatestOwner {
+		return "", fmt.Errorf("production unit ID [%s] must be different from batch's production unit ID [%s]", productionUnitID, receivedBatch.LatestOwner)
 	}
 
-	// Validate date
-	civilDate, err := civil.ParseDateTime(activityDate)
-	if err != nil {
-		return "", fmt.Errorf("could not validate dates: %w", err)
-	}
-
-	// Validate scores
-	validScores, err := validateScores(ECS, SES)
-	if !validScores {
+	// Validate transport score
+	validTransportScore, err := validateScore(transportScore)
+	if !validTransportScore {
 		return "", fmt.Errorf("invalid scores: %w", err)
 	}
 
+	// Validate SES
+	validSES, err := validateScore(SES)
+	if !validSES {
+		return "", fmt.Errorf("invalid scores: %w", err)
+	}
+
+	// Validate distance
+	if distance <= 0 {
+		return "", fmt.Errorf("distance must be 0+")
+	}
+	// Validate cost
+	if cost <= 0 {
+		return "", fmt.Errorf("cost must be 0+")
+	}
+
 	// Instatiate reception
-	reception := &Reception{
+	reception := &domain.Reception{
 		DocType:          "rc",
 		ID:               receptionID,
 		ProductionUnitID: productionUnitID,
+		Issuer:           clientID,
+		ActivityDate:     txTimestamp,
 		ReceivedBatch:    *receivedBatch,
 		IsAccepted:       isAccepted,
-		ActivityDate:     civilDate,
-		ECS:              ECS,
+		TransportScore:   transportScore,
 		SES:              SES,
+		Distance:         distance,
+		Cost:             cost,
 	}
-	/*
-		var transportID string
 
-		// Iterate through latest traceability actvity
-		iter := reflect.ValueOf(receivedBatch.Traceability[0]).MapRange()
-		for iter.Next() {
-			k := iter.Key()
-			v := iter.Value()
-
-			// Get field named "ID"
-			if k.String() == "ID" {
-				transportID = v.Elem().String()
-				prefix, err := validateActivityType(transportID)
-				if err != nil {
-					return "", err
-				} else if prefix != "t" { // Check for activity type (Transport)
-					return "", fmt.Errorf("previous activity must be transport")
-				}
-				break
-			}
-		}
-
-		transport, err := c.ReadTransport(ctx, transportID)
-		if err != nil {
-			return "", fmt.Errorf("could not read transport from world state: %w", err)
-		}
-
-		// Assign scores to corresponding transport
-		transport.ECS = ECS
-		transport.SES = SES
-
-		// Marshal transport to bytes
-		transportBytes, err := json.Marshal(transport)
-		if err != nil {
-			return "", err
-		}
-
-		// Put transportBytes in world state
-		err = ctx.GetStub().PutState(transportID, transportBytes)
-		if err != nil {
-			return "", fmt.Errorf("failed to put transport to world state: %w", err)
-		}
-	*/
 	// Initialize updated/"new" Batch object + aux variables
-	newBatch := new(Batch)
+	newBatch := new(domain.Batch)
 	activities := make([]interface{}, 0)
 	auxTrace := make([]interface{}, 0, 1)
 
 	if isAccepted {
-		newBatch = &Batch{
+		newBatch = &domain.Batch{
 			DocType:          "b",
 			ID:               newBatchID,
 			BatchType:        receivedBatch.BatchType,
-			ProductionUnitID: productionUnitID,
+			LatestOwner:      productionUnitID,
 			BatchInternalID:  newBatchInternalID,
 			SupplierID:       receivedBatch.SupplierID,
 			BatchComposition: receivedBatch.BatchComposition,
 			Quantity:         receivedBatch.Quantity,
 			Unit:             receivedBatch.Unit,
-			ECS:              receivedBatch.ECS,
-			SES:              receivedBatch.SES,
+			FinalScore:       receivedBatch.FinalScore,
 		}
 
 		receivedBatch.Quantity = 0     // Remove quantity from "old"
@@ -191,7 +184,8 @@ func (c *StvgdContract) CreateReception(ctx contractapi.TransactionContextInterf
 		}
 	}
 
-	receivedBatch.IsInTransit = false // Received batch is no longer in transit
+	// Received batch is no longer in transit
+	receivedBatch.IsInTransit = false
 
 	// Marshal input batch to bytes
 	receivedBatchBytes, err := json.Marshal(receivedBatch)
@@ -215,6 +209,7 @@ func (c *StvgdContract) CreateReception(ctx contractapi.TransactionContextInterf
 		return "", fmt.Errorf("failed to put reception to world state: %w", err)
 	}
 
+	//? IS THIS CORRECT?
 	// Different outputs based on new batch creation
 	if newBatch.ID == "" {
 		return fmt.Sprintf("reception activity [%s] was successfully added to the ledger", receptionID), nil
@@ -229,7 +224,7 @@ func (c *StvgdContract) CreateReception(ctx contractapi.TransactionContextInterf
 }
 
 // ReadReception retrieves an instance of Reception from the world state
-func (c *StvgdContract) ReadReception(ctx contractapi.TransactionContextInterface, receptionID string) (*Reception, error) {
+func (c *StvgdContract) ReadReception(ctx contractapi.TransactionContextInterface, receptionID string) (*domain.Reception, error) {
 
 	// Checks if the reception ID already exists
 	exists, err := c.ReceptionExists(ctx, receptionID)
@@ -242,7 +237,7 @@ func (c *StvgdContract) ReadReception(ctx contractapi.TransactionContextInterfac
 	// Queries world state for reception with given ID
 	receptionBytes, _ := ctx.GetStub().GetState(receptionID)
 	// Instatiate reception
-	reception := new(Reception)
+	reception := new(domain.Reception)
 	// Unmarshal receptionBytes to JSON
 	err = json.Unmarshal(receptionBytes, reception)
 	if err != nil {
@@ -253,7 +248,7 @@ func (c *StvgdContract) ReadReception(ctx contractapi.TransactionContextInterfac
 }
 
 // ! GetAllReceptions returns all receptions found in world state
-func (c *StvgdContract) GetAllReceptions(ctx contractapi.TransactionContextInterface) ([]*Reception, error) {
+func (c *StvgdContract) GetAllReceptions(ctx contractapi.TransactionContextInterface) ([]*domain.Reception, error) {
 	queryString := `{"selector":{"docType":"rc"}}`
 	return getQueryResultForQueryStringReception(ctx, queryString)
 }

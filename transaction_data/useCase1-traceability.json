@@ -1,0 +1,546 @@
+{
+  "traceability": [
+    {
+      "ID": "p-004",
+      "activityEndDate": "2022-12-17T23:29:34.32Z",
+      "activityStartDate": "2022-09-26T11:45:26.371Z",
+      "docType": "p",
+      "inputBatches": {
+        "b-009": {
+          "batch": {
+            "ID": "b-009",
+            "batchComposition": {
+              "cotton": 67,
+              "polyester": 33
+            },
+            "batchInternalID": "b-009-iid",
+            "batchType": "DYED_FABRIC",
+            "docType": "b",
+            "finalScore": 2,
+            "isInTransit": false,
+            "latestOwner": "TMGMSP:PU1",
+            "quantity": 50,
+            "supplierID": "suppl004",
+            "traceability": [
+              {
+                "ID": "rc-003",
+                "activityDate": "2022-12-17T23:29:21.985Z",
+                "cost": 40,
+                "distance": 150,
+                "docType": "rc",
+                "isAccepted": true,
+                "issuer": "eDUwOTo6Q049b3BlcmF0b3IsT1U9Y2xpZW50OjpDTj1jYS50bWcuZXhhbXBsZS5jb20sTz10bWcuZXhhbXBsZS5jb20sTD1TYW4gRnJhbmNpc2NvLFNUPUNhbGlmb3JuaWEsQz1VUw==",
+                "newBatch": {
+                  "ID": "b-009",
+                  "batchComposition": {
+                    "cotton": 67,
+                    "polyester": 33
+                  },
+                  "batchInternalID": "b-009-iid",
+                  "batchType": "DYED_FABRIC",
+                  "docType": "b",
+                  "finalScore": 2,
+                  "isInTransit": false,
+                  "latestOwner": "TMGMSP:PU1",
+                  "quantity": 50,
+                  "supplierID": "suppl004",
+                  "unit": "M2"
+                },
+                "productionUnitID": "TMGMSP:PU1",
+                "receivedBatch": {
+                  "ID": "b-008",
+                  "batchComposition": {
+                    "cotton": 67,
+                    "polyester": 33
+                  },
+                  "batchInternalID": "b-008-iid",
+                  "batchType": "DYED_FABRIC",
+                  "docType": "b",
+                  "finalScore": 2,
+                  "isInTransit": true,
+                  "latestOwner": "TintexMSP:PU1",
+                  "quantity": 50,
+                  "supplierID": "suppl004",
+                  "traceability": [
+                    {
+                      "ID": "t-003",
+                      "activityDate": "2022-12-17T23:28:29.87Z",
+                      "destinationProductionUnitID": "TMGMSP:PU1",
+                      "docType": "t",
+                      "inputBatch": {
+                        "b-008": {
+                          "batch": {
+                            "ID": "b-008",
+                            "batchComposition": {
+                              "cotton": 67,
+                              "polyester": 33
+                            },
+                            "batchInternalID": "b-008-iid",
+                            "batchType": "DYED_FABRIC",
+                            "docType": "b",
+                            "finalScore": 2,
+                            "isInTransit": false,
+                            "latestOwner": "TintexMSP:PU1",
+                            "quantity": 50,
+                            "supplierID": "suppl004",
+                            "traceability": [
+                              {
+                                "ID": "p-003",
+                                "activityEndDate": "2022-12-17T23:28:25.049Z",
+                                "activityStartDate": "2022-09-16T11:45:26.371Z",
+                                "docType": "p",
+                                "inputBatches": {
+                                  "b-006": {
+                                    "batch": {
+                                      "ID": "b-006",
+                                      "batchComposition": {
+                                        "cotton": 67,
+                                        "polyester": 33
+                                      },
+                                      "batchInternalID": "b-006-iid",
+                                      "batchType": "FABRIC",
+                                      "docType": "b",
+                                      "finalScore": 2,
+                                      "isInTransit": false,
+                                      "latestOwner": "TintexMSP:PU1",
+                                      "quantity": 50,
+                                      "supplierID": "suppl002",
+                                      "traceability": [
+                                        {
+                                          "ID": "rc-002",
+                                          "activityDate": "2022-12-17T23:28:14.188Z",
+                                          "cost": 40,
+                                          "distance": 150,
+                                          "docType": "rc",
+                                          "isAccepted": true,
+                                          "issuer": "eDUwOTo6Q049b3BlcmF0b3IsT1U9Y2xpZW50OjpDTj1jYS50aW50ZXguZXhhbXBsZS5jb20sTz10aW50ZXguZXhhbXBsZS5jb20sTD1TYW4gRnJhbmNpc2NvLFNUPUNhbGlmb3JuaWEsQz1VUw==",
+                                          "newBatch": {
+                                            "ID": "b-006",
+                                            "batchComposition": {
+                                              "cotton": 67,
+                                              "polyester": 33
+                                            },
+                                            "batchInternalID": "b-006-iid",
+                                            "batchType": "FABRIC",
+                                            "docType": "b",
+                                            "finalScore": 2,
+                                            "isInTransit": false,
+                                            "latestOwner": "TintexMSP:PU1",
+                                            "quantity": 50,
+                                            "supplierID": "suppl002",
+                                            "unit": "M2"
+                                          },
+                                          "productionUnitID": "TintexMSP:PU1",
+                                          "receivedBatch": {
+                                            "ID": "b-005",
+                                            "batchComposition": {
+                                              "cotton": 67,
+                                              "polyester": 33
+                                            },
+                                            "batchInternalID": "b-005-iid",
+                                            "batchType": "FABRIC",
+                                            "docType": "b",
+                                            "finalScore": 2,
+                                            "isInTransit": true,
+                                            "latestOwner": "ASampaioMSP:PU1",
+                                            "quantity": 50,
+                                            "supplierID": "suppl002",
+                                            "traceability": [
+                                              {
+                                                "ID": "t-002",
+                                                "activityDate": "2022-12-17T23:27:18.577Z",
+                                                "destinationProductionUnitID": "TintexMSP:PU1",
+                                                "docType": "t",
+                                                "inputBatch": {
+                                                  "b-005": {
+                                                    "batch": {
+                                                      "ID": "b-005",
+                                                      "batchComposition": {
+                                                        "cotton": 67,
+                                                        "polyester": 33
+                                                      },
+                                                      "batchInternalID": "b-005-iid",
+                                                      "batchType": "FABRIC",
+                                                      "docType": "b",
+                                                      "finalScore": 2,
+                                                      "isInTransit": false,
+                                                      "latestOwner": "ASampaioMSP:PU1",
+                                                      "quantity": 50,
+                                                      "supplierID": "suppl002",
+                                                      "traceability": [
+                                                        {
+                                                          "ID": "p-002",
+                                                          "activityEndDate": "2022-12-17T23:27:13.392Z",
+                                                          "activityStartDate": "2022-09-16T11:45:26.371Z",
+                                                          "docType": "p",
+                                                          "inputBatches": {
+                                                            "b-004": {
+                                                              "batch": {
+                                                                "ID": "b-004",
+                                                                "batchComposition": {
+                                                                  "cotton": 50,
+                                                                  "polyester": 50
+                                                                },
+                                                                "batchInternalID": "b-004-iid",
+                                                                "batchType": "YARN",
+                                                                "docType": "b",
+                                                                "finalScore": -3,
+                                                                "isInTransit": false,
+                                                                "latestOwner": "ASampaioMSP:PU1",
+                                                                "quantity": 100,
+                                                                "supplierID": "suppl001",
+                                                                "traceability": [
+                                                                  {
+                                                                    "ID": "rc-001",
+                                                                    "activityDate": "2022-12-17T23:27:03.043Z",
+                                                                    "cost": 40,
+                                                                    "distance": 150,
+                                                                    "docType": "rc",
+                                                                    "isAccepted": true,
+                                                                    "issuer": "eDUwOTo6Q049b3BlcmF0b3IsT1U9Y2xpZW50OjpDTj1jYS5hc2FtcGFpby5leGFtcGxlLmNvbSxPPWFzYW1wYWlvLmV4YW1wbGUuY29tLEw9U2FuIEZyYW5jaXNjbyxTVD1DYWxpZm9ybmlhLEM9VVM=",
+                                                                    "newBatch": {
+                                                                      "ID": "b-004",
+                                                                      "batchComposition": {
+                                                                        "cotton": 50,
+                                                                        "polyester": 50
+                                                                      },
+                                                                      "batchInternalID": "b-004-iid",
+                                                                      "batchType": "YARN",
+                                                                      "docType": "b",
+                                                                      "finalScore": -3,
+                                                                      "isInTransit": false,
+                                                                      "latestOwner": "ASampaioMSP:PU1",
+                                                                      "quantity": 100,
+                                                                      "supplierID": "suppl001",
+                                                                      "unit": "KG"
+                                                                    },
+                                                                    "productionUnitID": "ASampaioMSP:PU1",
+                                                                    "receivedBatch": {
+                                                                      "ID": "b-003",
+                                                                      "batchComposition": {
+                                                                        "cotton": 50,
+                                                                        "polyester": 50
+                                                                      },
+                                                                      "batchInternalID": "b-003-iid",
+                                                                      "batchType": "YARN",
+                                                                      "docType": "b",
+                                                                      "finalScore": -3,
+                                                                      "isInTransit": true,
+                                                                      "latestOwner": "InovafilMSP:PU1",
+                                                                      "quantity": 100,
+                                                                      "supplierID": "suppl001",
+                                                                      "traceability": [
+                                                                        {
+                                                                          "ID": "t-001",
+                                                                          "activityDate": "2022-12-17T23:25:57.611Z",
+                                                                          "destinationProductionUnitID": "ASampaioMSP:PU1",
+                                                                          "docType": "t",
+                                                                          "inputBatch": {
+                                                                            "b-003": {
+                                                                              "batch": {
+                                                                                "ID": "b-003",
+                                                                                "batchComposition": {
+                                                                                  "cotton": 50,
+                                                                                  "polyester": 50
+                                                                                },
+                                                                                "batchInternalID": "b-003-iid",
+                                                                                "batchType": "YARN",
+                                                                                "docType": "b",
+                                                                                "finalScore": -3,
+                                                                                "isInTransit": false,
+                                                                                "latestOwner": "InovafilMSP:PU1",
+                                                                                "quantity": 200,
+                                                                                "supplierID": "suppl001",
+                                                                                "traceability": [
+                                                                                  {
+                                                                                    "ID": "p-001",
+                                                                                    "activityEndDate": "2022-12-17T23:25:52.518Z",
+                                                                                    "activityStartDate": "2022-09-12T11:45:26.371Z",
+                                                                                    "docType": "p",
+                                                                                    "inputBatches": {
+                                                                                      "b-001": {
+                                                                                        "batch": {
+                                                                                          "ID": "b-001",
+                                                                                          "batchComposition": {
+                                                                                            "cotton": 100
+                                                                                          },
+                                                                                          "batchInternalID": "b-001-iid",
+                                                                                          "batchType": "FIBER",
+                                                                                          "docType": "b",
+                                                                                          "finalScore": -3,
+                                                                                          "isInTransit": false,
+                                                                                          "latestOwner": "InovafilMSP:PU1",
+                                                                                          "quantity": 100,
+                                                                                          "supplierID": "suppl001",
+                                                                                          "traceability": [
+                                                                                            {
+                                                                                              "ID": "rg-001",
+                                                                                              "activityDate": "2022-12-17T23:25:37.164Z",
+                                                                                              "docType": "rg",
+                                                                                              "issuer": "eDUwOTo6Q049b3BlcmF0b3IsT1U9Y2xpZW50OjpDTj1jYS5pbm92YWZpbC5leGFtcGxlLmNvbSxPPWlub3ZhZmlsLmV4YW1wbGUuY29tLEw9U2FuIEZyYW5jaXNjbyxTVD1DYWxpZm9ybmlhLEM9VVM=",
+                                                                                              "newBatch": {
+                                                                                                "ID": "b-001",
+                                                                                                "batchComposition": {
+                                                                                                  "cotton": 100
+                                                                                                },
+                                                                                                "batchInternalID": "b-001-iid",
+                                                                                                "batchType": "FIBER",
+                                                                                                "docType": "b",
+                                                                                                "finalScore": -3,
+                                                                                                "isInTransit": false,
+                                                                                                "latestOwner": "InovafilMSP:PU1",
+                                                                                                "quantity": 100,
+                                                                                                "supplierID": "suppl001",
+                                                                                                "unit": "KG"
+                                                                                              },
+                                                                                              "productionUnitID": "InovafilMSP:PU1"
+                                                                                            }
+                                                                                          ],
+                                                                                          "unit": "KG"
+                                                                                        },
+                                                                                        "quantity": 100
+                                                                                      },
+                                                                                      "b-002": {
+                                                                                        "batch": {
+                                                                                          "ID": "b-002",
+                                                                                          "batchComposition": {
+                                                                                            "polyester": 100
+                                                                                          },
+                                                                                          "batchInternalID": "b-002-iid",
+                                                                                          "batchType": "FIBER",
+                                                                                          "docType": "b",
+                                                                                          "finalScore": -3,
+                                                                                          "isInTransit": false,
+                                                                                          "latestOwner": "InovafilMSP:PU1",
+                                                                                          "quantity": 100,
+                                                                                          "supplierID": "suppl001",
+                                                                                          "traceability": [
+                                                                                            {
+                                                                                              "ID": "rg-002",
+                                                                                              "activityDate": "2022-12-17T23:25:42.436Z",
+                                                                                              "docType": "rg",
+                                                                                              "issuer": "eDUwOTo6Q049b3BlcmF0b3IsT1U9Y2xpZW50OjpDTj1jYS5pbm92YWZpbC5leGFtcGxlLmNvbSxPPWlub3ZhZmlsLmV4YW1wbGUuY29tLEw9U2FuIEZyYW5jaXNjbyxTVD1DYWxpZm9ybmlhLEM9VVM=",
+                                                                                              "newBatch": {
+                                                                                                "ID": "b-002",
+                                                                                                "batchComposition": {
+                                                                                                  "polyester": 100
+                                                                                                },
+                                                                                                "batchInternalID": "b-002-iid",
+                                                                                                "batchType": "FIBER",
+                                                                                                "docType": "b",
+                                                                                                "finalScore": -3,
+                                                                                                "isInTransit": false,
+                                                                                                "latestOwner": "InovafilMSP:PU1",
+                                                                                                "quantity": 100,
+                                                                                                "supplierID": "suppl001",
+                                                                                                "unit": "KG"
+                                                                                              },
+                                                                                              "productionUnitID": "InovafilMSP:PU1"
+                                                                                            }
+                                                                                          ],
+                                                                                          "unit": "KG"
+                                                                                        },
+                                                                                        "quantity": 100
+                                                                                      }
+                                                                                    },
+                                                                                    "issuer": "eDUwOTo6Q049b3BlcmF0b3IsT1U9Y2xpZW50OjpDTj1jYS5pbm92YWZpbC5leGFtcGxlLmNvbSxPPWlub3ZhZmlsLmV4YW1wbGUuY29tLEw9U2FuIEZyYW5jaXNjbyxTVD1DYWxpZm9ybmlhLEM9VVM=",
+                                                                                    "outputBatch": {
+                                                                                      "ID": "b-003",
+                                                                                      "batchComposition": {
+                                                                                        "cotton": 50,
+                                                                                        "polyester": 50
+                                                                                      },
+                                                                                      "batchInternalID": "b-003-iid",
+                                                                                      "batchType": "YARN",
+                                                                                      "docType": "b",
+                                                                                      "finalScore": -3,
+                                                                                      "isInTransit": false,
+                                                                                      "latestOwner": "InovafilMSP:PU1",
+                                                                                      "quantity": 200,
+                                                                                      "supplierID": "suppl001",
+                                                                                      "unit": "KG"
+                                                                                    },
+                                                                                    "productionScore": -1,
+                                                                                    "productionType": "SPINNING",
+                                                                                    "productionUnitID": "InovafilMSP:PU1",
+                                                                                    "ses": 9
+                                                                                  }
+                                                                                ],
+                                                                                "unit": "KG"
+                                                                              },
+                                                                              "quantity": 100
+                                                                            }
+                                                                          },
+                                                                          "isReturn": false,
+                                                                          "issuer": "eDUwOTo6Q049b3BlcmF0b3IsT1U9Y2xpZW50OjpDTj1jYS5pbm92YWZpbC5leGFtcGxlLmNvbSxPPWlub3ZhZmlsLmV4YW1wbGUuY29tLEw9U2FuIEZyYW5jaXNjbyxTVD1DYWxpZm9ybmlhLEM9VVM=",
+                                                                          "originProductionUnitID": "InovafilMSP:PU1",
+                                                                          "transportationType": "ROAD"
+                                                                        }
+                                                                      ],
+                                                                      "unit": "KG"
+                                                                    },
+                                                                    "ses": -3,
+                                                                    "transportScore": -7
+                                                                  }
+                                                                ],
+                                                                "unit": "KG"
+                                                              },
+                                                              "quantity": 100
+                                                            }
+                                                          },
+                                                          "issuer": "eDUwOTo6Q049b3BlcmF0b3IsT1U9Y2xpZW50OjpDTj1jYS5hc2FtcGFpby5leGFtcGxlLmNvbSxPPWFzYW1wYWlvLmV4YW1wbGUuY29tLEw9U2FuIEZyYW5jaXNjbyxTVD1DYWxpZm9ybmlhLEM9VVM=",
+                                                          "outputBatch": {
+                                                            "ID": "b-005",
+                                                            "batchComposition": {
+                                                              "cotton": 67,
+                                                              "polyester": 33
+                                                            },
+                                                            "batchInternalID": "b-005-iid",
+                                                            "batchType": "FABRIC",
+                                                            "docType": "b",
+                                                            "finalScore": 2,
+                                                            "isInTransit": false,
+                                                            "latestOwner": "ASampaioMSP:PU1",
+                                                            "quantity": 50,
+                                                            "supplierID": "suppl002",
+                                                            "unit": "M2"
+                                                          },
+                                                          "productionScore": -5,
+                                                          "productionType": "WEAVING",
+                                                          "productionUnitID": "ASampaioMSP:PU1",
+                                                          "ses": 2
+                                                        }
+                                                      ],
+                                                      "unit": "M2"
+                                                    },
+                                                    "quantity": 50
+                                                  }
+                                                },
+                                                "isReturn": false,
+                                                "issuer": "eDUwOTo6Q049b3BlcmF0b3IsT1U9Y2xpZW50OjpDTj1jYS5hc2FtcGFpby5leGFtcGxlLmNvbSxPPWFzYW1wYWlvLmV4YW1wbGUuY29tLEw9U2FuIEZyYW5jaXNjbyxTVD1DYWxpZm9ybmlhLEM9VVM=",
+                                                "originProductionUnitID": "ASampaioMSP:PU1",
+                                                "transportationType": "ROAD"
+                                              }
+                                            ],
+                                            "unit": "M2"
+                                          },
+                                          "ses": -3,
+                                          "transportScore": -7
+                                        }
+                                      ],
+                                      "unit": "M2"
+                                    },
+                                    "quantity": 50
+                                  },
+                                  "b-007": {
+                                    "batch": {
+                                      "ID": "b-007",
+                                      "batchComposition": {
+                                        "black-dye": 100
+                                      },
+                                      "batchInternalID": "b-007-iid",
+                                      "batchType": "OTHER",
+                                      "docType": "b",
+                                      "finalScore": -3,
+                                      "isInTransit": false,
+                                      "latestOwner": "TintexMSP:PU1",
+                                      "quantity": 100,
+                                      "supplierID": "suppl003",
+                                      "traceability": [
+                                        {
+                                          "ID": "rg-003",
+                                          "activityDate": "2022-12-17T23:28:20.164Z",
+                                          "docType": "rg",
+                                          "issuer": "eDUwOTo6Q049b3BlcmF0b3IsT1U9Y2xpZW50OjpDTj1jYS50aW50ZXguZXhhbXBsZS5jb20sTz10aW50ZXguZXhhbXBsZS5jb20sTD1TYW4gRnJhbmNpc2NvLFNUPUNhbGlmb3JuaWEsQz1VUw==",
+                                          "newBatch": {
+                                            "ID": "b-007",
+                                            "batchComposition": {
+                                              "black-dye": 100
+                                            },
+                                            "batchInternalID": "b-007-iid",
+                                            "batchType": "OTHER",
+                                            "docType": "b",
+                                            "finalScore": -3,
+                                            "isInTransit": false,
+                                            "latestOwner": "TintexMSP:PU1",
+                                            "quantity": 100,
+                                            "supplierID": "suppl003",
+                                            "unit": "KG"
+                                          },
+                                          "productionUnitID": "TintexMSP:PU1"
+                                        }
+                                      ],
+                                      "unit": "KG"
+                                    },
+                                    "quantity": 5
+                                  }
+                                },
+                                "issuer": "eDUwOTo6Q049b3BlcmF0b3IsT1U9Y2xpZW50OjpDTj1jYS50aW50ZXguZXhhbXBsZS5jb20sTz10aW50ZXguZXhhbXBsZS5jb20sTD1TYW4gRnJhbmNpc2NvLFNUPUNhbGlmb3JuaWEsQz1VUw==",
+                                "outputBatch": {
+                                  "ID": "b-008",
+                                  "batchComposition": {
+                                    "cotton": 67,
+                                    "polyester": 33
+                                  },
+                                  "batchInternalID": "b-008-iid",
+                                  "batchType": "DYED_FABRIC",
+                                  "docType": "b",
+                                  "finalScore": 2,
+                                  "isInTransit": false,
+                                  "latestOwner": "TintexMSP:PU1",
+                                  "quantity": 50,
+                                  "supplierID": "suppl004",
+                                  "unit": "M2"
+                                },
+                                "productionScore": -5,
+                                "productionType": "DYEING_FINISHING",
+                                "productionUnitID": "TintexMSP:PU1",
+                                "ses": 2
+                              }
+                            ],
+                            "unit": "M2"
+                          },
+                          "quantity": 50
+                        }
+                      },
+                      "isReturn": false,
+                      "issuer": "eDUwOTo6Q049b3BlcmF0b3IsT1U9Y2xpZW50OjpDTj1jYS50aW50ZXguZXhhbXBsZS5jb20sTz10aW50ZXguZXhhbXBsZS5jb20sTD1TYW4gRnJhbmNpc2NvLFNUPUNhbGlmb3JuaWEsQz1VUw==",
+                      "originProductionUnitID": "TintexMSP:PU1",
+                      "transportationType": "ROAD"
+                    }
+                  ],
+                  "unit": "M2"
+                },
+                "ses": -3,
+                "transportScore": -7
+              }
+            ],
+            "unit": "M2"
+          },
+          "quantity": 50
+        }
+      },
+      "issuer": "eDUwOTo6Q049b3BlcmF0b3IsT1U9Y2xpZW50OjpDTj1jYS50bWcuZXhhbXBsZS5jb20sTz10bWcuZXhhbXBsZS5jb20sTD1TYW4gRnJhbmNpc2NvLFNUPUNhbGlmb3JuaWEsQz1VUw==",
+      "outputBatch": {
+        "ID": "b-010",
+        "batchComposition": {
+          "cotton": 67,
+          "polyester": 33
+        },
+        "batchInternalID": "b-010-iid",
+        "batchType": "FINISHED_PIECE",
+        "docType": "b",
+        "finalScore": 2,
+        "isInTransit": false,
+        "latestOwner": "TMGMSP:PU1",
+        "quantity": 50,
+        "supplierID": "suppl006",
+        "unit": "KG"
+      },
+      "productionScore": -5,
+      "productionType": "CONFECTION",
+      "productionUnitID": "TMGMSP:PU1",
+      "ses": 10
+    }
+  ]
+}

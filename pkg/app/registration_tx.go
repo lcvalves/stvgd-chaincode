@@ -1,29 +1,12 @@
-package main
+package app
 
 import (
 	"encoding/json"
 	"fmt"
 
-	"cloud.google.com/go/civil"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+	"github.com/lcvalves/stvgd-chaincode/pkg/domain"
 )
-
-/*
- * -----------------------------------
- * STRUCTS
- * -----------------------------------
- */
-
-// Registration stores information about the batch registrations in the supply chain companies/production units
-type Registration struct {
-	DocType          string         `json:"docType"` // docType ("rg") is used to distinguish the various types of objects in state database
-	ID               string         `json:"ID"`      // the field tags are needed to keep case from bouncing around
-	ProductionUnitID string         `json:"productionUnitID"`
-	ActivityDate     civil.DateTime `json:"activityDate"`
-	NewBatch         Batch          `json:"newBatch"`
-	ECS              float32        `json:"ecs"` // from non-recorded activities to 1st current owner on the value chain
-	SES              float32        `json:"ses"` // from non-recorded activities to 1st current owner on the value chain
-}
 
 /*
  * -----------------------------------
@@ -44,16 +27,16 @@ func (c *StvgdContract) RegistrationExists(ctx contractapi.TransactionContextInt
 }
 
 // CreateRegistration creates a new instance of Registration
-func (c *StvgdContract) CreateRegistration(ctx contractapi.TransactionContextInterface, registrationID, activityDate string, ECS, SES float32, newBatch Batch) (string, error) {
+func (c *StvgdContract) CreateRegistration(ctx contractapi.TransactionContextInterface, registrationID, productionUnitInternalID, batchID, batchType, batchInternalID, supplierID, unit string, quantity, finalScore float32, batchComposition map[string]float32) (string, error) {
 
-	// Activity prefix validation
-	activityPrefix, err := validateActivityType(registrationID)
-	if err != nil {
-		return "", fmt.Errorf("%w", err)
-	} else if activityPrefix != "rg" {
-		return "", fmt.Errorf("activity ID prefix must match its type (should be [rg-...])")
-	}
-
+	/* 	// Activity prefix validation
+	   	activityPrefix, err := validateActivityType(registrationID)
+	   	if err != nil {
+	   		return "", fmt.Errorf("%w", err)
+	   	} else if activityPrefix != "rg" {
+	   		return "", fmt.Errorf("activity ID prefix must match its type (should be [rg-...])")
+	   	}
+	*/
 	// Checks if the registration ID already exists
 	exists, err := c.RegistrationExists(ctx, registrationID)
 	if err != nil {
@@ -62,33 +45,69 @@ func (c *StvgdContract) CreateRegistration(ctx contractapi.TransactionContextInt
 		return "", fmt.Errorf("registration [%s] already exists", registrationID)
 	}
 
-	// Validate dates
-	civilDate, err := civil.ParseDateTime(activityDate)
+	// Timestamp when the transaction was created, have the same value across all endorsers
+	txTimestamp, err := getTxTimestampRFC3339Time(ctx.GetStub())
 	if err != nil {
-		return "", fmt.Errorf("could not validate dates: %w", err)
+		return "", fmt.Errorf("could not get transaction timestamp: %w", err)
 	}
 
-	// Validate scores
-	validScores, err := validateScores(ECS, SES)
-	if !validScores {
-		return "", fmt.Errorf("invalid scores: %w", err)
+	// txTimestamp, _ := time.Parse(time.RFC3339, testActivityDateString)
+
+	// Validate batch type
+	validBatchType, err := validateBatchType(batchType)
+	if err != nil {
+		return "", fmt.Errorf("could not validate batch type: %w", err)
+	}
+
+	// Validate unir
+	validUnit, err := validateUnit(unit)
+	if err != nil {
+		return "", fmt.Errorf("could not validate batch unit: %w", err)
+	}
+
+	/// Get company MSP ID
+	mspID, err := ctx.GetClientIdentity().GetMSPID()
+	if err != nil {
+		return "", fmt.Errorf("could not get MSP ID: %w", err)
+	}
+
+	// Get issuer client ID
+	clientID, err := getSubmittingClientIdentity(ctx)
+	if err != nil {
+		return "", fmt.Errorf("could not get issuer's client ID: %w", err)
+	}
+
+	// mspID := testProductionUnitID[0:11]
+	// clientID := testIssuer
+
+	// Initialize "new" Batch object
+	newBatch := &domain.Batch{
+		DocType:          "b",
+		ID:               batchID,
+		BatchType:        validBatchType,
+		LatestOwner:      mspID + ":" + productionUnitInternalID,
+		BatchInternalID:  batchInternalID,
+		SupplierID:       supplierID,
+		Quantity:         quantity,
+		Unit:             validUnit,
+		FinalScore:       finalScore,
+		BatchComposition: batchComposition,
 	}
 
 	// Validate new batch
-	isValidBatch, err := validateBatch(ctx, newBatch.ID, newBatch.ProductionUnitID, newBatch.BatchInternalID, newBatch.SupplierID, string(newBatch.Unit), string(newBatch.BatchType), newBatch.BatchComposition, newBatch.Quantity, newBatch.ECS, newBatch.SES, newBatch.IsInTransit)
+	isValidBatch, err := validateBatch(ctx, newBatch.ID, newBatch.LatestOwner, newBatch.BatchInternalID, newBatch.SupplierID, string(newBatch.Unit), string(newBatch.BatchType), newBatch.BatchComposition, newBatch.Quantity, newBatch.FinalScore, newBatch.IsInTransit)
 	if !isValidBatch {
 		return "", fmt.Errorf("failed to validate batch to world state: %w", err)
 	}
 
 	// Instatiate registration
-	registration := &Registration{
+	registration := &domain.Registration{
 		DocType:          "rg",
 		ID:               registrationID,
-		ProductionUnitID: newBatch.ProductionUnitID,
-		NewBatch:         newBatch,
-		ActivityDate:     civilDate,
-		ECS:              ECS,
-		SES:              SES,
+		ProductionUnitID: newBatch.LatestOwner,
+		Issuer:           clientID,
+		NewBatch:         *newBatch,
+		ActivityDate:     txTimestamp,
 	}
 
 	// Setup & append traceability to new batch
@@ -110,6 +129,7 @@ func (c *StvgdContract) CreateRegistration(ctx contractapi.TransactionContextInt
 	if err != nil {
 		return "", err
 	}
+
 	// Put registrationBytes in world state
 	err = ctx.GetStub().PutState(registrationID, registrationBytes)
 	if err != nil {
@@ -120,7 +140,7 @@ func (c *StvgdContract) CreateRegistration(ctx contractapi.TransactionContextInt
 }
 
 // ReadRegistration retrieves an instance of Registration from the world state
-func (c *StvgdContract) ReadRegistration(ctx contractapi.TransactionContextInterface, registrationID string) (*Registration, error) {
+func (c *StvgdContract) ReadRegistration(ctx contractapi.TransactionContextInterface, registrationID string) (*domain.Registration, error) {
 
 	// Checks if the registration ID already exists
 	exists, err := c.RegistrationExists(ctx, registrationID)
@@ -133,7 +153,7 @@ func (c *StvgdContract) ReadRegistration(ctx contractapi.TransactionContextInter
 	// Queries world state for registration with given ID
 	registrationBytes, _ := ctx.GetStub().GetState(registrationID)
 	// Instatiate registration
-	registration := new(Registration)
+	registration := new(domain.Registration)
 	// Unmarshal registrationBytes to JSON
 	err = json.Unmarshal(registrationBytes, registration)
 	if err != nil {
@@ -144,7 +164,7 @@ func (c *StvgdContract) ReadRegistration(ctx contractapi.TransactionContextInter
 }
 
 // GetAllRegistrations returns all registrations found in world state
-func (c *StvgdContract) GetAllRegistrations(ctx contractapi.TransactionContextInterface) ([]*Registration, error) {
+func (c *StvgdContract) GetAllRegistrations(ctx contractapi.TransactionContextInterface) ([]*domain.Registration, error) {
 	queryString := `{"selector":{"docType":"rg"}}`
 	return getQueryResultForQueryStringRegistration(ctx, queryString)
 }

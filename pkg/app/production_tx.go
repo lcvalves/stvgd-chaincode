@@ -1,49 +1,13 @@
-package main
+package app
 
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
-	"cloud.google.com/go/civil"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+	"github.com/lcvalves/stvgd-chaincode/pkg/domain"
 )
-
-/*
- * -----------------------------------
- * ENUMS
- * -----------------------------------
- */
-
-type ProductionType string
-
-const (
-	Spinning        ProductionType = "SPINNING"
-	Weaving         ProductionType = "WEAVING"
-	Knitting        ProductionType = "KNITTING"
-	DyeingFinishing ProductionType = "DYEING_FINISHING"
-	Confection      ProductionType = "CONFECTION"
-)
-
-/*
- * -----------------------------------
- * STRUCTS
- * -----------------------------------
- */
-
-// Production stores information about the production activities in the supply chain
-type Production struct {
-	DocType           string                `json:"docType"` // docType ("p") is used to distinguish the various types of objects in state database
-	ID                string                `json:"ID"`      // the field tags are needed to keep case from bouncing around
-	ProductionUnitID  string                `json:"productionUnitID"`
-	CompanyID         string                `json:"companyID"`
-	ProductionType    ProductionType        `json:"productionType"`
-	ActivityStartDate civil.DateTime        `json:"activityStartDate"`
-	ActivityEndDate   civil.DateTime        `json:"activityEndDate"`
-	ECS               float32               `json:"ecs"`
-	SES               float32               `json:"ses"`
-	OutputBatch       Batch                 `json:"outputBatch"`
-	InputBatches      map[string]InputBatch `json:"inputBatches"`
-}
 
 /*
  * -----------------------------------
@@ -64,7 +28,7 @@ func (c *StvgdContract) ProductionExists(ctx contractapi.TransactionContextInter
 }
 
 // CreateProduction creates a new instance of Production
-func (c *StvgdContract) CreateProduction(ctx contractapi.TransactionContextInterface, productionID, companyID, productionTypeID, activityStartDate, activityEndDate string, inputBatches map[string]float32, outputBatch Batch, ECS, SES float32) (string, error) {
+func (c *StvgdContract) CreateProduction(ctx contractapi.TransactionContextInterface, productionID, productionUnitInternalID, productionTypeID, activityStartDate, batchID, batchType, batchInternalID, supplierID, unit string, inputBatches, batchComposition map[string]float32, quantity, finalScore, productionScore, SES float32) (string, error) {
 
 	// Activity prefix validation
 	activityPrefix, err := validateActivityType(productionID)
@@ -82,9 +46,34 @@ func (c *StvgdContract) CreateProduction(ctx contractapi.TransactionContextInter
 		return "", fmt.Errorf("production activity [%s] already exists", productionID)
 	}
 
-	// Validate company ID
-	if companyID == "" {
-		return "", fmt.Errorf("company ID must not be empty")
+	// Parse start date
+	parsedStartDate, err := time.Parse(time.RFC3339, activityStartDate)
+	if err != nil {
+		return "", fmt.Errorf("could not parse activity start date: %w", err)
+	}
+
+	// Timestamp when the transaction was created, have the same value across all endorsers
+	txTimestamp, err := getTxTimestampRFC3339Time(ctx.GetStub())
+	if err != nil {
+		return "", fmt.Errorf("could not get transaction timestamp: %w", err)
+	}
+
+	// Checks if dates are valid
+	isStartDateBeforeEndDate := parsedStartDate.Before(txTimestamp)
+	if !isStartDateBeforeEndDate {
+		return "", fmt.Errorf("activity start date can't be after the activity end date: %w", err)
+	}
+
+	// Get company MSP ID
+	mspID, err := ctx.GetClientIdentity().GetMSPID()
+	if err != nil {
+		return "", fmt.Errorf("could not get MSP ID: %w", err)
+	}
+
+	// Get issuer client ID
+	clientID, err := getSubmittingClientIdentity(ctx)
+	if err != nil {
+		return "", fmt.Errorf("could not get issuer's client ID: %w", err)
 	}
 
 	// Validate production type
@@ -93,16 +82,28 @@ func (c *StvgdContract) CreateProduction(ctx contractapi.TransactionContextInter
 		return "", fmt.Errorf("could not validate activity type: %w", err)
 	}
 
-	// Validate dates
-	civilDates, err := validateDates(activityStartDate, activityEndDate)
-	if err != nil {
-		return "", fmt.Errorf("could not validate dates: %w", err)
+	// Validate production score
+	validProductionScore, err := validateScore(productionScore)
+	if !validProductionScore {
+		return "", fmt.Errorf("invalid scores: %w", err)
 	}
 
-	// Validate scores
-	validScores, err := validateScores(ECS, SES)
-	if !validScores {
+	// Validate SES
+	validSES, err := validateScore(SES)
+	if !validSES {
 		return "", fmt.Errorf("invalid scores: %w", err)
+	}
+
+	// Validate batch type
+	validBatchType, err := validateBatchType(batchType)
+	if err != nil {
+		return "", fmt.Errorf("could not validate batch type: %w", err)
+	}
+
+	// Validate unir
+	validUnit, err := validateUnit(unit)
+	if err != nil {
+		return "", fmt.Errorf("could not validate batch type: %w", err)
 	}
 
 	// Input batches min length (1)
@@ -113,7 +114,7 @@ func (c *StvgdContract) CreateProduction(ctx contractapi.TransactionContextInter
 	// Aux variables
 	activities := make([]interface{}, 0)
 	auxTrace := make([]interface{}, 0, 1)
-	auxInputBatches := map[string]InputBatch{}
+	auxInputBatches := map[string]domain.InputBatch{}
 
 	for batchID, quantity := range inputBatches { // In every single input batch
 
@@ -146,24 +147,23 @@ func (c *StvgdContract) CreateProduction(ctx contractapi.TransactionContextInter
 
 		// Append input batches traceability for output batch
 		activities = append(activities, batch.Traceability...)
-		auxInputBatch := InputBatch{
+		auxInputBatch := &domain.InputBatch{
 			Batch:    batch,
 			Quantity: quantity,
 		}
-		auxInputBatches[batchID] = auxInputBatch
+		auxInputBatches[batchID] = *auxInputBatch
 
 		// Initialize updated/"new" Batch object
-		updatedInputBatch := &Batch{
+		updatedInputBatch := &domain.Batch{
 			DocType:          batch.DocType,
 			ID:               batch.ID,
 			BatchType:        batch.BatchType,
-			ProductionUnitID: batch.ProductionUnitID,
+			LatestOwner:      batch.LatestOwner,
 			BatchInternalID:  batch.BatchInternalID,
 			SupplierID:       batch.SupplierID,
 			Quantity:         batch.Quantity - quantity,
 			Unit:             batch.Unit,
-			ECS:              batch.ECS,
-			SES:              batch.SES,
+			FinalScore:       batch.FinalScore,
 			BatchComposition: batch.BatchComposition,
 			Traceability:     batch.Traceability,
 		}
@@ -188,25 +188,39 @@ func (c *StvgdContract) CreateProduction(ctx contractapi.TransactionContextInter
 		}
 	}
 
+	// Initialize "new" Batch object
+	outputBatch := &domain.Batch{
+		DocType:          "b",
+		ID:               batchID,
+		BatchType:        validBatchType,
+		LatestOwner:      mspID + ":" + productionUnitInternalID,
+		BatchInternalID:  batchInternalID,
+		SupplierID:       supplierID,
+		Quantity:         quantity,
+		Unit:             validUnit,
+		FinalScore:       finalScore,
+		BatchComposition: batchComposition,
+	}
+
 	// Validate output batch
-	isValidBatch, err := validateBatch(ctx, outputBatch.ID, outputBatch.ProductionUnitID, outputBatch.BatchInternalID, outputBatch.SupplierID, string(outputBatch.Unit), string(outputBatch.BatchType), outputBatch.BatchComposition, outputBatch.Quantity, outputBatch.ECS, outputBatch.SES, outputBatch.IsInTransit)
+	isValidBatch, err := validateBatch(ctx, outputBatch.ID, outputBatch.LatestOwner, outputBatch.BatchInternalID, outputBatch.SupplierID, string(outputBatch.Unit), string(outputBatch.BatchType), outputBatch.BatchComposition, outputBatch.Quantity, outputBatch.FinalScore, outputBatch.IsInTransit)
 	if !isValidBatch {
 		return "", fmt.Errorf("failed to validate batch to world state: %w", err)
 	}
 
 	// Instantiate production
-	production := &Production{
+	production := &domain.Production{
 		DocType:           "p",
 		ID:                productionID,
-		ProductionUnitID:  outputBatch.ProductionUnitID,
-		CompanyID:         companyID,
+		ProductionUnitID:  mspID + ":" + productionUnitInternalID,
+		Issuer:            clientID,
 		ProductionType:    validProductionType,
-		ActivityStartDate: civilDates[0],
-		ActivityEndDate:   civilDates[1],
-		ECS:               ECS,
+		ActivityStartDate: parsedStartDate,
+		ActivityEndDate:   txTimestamp,
+		ProductionScore:   productionScore,
 		SES:               SES,
 		InputBatches:      auxInputBatches,
-		OutputBatch:       outputBatch,
+		OutputBatch:       *outputBatch,
 	}
 
 	// Setup & append traceability to output batch
@@ -240,7 +254,7 @@ func (c *StvgdContract) CreateProduction(ctx contractapi.TransactionContextInter
 }
 
 // ReadProduction retrieves an instance of Production from the world state
-func (c *StvgdContract) ReadProduction(ctx contractapi.TransactionContextInterface, productionID string) (*Production, error) {
+func (c *StvgdContract) ReadProduction(ctx contractapi.TransactionContextInterface, productionID string) (*domain.Production, error) {
 
 	// Checks if the production ID already exists
 	exists, err := c.ProductionExists(ctx, productionID)
@@ -253,7 +267,7 @@ func (c *StvgdContract) ReadProduction(ctx contractapi.TransactionContextInterfa
 	// Queries world state for production with given ID
 	productionBytes, _ := ctx.GetStub().GetState(productionID)
 	// Instatiate production
-	production := new(Production)
+	production := new(domain.Production)
 	// Unmarshal productionBytes to JSON
 	err = json.Unmarshal(productionBytes, production)
 	if err != nil {
@@ -264,7 +278,7 @@ func (c *StvgdContract) ReadProduction(ctx contractapi.TransactionContextInterfa
 }
 
 // ! GetAllProductions returns all productions found in world state
-func (c *StvgdContract) GetAllProductions(ctx contractapi.TransactionContextInterface) ([]*Production, error) {
+func (c *StvgdContract) GetAllProductions(ctx contractapi.TransactionContextInterface) ([]*domain.Production, error) {
 	queryString := `{"selector":{"docType":"p"}}`
 	return getQueryResultForQueryStringProduction(ctx, queryString)
 }

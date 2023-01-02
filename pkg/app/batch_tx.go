@@ -1,72 +1,12 @@
-package main
+package app
 
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
-	"google.golang.org/protobuf/types/known/timestamppb"
+	"github.com/lcvalves/stvgd-chaincode/pkg/domain"
 )
-
-/*
- * -----------------------------------
- * ENUMS
- * -----------------------------------
- */
-
-type Unit string
-
-const (
-	Kilograms     Unit = "KG"
-	Liters        Unit = "L"
-	Meters        Unit = "M"
-	SquaredMeters Unit = "M2"
-)
-
-type BatchType string
-
-const (
-	Fiber          BatchType = "FIBER"
-	Yarn           BatchType = "YARN"
-	Mesh           BatchType = "MESH"
-	Fabric         BatchType = "FABRIC"
-	DyedMesh       BatchType = "DYED_MESH"
-	FinishedMesh   BatchType = "FINISHED_MESH"
-	DyedFabric     BatchType = "DYED_FABRIC"
-	FinishedFabric BatchType = "FINISHED_FABRIC"
-	Cut            BatchType = "CUT"
-	FinishedPiece  BatchType = "FINISHED_PIECE"
-	Other          BatchType = "OTHER"
-)
-
-/*
- * -----------------------------------
- * STRUCTS
- * -----------------------------------
- */
-
-// Batch stores information about the batches in the supply chain
-type Batch struct {
-	DocType          string             `json:"docType"` // docType ("b") is used to distinguish the various types of objects in state database
-	ID               string             `json:"ID"`      // the field tags are needed to keep case from bouncing around
-	BatchType        BatchType          `json:"batchType"`
-	ProductionUnitID string             `json:"productionUnitID"` // current/latest owner
-	BatchInternalID  string             `json:"batchInternalID"`
-	SupplierID       string             `json:"supplierID"`
-	IsInTransit      bool               `json:"isInTransit" metadata:",optional"`
-	Quantity         float32            `json:"quantity"`
-	Unit             Unit               `json:"unit"`
-	ECS              float32            `json:"ecs"`
-	SES              float32            `json:"ses"`
-	BatchComposition map[string]float32 `json:"batchComposition"` // i.e. {raw_material_id: %}
-	Traceability     []interface{}      `json:"traceability,omitempty" metadata:",optional"`
-}
-
-type InputBatch struct {
-	Batch    *Batch  `json:"batch"`
-	Quantity float32 `json:"quantity"`
-}
 
 /*
  * -----------------------------------
@@ -86,7 +26,7 @@ func (c *StvgdContract) BatchExists(ctx contractapi.TransactionContextInterface,
 }
 
 // ReadBatch retrieves an instance of Batch from the world state
-func (c *StvgdContract) ReadBatch(ctx contractapi.TransactionContextInterface, batchID string) (*Batch, error) {
+func (c *StvgdContract) ReadBatch(ctx contractapi.TransactionContextInterface, batchID string) (*domain.Batch, error) {
 
 	exists, err := c.BatchExists(ctx, batchID)
 	if err != nil {
@@ -97,7 +37,7 @@ func (c *StvgdContract) ReadBatch(ctx contractapi.TransactionContextInterface, b
 
 	batchBytes, _ := ctx.GetStub().GetState(batchID)
 
-	batch := new(Batch)
+	batch := new(domain.Batch)
 
 	err = json.Unmarshal(batchBytes, batch)
 
@@ -113,11 +53,12 @@ func (c *StvgdContract) ReadBatch(ctx contractapi.TransactionContextInterface, b
 // and accepting a single query parameter (docType).
 // Only available on state databases that support rich query (e.g. CouchDB)
 // Example: Parameterized rich query
-func (c *StvgdContract) GetAvailableBatches(ctx contractapi.TransactionContextInterface) ([]*Batch, error) {
+func (c *StvgdContract) GetAvailableBatches(ctx contractapi.TransactionContextInterface) ([]*domain.Batch, error) {
 	queryString := `{"selector":{"docType":"b"}}`
 	return getQueryResultForQueryStringBatch(ctx, queryString)
 }
 
+/*
 // GetAssetHistory returns the chain of custody for a batch since issuance.
 func (c *StvgdContract) GetBatchHistory(ctx contractapi.TransactionContextInterface, batchID string) ([]HistoryQueryResult, error) {
 	log.Printf("GetAssetHistory: ID %v", batchID)
@@ -135,14 +76,14 @@ func (c *StvgdContract) GetBatchHistory(ctx contractapi.TransactionContextInterf
 			return nil, err
 		}
 
-		var batch Batch
+		var batch domain.Batch
 		if len(response.Value) > 0 {
 			err = json.Unmarshal(response.Value, &batch)
 			if err != nil {
 				return nil, err
 			}
 		} else {
-			batch = Batch{
+			batch = domain.Batch{
 				ID: batchID,
 			}
 		}
@@ -163,9 +104,9 @@ func (c *StvgdContract) GetBatchHistory(ctx contractapi.TransactionContextInterf
 
 	return records, nil
 }
-
+*/
 // TraceBatchByInternalID lists the batch's traceability
-func (c *StvgdContract) TraceBatchByInternalID(ctx contractapi.TransactionContextInterface, batchInternalID string) ([]*Batch, error) {
+func (c *StvgdContract) TraceBatchByInternalID(ctx contractapi.TransactionContextInterface, batchInternalID string) ([]*domain.Batch, error) {
 	queryString := `{"selector":{"batchInternalID":"` + batchInternalID + `"}}`
 	return getQueryResultForQueryStringBatch(ctx, queryString)
 }

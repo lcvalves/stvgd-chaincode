@@ -1,0 +1,22 @@
+{
+  "ID": "rg-001",
+  "activityDate": "2022-12-17T23:25:37.164Z",
+  "docType": "rg",
+  "issuer": "eDUwOTo6Q049b3BlcmF0b3IsT1U9Y2xpZW50OjpDTj1jYS5pbm92YWZpbC5leGFtcGxlLmNvbSxPPWlub3ZhZmlsLmV4YW1wbGUuY29tLEw9U2FuIEZyYW5jaXNjbyxTVD1DYWxpZm9ybmlhLEM9VVM=",
+  "newBatch": {
+    "ID": "b-001",
+    "batchComposition": {
+      "cotton": 100
+    },
+    "batchInternalID": "b-001-iid",
+    "batchType": "FIBER",
+    "docType": "b",
+    "finalScore": -3,
+    "isInTransit": false,
+    "latestOwner": "InovafilMSP:PU1",
+    "quantity": 100,
+    "supplierID": "suppl001",
+    "unit": "KG"
+  },
+  "productionUnitID": "InovafilMSP:PU1"
+}

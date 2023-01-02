@@ -1,0 +1,27 @@
+[
+  {
+    "transactionName": "CreateRegistration",
+    "transactionLabel": "Create rg-001 & b-001",
+    "arguments": [
+      "rg-001",
+      "PU1",
+      "b-001",
+      "FIBER",
+      "b-001-iid",
+      "suppl001",
+      "KG",
+      "100",
+      "-3",
+      "{\"cotton\": 100}"
+    ],
+    "transientData": {}
+  },
+  {
+    "transactionName": "ReadRegistration",
+    "transactionLabel": "Read rg-001 & b-001",
+    "arguments": [
+      "rg-001"
+    ],
+    "transientData": {}
+  }
+]
