@@ -13,11 +13,11 @@ import (
 type TransportType string
 
 const (
-	Road       TransportType = "ROAD"
-	Maritime   TransportType = "MARITIME"
-	Air        TransportType = "AIR"
-	Rail       TransportType = "RAIL"
-	Intermodal TransportType = "INTERMODAL"
+	TerrestrialSmall TransportType = "TERRESTRIAL_SMALL"
+	TerrestrialBig   TransportType = "TERRESTRIAL_BIG"
+	Maritime         TransportType = "MARITIME"
+	Aerial           TransportType = "AERIAL"
+	Railroader       TransportType = "RAILROADER"
 )
 
 /*

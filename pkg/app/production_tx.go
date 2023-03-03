@@ -103,7 +103,12 @@ func (c *StvgdContract) CreateProduction(ctx contractapi.TransactionContextInter
 	// Validate unir
 	validUnit, err := validateUnit(unit)
 	if err != nil {
-		return "", fmt.Errorf("could not validate batch type: %w", err)
+		return "", fmt.Errorf("could not validate batch unit: %w", err)
+	}
+
+	/// Validate production unit internal ID
+	if productionUnitInternalID == "" {
+		return "", fmt.Errorf("production unit internal ID must not be empty: %w", err)
 	}
 
 	// Input batches min length (1)
@@ -183,7 +188,7 @@ func (c *StvgdContract) CreateProduction(ctx contractapi.TransactionContextInter
 		if updatedInputBatch.Quantity == 0 {
 			err = ctx.GetStub().DelState(updatedInputBatch.ID)
 			if err != nil {
-				return "", fmt.Errorf("could not delete batch from world state. %s", err)
+				return "", fmt.Errorf("could not delete batch from world state: %w", err)
 			}
 		}
 	}

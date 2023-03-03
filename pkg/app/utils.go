@@ -35,7 +35,7 @@ type HistoryQueryResult struct {
 func validateScore(score float32) (bool, error) {
 	// Range validate score
 	if score < -10.0 || score > 10.0 {
-		return false, fmt.Errorf("score out of bounds (should be between -10 & 10)")
+		return false, fmt.Errorf("invalid score")
 	}
 	return true, nil
 }
@@ -187,16 +187,16 @@ func validateProductionType(productionTypeID string) (domain.ProductionType, err
 func validateTransportType(transportTypeID string) (domain.TransportType, error) {
 	var transportType domain.TransportType
 	switch transportTypeID {
-	case "ROAD":
-		transportType = domain.Road
+	case "TERRESTRIAL_SMALL":
+		transportType = domain.TerrestrialSmall
+	case "TERRESTRIAL_BIG":
+		transportType = domain.TerrestrialBig
 	case "MARITIME":
 		transportType = domain.Maritime
-	case "AIR":
-		transportType = domain.Air
-	case "RAIL":
-		transportType = domain.Rail
-	case "INTERMODAL":
-		transportType = domain.Intermodal
+	case "AERIAL":
+		transportType = domain.Aerial
+	case "RAILROADER":
+		transportType = domain.Railroader
 	default:
 		return "", fmt.Errorf("transport type not found")
 	}
@@ -214,28 +214,52 @@ func validateTransportType(transportTypeID string) (domain.TransportType, error)
 func validateBatchType(batchTypeID string) (domain.BatchType, error) {
 	var batchType domain.BatchType
 	switch batchTypeID {
-	case "FIBER":
-		batchType = domain.Fiber
+	case "CONVENTIONAL_COTTON":
+		batchType = domain.ConventionalCotton
+	case "ORGANIC_COTTON":
+		batchType = domain.OrganicCotton
+	case "RECYCLED_COTTON":
+		batchType = domain.RecycledCotton
+	case "PES":
+		batchType = domain.Pes
+	case "PES_RPET":
+		batchType = domain.PesRPet
+	case "POLYPROPYLENE":
+		batchType = domain.Polypropylene
+	case "POLYAMIDE_6":
+		batchType = domain.Polyamide6
+	case "POLYAMIDE_66":
+		batchType = domain.Polyamide66
+	case "PAN":
+		batchType = domain.Pan
+	case "VISCOSE":
+		batchType = domain.Viscose
+	case "FLAX":
+		batchType = domain.Flax
+	case "JUTE":
+		batchType = domain.Jute
+	case "KENAF":
+		batchType = domain.Kenaf
+	case "BAMBOO":
+		batchType = domain.Bamboo
+	case "SILK":
+		batchType = domain.Silk
+	case "WOOL":
+		batchType = domain.Wool
+	case "ELASTANE":
+		batchType = domain.Elastane
 	case "YARN":
 		batchType = domain.Yarn
-	case "MESH":
-		batchType = domain.Mesh
-	case "FABRIC":
-		batchType = domain.Fabric
-	case "DYED_MESH":
-		batchType = domain.DyedMesh
-	case "FINISHED_MESH":
-		batchType = domain.FinishedMesh
+	case "RAW_FABRIC":
+		batchType = domain.RawFabric
 	case "DYED_FABRIC":
 		batchType = domain.DyedFabric
-	case "FINISHED_FABRIC":
-		batchType = domain.FinishedFabric
-	case "CUT":
-		batchType = domain.Cut
-	case "FINISHED_PIECE":
-		batchType = domain.FinishedPiece
-	case "OTHER":
-		batchType = domain.Other
+	case "RAW_KNITTED_FABRIC":
+		batchType = domain.RawKnittedFabric
+	case "DYED_KNITTED_FABRIC":
+		batchType = domain.DyedKnittedFabric
+	case "GARMENT":
+		batchType = domain.Garment
 	default:
 		return "", fmt.Errorf("batch type not found")
 	}
@@ -265,13 +289,16 @@ func validateUnit(unitID string) (domain.Unit, error) {
 // validateBatch validates batch for correct inputs/fields on Registration & Production activities
 func validateBatch(ctx contractapi.TransactionContextInterface, batchID, productionUnitID, batchInternalID, supplierID, unit, batchType string, batchComposition map[string]float32, quantity, finalScore float32, isInTransit bool) (bool, error) {
 
-	/* 	// Batch prefix validation
-	   	switch batchID[0:2] {
-	   	case "b-":
-	   	default:
-	   		return false, fmt.Errorf("incorrect batch prefix. (should be [b-...])")
-	   	}
-	*/
+	/// Batch prefix validation
+	if batchID == "" {
+		return false, fmt.Errorf("incorrect batch prefix. (should be [b-...])")
+	}
+	switch batchID[0:2] {
+	case "b-":
+	default:
+		return false, fmt.Errorf("incorrect batch prefix. (should be [b-...])")
+	}
+
 	// Verifies if Batch has a batchID that already exists
 	data, err := ctx.GetStub().GetState(batchID)
 	if err != nil {
@@ -297,17 +324,29 @@ func validateBatch(ctx contractapi.TransactionContextInterface, batchID, product
 
 	// Validate batch type
 	switch batchType {
-	case "FIBER":
+	case "CONVENTIONAL_COTTON":
+	case "ORGANIC_COTTON":
+	case "RECYCLED_COTTON":
+	case "PES":
+	case "PES_RPET":
+	case "POLYPROPYLENE":
+	case "POLYAMIDE_6":
+	case "POLYAMIDE_66":
+	case "PAN":
+	case "VISCOSE":
+	case "FLAX":
+	case "JUTE":
+	case "KENAF":
+	case "BAMBOO":
+	case "SILK":
+	case "WOOL":
+	case "ELASTANE":
 	case "YARN":
-	case "MESH":
-	case "FABRIC":
-	case "DYED_MESH":
-	case "FINISHED_MESH":
+	case "RAW_FABRIC":
 	case "DYED_FABRIC":
-	case "FINISHED_FABRIC":
-	case "CUT":
-	case "FINISHED_PIECE":
-	case "OTHER":
+	case "RAW_KNITTED_FABRIC":
+	case "DYED_KNITTED_FABRIC":
+	case "GARMENT":
 	default:
 		return false, fmt.Errorf("batch type is not valid")
 	}
@@ -317,15 +356,14 @@ func validateBatch(ctx contractapi.TransactionContextInterface, batchID, product
 	for _, percentage := range batchComposition {
 		percentageSum += percentage
 		if percentageSum > 100 {
-			return false, fmt.Errorf(" batch composition percentage sum should be equal to 100")
+			return false, fmt.Errorf("batch composition percentage sum should be equal to 100")
 		}
 	}
 	if percentageSum != 100 {
 		return false, fmt.Errorf("batch composition percentage sum should be equal to 100")
 	}
 
-	// Validate quantity
-	if quantity < 0 {
+	if quantity < 0 || fmt.Sprintf("%f", quantity) == "" {
 		return false, fmt.Errorf("batch quantity should be 0+")
 	}
 

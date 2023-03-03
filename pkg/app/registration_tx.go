@@ -29,14 +29,14 @@ func (c *StvgdContract) RegistrationExists(ctx contractapi.TransactionContextInt
 // CreateRegistration creates a new instance of Registration
 func (c *StvgdContract) CreateRegistration(ctx contractapi.TransactionContextInterface, registrationID, productionUnitInternalID, batchID, batchType, batchInternalID, supplierID, unit string, quantity, finalScore float32, batchComposition map[string]float32) (string, error) {
 
-	/* 	// Activity prefix validation
-	   	activityPrefix, err := validateActivityType(registrationID)
-	   	if err != nil {
-	   		return "", fmt.Errorf("%w", err)
-	   	} else if activityPrefix != "rg" {
-	   		return "", fmt.Errorf("activity ID prefix must match its type (should be [rg-...])")
-	   	}
-	*/
+	// Activity prefix validation
+	activityPrefix, err := validateActivityType(registrationID)
+	if err != nil {
+		return "", fmt.Errorf("%w", err)
+	} else if activityPrefix != "rg" {
+		return "", fmt.Errorf("activity ID prefix must match its type (should be [rg-...])")
+	}
+
 	// Checks if the registration ID already exists
 	exists, err := c.RegistrationExists(ctx, registrationID)
 	if err != nil {
@@ -51,18 +51,21 @@ func (c *StvgdContract) CreateRegistration(ctx contractapi.TransactionContextInt
 		return "", fmt.Errorf("could not get transaction timestamp: %w", err)
 	}
 
-	// txTimestamp, _ := time.Parse(time.RFC3339, testActivityDateString)
-
 	// Validate batch type
 	validBatchType, err := validateBatchType(batchType)
 	if err != nil {
-		return "", fmt.Errorf("could not validate batch type: %w", err)
+		return "", fmt.Errorf("could not validate batch type %w", err)
 	}
 
-	// Validate unir
+	// Validate unit
 	validUnit, err := validateUnit(unit)
 	if err != nil {
 		return "", fmt.Errorf("could not validate batch unit: %w", err)
+	}
+
+	/// Validate production unit internal ID
+	if productionUnitInternalID == "" {
+		return "", fmt.Errorf("production unit internal ID must not be empty: %w", err)
 	}
 
 	/// Get company MSP ID
@@ -77,8 +80,14 @@ func (c *StvgdContract) CreateRegistration(ctx contractapi.TransactionContextInt
 		return "", fmt.Errorf("could not get issuer's client ID: %w", err)
 	}
 
-	// mspID := testProductionUnitID[0:11]
-	// clientID := testIssuer
+	if quantity <= 0 {
+		return "", fmt.Errorf("batch quantity should be positive")
+	}
+
+	// Range validate score
+	if fmt.Sprintf("%f", finalScore) == "" {
+		return "", fmt.Errorf("invalid score")
+	}
 
 	// Initialize "new" Batch object
 	newBatch := &domain.Batch{

@@ -32,7 +32,7 @@ func (c *StvgdContract) ReadBatch(ctx contractapi.TransactionContextInterface, b
 	if err != nil {
 		return nil, fmt.Errorf("could not read batch from world state. %s", err)
 	} else if !exists {
-		return nil, fmt.Errorf("[%s] does not exist", batchID)
+		return nil, fmt.Errorf("batch [%s] does not exist", batchID)
 	}
 
 	batchBytes, _ := ctx.GetStub().GetState(batchID)

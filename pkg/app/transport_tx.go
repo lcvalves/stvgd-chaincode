@@ -63,10 +63,18 @@ func (c *StvgdContract) CreateTransport(ctx contractapi.TransactionContextInterf
 		return "", fmt.Errorf("could not get issuer's client ID: %w", err)
 	}
 
+	// Validate origin production unit's internal ID
+	if originProductionUnitInternalID == "" {
+		return "", fmt.Errorf("origin production unit's internal ID must not be empty")
+	}
+
 	// Validate destination production unit's ID
 	if destinationProductionUnitID == "" {
 		return "", fmt.Errorf("destination production unit's ID must not be empty")
 	}
+
+	// production unit ID composite key
+	productionUnitID := mspID + ":" + originProductionUnitInternalID
 
 	// Validate transport type
 	validTransportType, err := validateTransportType(transportTypeID)
@@ -104,6 +112,11 @@ func (c *StvgdContract) CreateTransport(ctx contractapi.TransactionContextInterf
 		// Checks difference in ortigin & destination production IDs
 		if batch.LatestOwner == destinationProductionUnitID {
 			return "", fmt.Errorf("origin production unit ID [%s] must be different from destination production unit ID [%s]", batch.LatestOwner, destinationProductionUnitID)
+		}
+
+		// Checks difference in ortigin & destination production IDs
+		if batch.LatestOwner != productionUnitID {
+			return "", fmt.Errorf("can only transport batches that are in current production unit [%s]", productionUnitID)
 		}
 
 		// Cannot use a batch that is in transit
@@ -168,7 +181,7 @@ func (c *StvgdContract) CreateTransport(ctx contractapi.TransactionContextInterf
 			// Put remainingBatchBytes in world state
 			err = ctx.GetStub().PutState(remainingBatch.ID, remainingBatchBytes)
 			if err != nil {
-				return "", fmt.Errorf("failed to put batch to world state: %w", err)
+				return "", fmt.Errorf("failed to put remaining batch to world state: %w", err)
 			}
 
 		default: // quantity = batch.Quantity, remaining batch is not created and the entire batch is shipped
@@ -204,7 +217,7 @@ func (c *StvgdContract) CreateTransport(ctx contractapi.TransactionContextInterf
 		// Put inputBatchBytes in world state
 		err = ctx.GetStub().PutState(updatedInputBatch.ID, inputBatchBytes)
 		if err != nil {
-			return "", fmt.Errorf("failed to put batch to world state: %w", err)
+			return "", fmt.Errorf("failed to put updated batch to world state: %w", err)
 		}
 	}
 

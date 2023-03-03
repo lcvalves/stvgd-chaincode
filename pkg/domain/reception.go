@@ -20,8 +20,7 @@ type Reception struct {
 	IsAccepted       bool      `json:"isAccepted"`                              // quality assessment
 	TransportScore   float32   `json:"transportScore"`                          // score of transport activity
 	SES              float32   `json:"ses"`                                     // Social-Economic Score (yearly audited by outsider cerification entity)
-	Distance         float32   `json:"distance"`                                // in kilometers
-	Cost             float32   `json:"cost"`                                    // transport cost
+	Distance         float32   `json:"distance"`                                // in kilometers                          // transport cost
 	ReceivedBatch    Batch     `json:"receivedBatch"`                           // batch in reception
 	NewBatch         Batch     `json:"newBatch,omitempty" metadata:",optional"` // Mandatory when batch is accepted (isAccepted = true)
 }

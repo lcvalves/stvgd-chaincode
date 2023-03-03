@@ -163,7 +163,7 @@
   "chaincodes": [
     {
       "name": "stvgd-chaincode",
-      "version": "14",
+      "version": "15",
       "lang": "golang",
       "channel": "stvgd-channel",
       "directory": "."

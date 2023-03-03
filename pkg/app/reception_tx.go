@@ -142,7 +142,6 @@ func (c *StvgdContract) CreateReception(ctx contractapi.TransactionContextInterf
 		TransportScore:   transportScore,
 		SES:              SES,
 		Distance:         distance,
-		Cost:             cost,
 	}
 
 	// Initialize updated/"new" Batch object + aux variables
@@ -162,10 +161,17 @@ func (c *StvgdContract) CreateReception(ctx contractapi.TransactionContextInterf
 			Quantity:         receivedBatch.Quantity,
 			Unit:             receivedBatch.Unit,
 			FinalScore:       receivedBatch.FinalScore,
+			IsInTransit:      false,
 		}
 
 		receivedBatch.Quantity = 0     // Remove quantity from "old"
 		reception.NewBatch = *newBatch // Update reception with newly created batch
+
+		// Validate new batch
+		isValidBatch, err := validateBatch(ctx, newBatch.ID, newBatch.LatestOwner, newBatch.BatchInternalID, newBatch.SupplierID, string(newBatch.Unit), string(newBatch.BatchType), newBatch.BatchComposition, newBatch.Quantity, newBatch.FinalScore, newBatch.IsInTransit)
+		if !isValidBatch {
+			return "", fmt.Errorf("failed to validate batch to world state: %w", err)
+		}
 
 		// Setup new batch traceability
 		activities = append(activities, reception)
