@@ -267,27 +267,8 @@ func validateBatchType(batchTypeID string) (domain.BatchType, error) {
 	return batchType, nil
 }
 
-// Unit validation
-func validateUnit(unitID string) (domain.Unit, error) {
-	var unit domain.Unit
-	switch unitID {
-	case "KG":
-		unit = domain.Kilograms
-	case "L":
-		unit = domain.Liters
-	case "M":
-		unit = domain.Meters
-	case "M2":
-		unit = domain.SquaredMeters
-	default:
-		return "", fmt.Errorf("unit not found")
-	}
-
-	return unit, nil
-}
-
 // validateBatch validates batch for correct inputs/fields on Registration & Production activities
-func validateBatch(ctx contractapi.TransactionContextInterface, batchID, productionUnitID, batchInternalID, supplierID, unit, batchType string, batchComposition map[string]float32, quantity, finalScore float32, isInTransit bool) (bool, error) {
+func validateBatch(ctx contractapi.TransactionContextInterface, batchID, productionUnitID, batchInternalID, supplierID, batchType string, batchComposition map[string]float32, quantity, finalScore float32, isInTransit bool) (bool, error) {
 
 	/// Batch prefix validation
 	if batchID == "" {
@@ -365,16 +346,6 @@ func validateBatch(ctx contractapi.TransactionContextInterface, batchID, product
 
 	if quantity < 0 || fmt.Sprintf("%f", quantity) == "" {
 		return false, fmt.Errorf("batch quantity should be 0+")
-	}
-
-	// Validate unit
-	switch unit {
-	case "KG":
-	case "L":
-	case "M":
-	case "M2":
-	default:
-		return false, fmt.Errorf("unit is not valid")
 	}
 
 	// Validate scores (-10 <= SCORE <= 10)

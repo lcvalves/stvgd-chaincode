@@ -6,15 +6,6 @@ package domain
  * -----------------------------------
  */
 
-type Unit string
-
-const (
-	Kilograms     Unit = "KG"
-	Liters        Unit = "L"
-	Meters        Unit = "M"
-	SquaredMeters Unit = "M2"
-)
-
 type BatchType string
 
 const (
@@ -59,7 +50,6 @@ type Batch struct {
 	SupplierID       string             `json:"supplierID"`
 	IsInTransit      bool               `json:"isInTransit" metadata:",optional"`
 	Quantity         float32            `json:"quantity"`
-	Unit             Unit               `json:"unit"`
 	FinalScore       float32            `json:"finalScore"`
 	BatchComposition map[string]float32 `json:"batchComposition"` // i.e. {raw_material_id: %}
 	Traceability     []interface{}      `json:"traceability,omitempty" metadata:",optional"`

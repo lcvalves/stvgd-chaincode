@@ -159,7 +159,6 @@ func (c *StvgdContract) CreateReception(ctx contractapi.TransactionContextInterf
 			SupplierID:       receivedBatch.SupplierID,
 			BatchComposition: receivedBatch.BatchComposition,
 			Quantity:         receivedBatch.Quantity,
-			Unit:             receivedBatch.Unit,
 			FinalScore:       receivedBatch.FinalScore,
 			IsInTransit:      false,
 		}
@@ -168,7 +167,7 @@ func (c *StvgdContract) CreateReception(ctx contractapi.TransactionContextInterf
 		reception.NewBatch = *newBatch // Update reception with newly created batch
 
 		// Validate new batch
-		isValidBatch, err := validateBatch(ctx, newBatch.ID, newBatch.LatestOwner, newBatch.BatchInternalID, newBatch.SupplierID, string(newBatch.Unit), string(newBatch.BatchType), newBatch.BatchComposition, newBatch.Quantity, newBatch.FinalScore, newBatch.IsInTransit)
+		isValidBatch, err := validateBatch(ctx, newBatch.ID, newBatch.LatestOwner, newBatch.BatchInternalID, newBatch.SupplierID, string(newBatch.BatchType), newBatch.BatchComposition, newBatch.Quantity, newBatch.FinalScore, newBatch.IsInTransit)
 		if !isValidBatch {
 			return "", fmt.Errorf("failed to validate batch to world state: %w", err)
 		}

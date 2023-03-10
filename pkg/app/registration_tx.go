@@ -27,7 +27,7 @@ func (c *StvgdContract) RegistrationExists(ctx contractapi.TransactionContextInt
 }
 
 // CreateRegistration creates a new instance of Registration
-func (c *StvgdContract) CreateRegistration(ctx contractapi.TransactionContextInterface, registrationID, productionUnitInternalID, batchID, batchType, batchInternalID, supplierID, unit string, quantity, finalScore float32, batchComposition map[string]float32) (string, error) {
+func (c *StvgdContract) CreateRegistration(ctx contractapi.TransactionContextInterface, registrationID, productionUnitInternalID, batchID, batchType, batchInternalID, supplierID string, quantity, finalScore float32, batchComposition map[string]float32) (string, error) {
 
 	// Activity prefix validation
 	activityPrefix, err := validateActivityType(registrationID)
@@ -55,12 +55,6 @@ func (c *StvgdContract) CreateRegistration(ctx contractapi.TransactionContextInt
 	validBatchType, err := validateBatchType(batchType)
 	if err != nil {
 		return "", fmt.Errorf("could not validate batch type %w", err)
-	}
-
-	// Validate unit
-	validUnit, err := validateUnit(unit)
-	if err != nil {
-		return "", fmt.Errorf("could not validate batch unit: %w", err)
 	}
 
 	/// Validate production unit internal ID
@@ -98,13 +92,12 @@ func (c *StvgdContract) CreateRegistration(ctx contractapi.TransactionContextInt
 		BatchInternalID:  batchInternalID,
 		SupplierID:       supplierID,
 		Quantity:         quantity,
-		Unit:             validUnit,
 		FinalScore:       finalScore,
 		BatchComposition: batchComposition,
 	}
 
 	// Validate new batch
-	isValidBatch, err := validateBatch(ctx, newBatch.ID, newBatch.LatestOwner, newBatch.BatchInternalID, newBatch.SupplierID, string(newBatch.Unit), string(newBatch.BatchType), newBatch.BatchComposition, newBatch.Quantity, newBatch.FinalScore, newBatch.IsInTransit)
+	isValidBatch, err := validateBatch(ctx, newBatch.ID, newBatch.LatestOwner, newBatch.BatchInternalID, newBatch.SupplierID, string(newBatch.BatchType), newBatch.BatchComposition, newBatch.Quantity, newBatch.FinalScore, newBatch.IsInTransit)
 	if !isValidBatch {
 		return "", fmt.Errorf("failed to validate batch to world state: %w", err)
 	}

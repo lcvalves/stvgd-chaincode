@@ -169,7 +169,6 @@ func (c *StvgdContract) CreateTransport(ctx contractapi.TransactionContextInterf
 				BatchComposition: batch.BatchComposition,
 				Traceability:     batch.Traceability,
 				Quantity:         batch.Quantity - quantity,
-				Unit:             batch.Unit,
 				FinalScore:       batch.FinalScore,
 			}
 
@@ -203,7 +202,6 @@ func (c *StvgdContract) CreateTransport(ctx contractapi.TransactionContextInterf
 			SupplierID:       batch.SupplierID,
 			IsInTransit:      true,
 			Quantity:         quantity,
-			Unit:             batch.Unit,
 			FinalScore:       batch.FinalScore,
 			BatchComposition: batch.BatchComposition,
 			Traceability:     auxTrace,

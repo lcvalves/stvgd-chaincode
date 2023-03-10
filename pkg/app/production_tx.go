@@ -28,7 +28,7 @@ func (c *StvgdContract) ProductionExists(ctx contractapi.TransactionContextInter
 }
 
 // CreateProduction creates a new instance of Production
-func (c *StvgdContract) CreateProduction(ctx contractapi.TransactionContextInterface, productionID, productionUnitInternalID, productionTypeID, activityStartDate, batchID, batchType, batchInternalID, supplierID, unit string, inputBatches, batchComposition map[string]float32, quantity, finalScore, productionScore, SES float32) (string, error) {
+func (c *StvgdContract) CreateProduction(ctx contractapi.TransactionContextInterface, productionID, productionUnitInternalID, productionTypeID, activityStartDate, batchID, batchType, batchInternalID, supplierID string, inputBatches, batchComposition map[string]float32, quantity, finalScore, productionScore, SES float32) (string, error) {
 
 	// Activity prefix validation
 	activityPrefix, err := validateActivityType(productionID)
@@ -100,12 +100,6 @@ func (c *StvgdContract) CreateProduction(ctx contractapi.TransactionContextInter
 		return "", fmt.Errorf("could not validate batch type: %w", err)
 	}
 
-	// Validate unir
-	validUnit, err := validateUnit(unit)
-	if err != nil {
-		return "", fmt.Errorf("could not validate batch unit: %w", err)
-	}
-
 	/// Validate production unit internal ID
 	if productionUnitInternalID == "" {
 		return "", fmt.Errorf("production unit internal ID must not be empty: %w", err)
@@ -167,7 +161,6 @@ func (c *StvgdContract) CreateProduction(ctx contractapi.TransactionContextInter
 			BatchInternalID:  batch.BatchInternalID,
 			SupplierID:       batch.SupplierID,
 			Quantity:         batch.Quantity - quantity,
-			Unit:             batch.Unit,
 			FinalScore:       batch.FinalScore,
 			BatchComposition: batch.BatchComposition,
 			Traceability:     batch.Traceability,
@@ -202,13 +195,12 @@ func (c *StvgdContract) CreateProduction(ctx contractapi.TransactionContextInter
 		BatchInternalID:  batchInternalID,
 		SupplierID:       supplierID,
 		Quantity:         quantity,
-		Unit:             validUnit,
 		FinalScore:       finalScore,
 		BatchComposition: batchComposition,
 	}
 
 	// Validate output batch
-	isValidBatch, err := validateBatch(ctx, outputBatch.ID, outputBatch.LatestOwner, outputBatch.BatchInternalID, outputBatch.SupplierID, string(outputBatch.Unit), string(outputBatch.BatchType), outputBatch.BatchComposition, outputBatch.Quantity, outputBatch.FinalScore, outputBatch.IsInTransit)
+	isValidBatch, err := validateBatch(ctx, outputBatch.ID, outputBatch.LatestOwner, outputBatch.BatchInternalID, outputBatch.SupplierID, string(outputBatch.BatchType), outputBatch.BatchComposition, outputBatch.Quantity, outputBatch.FinalScore, outputBatch.IsInTransit)
 	if !isValidBatch {
 		return "", fmt.Errorf("failed to validate batch to world state: %w", err)
 	}
