@@ -27,7 +27,7 @@ func (c *StvgdContract) ReceptionExists(ctx contractapi.TransactionContextInterf
 }
 
 // CreateReception creates a new instance of Reception
-func (c *StvgdContract) CreateReception(ctx contractapi.TransactionContextInterface, receptionID, productionUnitInternalID, activityDate, receivedBatchID, newBatchID, newBatchInternalID string, isAccepted bool, transportScore, SES, distance, cost float32) (string, error) {
+func (c *StvgdContract) CreateReception(ctx contractapi.TransactionContextInterface, receptionID, productionUnitInternalID, activityDate, receivedBatchID, newBatchID, newBatchInternalID string, isAccepted bool, transportScore, SES, distance float32) (string, error) {
 
 	// Activity prefix validation
 	activityPrefix, err := validateActivityType(receptionID)
@@ -124,10 +124,6 @@ func (c *StvgdContract) CreateReception(ctx contractapi.TransactionContextInterf
 	// Validate distance
 	if distance <= 0 {
 		return "", fmt.Errorf("distance must be 0+")
-	}
-	// Validate cost
-	if cost <= 0 {
-		return "", fmt.Errorf("cost must be 0+")
 	}
 
 	// Instatiate reception
